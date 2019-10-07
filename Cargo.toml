@@ -50,7 +50,7 @@ git = 'https://github.com/paritytech/substrate.git'
 package = 'substrate-network'
 rev = '3dedd246c62255ba6f9b777ecba318dfc2078d85'
 
-[dependencies.node-template-runtime]
+[dependencies.haski-runtime]
 path = 'runtime'
 
 [dependencies.primitives]
@@ -86,7 +86,7 @@ rev = '3dedd246c62255ba6f9b777ecba318dfc2078d85'
 panic = 'unwind'
 
 [[bin]]
-name = 'node-template'
+name = 'haski'
 path = 'src/main.rs'
 
 [workspace]
@@ -96,7 +96,7 @@ members = ['runtime']
 authors = ['Anonymous']
 build = 'build.rs'
 edition = '2018'
-name = 'node-template'
+name = 'haski'
 version = '2.0.0'
 
 [build-dependencies]
