@@ -1,13 +1,6 @@
-/// A runtime module template with necessary imports
+#![cfg_attr(not(feature = "std"), no_std)]
 
-/// Feel free to remove or edit this file as needed.
-/// If you change the name of this file, make sure to update its references in runtime/src/lib.rs
-/// If you remove this file, you can remove those references
-
-
-/// For more guidance on Substrate modules, see the example module
-/// https://github.com/paritytech/substrate/blob/master/srml/example/src/lib.rs
-
+use rstd::prelude::*;
 use support::{decl_module, decl_storage, decl_event, dispatch::Result};
 use system::ensure_signed;
 use balances::{self, Module as Balances};
@@ -29,6 +22,7 @@ pub trait Trait: system::Trait + balances::Trait {
 decl_storage! {
 	trait Store for Module<T: Trait> as Haski {
 		Faucets get(faucets): map T::AccountId => Option<T::Balance>;
+		Teams get(teams): map Vec<u8> => Vec<T::AccountId>;
 	}
 }
 
@@ -36,8 +30,6 @@ decl_storage! {
 decl_module! {
 	/// The module declaration.
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
-		// Initializing events
-		// this is needed only if you are using events in your module
 		fn deposit_event() = default;
 
 		pub fn open_faucet(origin, limit: T::Balance) -> Result {
@@ -70,6 +62,54 @@ decl_module! {
 			Faucets::<T>::insert(&source, new_limit);
 			Ok(())
 		}
+
+		//
+		//    ---- Hackathon registry
+		//
+
+		pub fn create_team(origin, name: Vec<u8>) -> Result {
+			let who = ensure_signed(origin)?;
+			if Teams::<T>::exists(&name) {
+				return Err("Team already exists!");
+			}
+
+			Teams::<T>::insert(name, vec![who]);
+			Ok(())
+		}
+
+		pub fn join_team(origin, name: Vec<u8>) -> Result {
+			let who = ensure_signed(origin)?;
+			if !Teams::<T>::exists(&name) {
+				return Err("Team doesn't exists!");
+			}
+
+			if Teams::<T>::get(&name).iter().find(|a| **a == who).is_none() {
+				// not already in our member list, let's add
+				Teams::<T>::mutate(name, |m| m.push(who) );
+			}
+
+			Ok(())
+		}
+
+		pub fn leave_team(origin, name: Vec<u8>) -> Result {
+			let who = ensure_signed(origin)?;
+			if !Teams::<T>::exists(&name) {
+				return Err("Team doesn't exists!");
+			}
+
+			let position = Teams::<T>::get(&name).iter().position(|a| *a == who);
+
+			if let Some(index) = position {
+				// found an item, remove it.
+				Teams::<T>::mutate(name, |m| m.remove(index) );
+			}
+
+			Ok(())
+		}
+		
+		
+
+
 	}
 }
 
