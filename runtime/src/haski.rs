@@ -10,9 +10,15 @@
 
 use support::{decl_module, decl_storage, decl_event, dispatch::Result};
 use system::ensure_signed;
+use balances::{self, Module as Balances};
+use support::traits::Currency;
+use sr_primitives::{
+	traits::{CheckedSub, CheckedMul},
+	weights::SimpleDispatchInfo,
+};
 
 /// The module's configuration trait.
-pub trait Trait: system::Trait {
+pub trait Trait: system::Trait + balances::Trait {
 	// TODO: Add other types and constants required configure this module.
 
 	/// The overarching event type.
@@ -22,10 +28,7 @@ pub trait Trait: system::Trait {
 // This module's storage items.
 decl_storage! {
 	trait Store for Module<T: Trait> as Haski {
-		// Just a dummy storage item.
-		// Here we are declaring a StorageValue, `Something` as a Option<u32>
-		// `get(something)` is the default getter which returns either the stored `u32` or `None` if nothing stored
-		Something get(something): Option<u32>;
+		Faucets get(faucets): map T::AccountId => Option<T::Balance>;
 	}
 }
 
@@ -37,19 +40,34 @@ decl_module! {
 		// this is needed only if you are using events in your module
 		fn deposit_event() = default;
 
-		// Just a dummy entry point.
-		// function that can be called by the external world as an extrinsics call
-		// takes a parameter of the type `AccountId`, stores it and emits an event
-		pub fn do_something(origin, something: u32) -> Result {
-			// TODO: You only need this if you want to check it was signed.
+		pub fn open_faucet(origin, limit: T::Balance) -> Result {
 			let who = ensure_signed(origin)?;
 
-			// TODO: Code to execute when something calls this.
-			// For example: the following line stores the passed in u32 in the storage
-			Something::put(something);
+			Faucets::<T>::insert(&who, limit);
+			Ok(())
+		}
 
-			// here we are raising the Something event
-			Self::deposit_event(RawEvent::SomethingStored(something, who));
+		/// Just is a super simplistic faucet, that gives any new account a minimum BALANCE.
+		/// This is only for testing environments AND SHOULD NEVER BE DEPLOYED ANYWHERE.
+		#[weight = SimpleDispatchInfo::FreeOperational]
+		pub fn faucet(origin, source: T::AccountId) -> Result {
+			let target = ensure_signed(origin)?;
+			// TODO: You only need this if you want to check it was signed.
+			let to_transfer = match <Balances<T> as Currency<T::AccountId>>::minimum_balance().checked_mul(&T::Balance::from(10)){
+				None => return Err("Could not calc faucet"),
+				Some(b) => b,
+			};
+			let source_limit = match Self::faucets(&source) {
+				None => return Err("Source doesn't have an open faucet"),
+				Some(b) => b,
+			};
+			let new_limit = match source_limit.checked_sub(&to_transfer) {
+				None => return Err("would drive limit too low"),
+				Some(b) => b,
+			};
+
+			let _ = <Balances<T> as Currency<T::AccountId>>::transfer(&source, &target, to_transfer)?;
+			Faucets::<T>::insert(&source, new_limit);
 			Ok(())
 		}
 	}
