@@ -6,7 +6,7 @@ use system::ensure_signed;
 use balances::{self, Module as Balances};
 use support::traits::Currency;
 use sr_primitives::{
-	traits::{CheckedSub, CheckedMul},
+	traits::CheckedSub,
 	weights::SimpleDispatchInfo,
 };
 
@@ -45,10 +45,7 @@ decl_module! {
 		pub fn faucet(origin, source: T::AccountId) -> Result {
 			let target = ensure_signed(origin)?;
 			// TODO: You only need this if you want to check it was signed.
-			let to_transfer = match <Balances<T> as Currency<T::AccountId>>::minimum_balance().checked_mul(&T::Balance::from(10)){
-				None => return Err("Could not calc faucet"),
-				Some(b) => b,
-			};
+			let to_transfer = T::Balance::from(1000);
 			let source_limit = match Self::faucets(&source) {
 				None => return Err("Source doesn't have an open faucet"),
 				Some(b) => b,
