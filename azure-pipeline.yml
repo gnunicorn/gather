@@ -132,7 +132,7 @@ stages:
       condition: ne( variables['Agent.OS'], 'Windows_NT' )
       inputs:
         gitHubConnection: 'gnunicorn'
-        repositoryName: 'gnunicorn/haski/'
+        repositoryName: 'gnunicorn/haski'
         action: 'edit'
         target: '$(build.sourceVersion)'
         tagSource: 'manual'
