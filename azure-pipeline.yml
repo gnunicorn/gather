@@ -140,7 +140,6 @@ stages:
         assets: '$(Build.ArtifactStagingDirectory)/$(crate_name)-$(Build.SourceBranchName)-$(TARGET).tar.gz'
         title: '$(Build.SourceBranchName)'
         assetUploadMode: 'replace'
-        addChangeLog: true
     - task: ArchiveFiles@2
       displayName: Zip assets
       condition: eq( variables['Agent.OS'], 'Windows_NT' )
@@ -161,7 +160,6 @@ stages:
         assets: '$(Build.ArtifactStagingDirectory)/$(crate_name)-$(Build.SourceBranchName)-$(TARGET).zip'
         title: '$(Build.SourceBranchName)'
         assetUploadMode: 'replace'
-        addChangeLog: true
 
 resources:
   repositories:
