@@ -1,5 +1,11 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import React, { useState, useEffect } from 'react';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  // Link
+} from "react-router-dom";
 
 import Home from "./Home";
 import Footer from "./Footer";
@@ -23,12 +29,22 @@ export default function App () {
   
 
   return (
-    <div>
+    <Router>
       <header>
         <TopBar />
       </header>
-      <Home />
+      <Switch>
+          {/* <Route path="/discover">
+            <Discover />
+          </Route>
+          <Route path="/event">
+            <Topics />
+          </Route> */}
+          <Route path="/">
+            <Home />
+          </Route>
+        </Switch>
       <Footer apiReady={apiReady} api={api} />
-    </div>
+    </Router>
   );
 }
