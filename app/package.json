@@ -1,0 +1,38 @@
+{
+  "name": "substrate-front-end",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@material-ui/core": "latest",
+    "@material-ui/icons": "^4.5.1",
+    "@polkadot/api": "^0.94.1",
+    "@polkadot/extension-dapp": "^0.12.1",
+    "@polkadot/keyring": "^1.5.1",
+    "@polkadot/react-identicon": "^0.45.1",
+    "@polkadot/ui-keyring": "^0.45.1",
+    "clsx": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
