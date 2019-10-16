@@ -86,7 +86,7 @@ rev = '3dedd246c62255ba6f9b777ecba318dfc2078d85'
 panic = 'unwind'
 
 [[bin]]
-name = 'haski'
+name = 'gather'
 path = 'src/main.rs'
 
 [workspace]

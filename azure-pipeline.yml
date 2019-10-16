@@ -23,7 +23,7 @@ variables:
   mac_vm: macos-10.14
   linux_vm: ubuntu-16.04
   rust_style: stable
-  crate_name: haski
+  crate_name: gather
 
 stages:
 - stage: test
@@ -132,7 +132,7 @@ stages:
       condition: ne( variables['Agent.OS'], 'Windows_NT' )
       inputs:
         gitHubConnection: 'gnunicorn'
-        repositoryName: 'gnunicorn/haski'
+        repositoryName: 'gnunicorn/gather'
         action: 'edit'
         target: '$(build.sourceVersion)'
         tagSource: 'manual'
@@ -152,7 +152,7 @@ stages:
       condition: eq( variables['Agent.OS'], 'Windows_NT' )
       inputs:
         gitHubConnection: 'gnunicorn'
-        repositoryName: 'gnunicorn/haski'
+        repositoryName: 'gnunicorn/gather'
         action: 'edit'
         target: '$(build.sourceVersion)'
         tagSource: 'manual'
