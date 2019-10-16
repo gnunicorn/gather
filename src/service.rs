@@ -6,7 +6,7 @@ use substrate_client::LongestChain;
 use babe;
 use grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
 use futures::prelude::*;
-use haski_runtime::{self, GenesisConfig, opaque::Block, RuntimeApi};
+use gather_runtime::{self, GenesisConfig, opaque::Block, RuntimeApi};
 use substrate_service::{error::{Error as ServiceError}, AbstractService, Configuration, ServiceBuilder};
 use transaction_pool::{self, txpool::{Pool as TransactionPool}};
 use inherents::InherentDataProviders;
@@ -17,8 +17,8 @@ pub use substrate_executor::NativeExecutor;
 // Our native executor instance.
 native_executor_instance!(
 	pub Executor,
-	haski_runtime::api::dispatch,
-	haski_runtime::native_version,
+	gather_runtime::api::dispatch,
+	gather_runtime::native_version,
 );
 
 construct_simple_protocol! {
@@ -36,7 +36,7 @@ macro_rules! new_full_start {
 		let inherent_data_providers = inherents::InherentDataProviders::new();
 
 		let builder = substrate_service::ServiceBuilder::new_full::<
-			haski_runtime::opaque::Block, haski_runtime::RuntimeApi, crate::service::Executor
+			gather_runtime::opaque::Block, gather_runtime::RuntimeApi, crate::service::Executor
 		>($config)?
 			.with_select_chain(|_config, backend| {
 				Ok(substrate_client::LongestChain::new(backend.clone()))
@@ -48,7 +48,7 @@ macro_rules! new_full_start {
 				let select_chain = select_chain.take()
 					.ok_or_else(|| substrate_service::Error::SelectChainRequired)?;
 				let (grandpa_block_import, grandpa_link) =
-					grandpa::block_import::<_, _, _, haski_runtime::RuntimeApi, _, _>(
+					grandpa::block_import::<_, _, _, gather_runtime::RuntimeApi, _, _>(
 						client.clone(), &*client, select_chain
 					)?;
 				let justification_import = grandpa_block_import.clone();
