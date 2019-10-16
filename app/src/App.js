@@ -1,10 +1,10 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import React, { useState, useEffect } from 'react';
 import Container from '@material-ui/core/Container';
-import Typography from '@material-ui/core/Typography';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Box from '@material-ui/core/Box';
-import NodeInfo from './NodeInfo';
+
+import Footer from "./Footer";
+import TopBar from './MenuBar';
 
 export default function App () {
   const [api, setApi] = useState();
@@ -21,28 +21,18 @@ export default function App () {
       })
       .catch((e) => console.error(e));
   }, []);
-
-  const loader = function (text){
-    return (
-      <CircularProgress />
-    );
-  };
   
-  if(!apiReady){
-    return loader('Connecting to the blockchain')
-  }
 
   return (
-    <Container maxWidth="sm">
-      <Box my={4}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Connected
-        </Typography>
-
-        <NodeInfo
-          api={api}
-        />
-      </Box>
-    </Container>
+    <div>
+      <header>
+        <TopBar />
+      </header>
+      <Container maxWidth="sm">
+        <Box my={4}>
+        </Box>
+      </Container>
+      <Footer apiReady={apiReady} api={api} />
+    </div>
   );
 }
