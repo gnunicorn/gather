@@ -12,13 +12,13 @@ pub use substrate_cli::{VersionInfo, IntoExit, error};
 
 fn main() {
 	let version = VersionInfo {
-		name: "Substrate HAckathon Starter Kit",
+		name: "Gatgher",
 		commit: env!("VERGEN_SHA_SHORT"),
 		version: env!("CARGO_PKG_VERSION"),
-		executable_name: "haski",
+		executable_name: "gather",
 		author: "Anonymous",
-		description: "Blockchain Hackathon Substrate Quick Starter Kit",
-		support_url: "https://github.com/substrate-developer-hub/haski/",
+		description: "Community Gatherings plattform",
+		support_url: "https://github.com/gnunicorn/gather",
 	};
 
 	if let Err(e) = cli::run(::std::env::args(), cli::Exit, version) {
