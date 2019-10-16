@@ -1,8 +1,7 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import React, { useState, useEffect } from 'react';
-import Container from '@material-ui/core/Container';
-import Box from '@material-ui/core/Box';
 
+import Home from "./Home";
 import Footer from "./Footer";
 import TopBar from './MenuBar';
 
@@ -28,10 +27,7 @@ export default function App () {
       <header>
         <TopBar />
       </header>
-      <Container maxWidth="sm">
-        <Box my={4}>
-        </Box>
-      </Container>
+      <Home />
       <Footer apiReady={apiReady} api={api} />
     </div>
   );
