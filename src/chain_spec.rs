@@ -1,5 +1,5 @@
 use primitives::{Pair, Public};
-use haski_runtime::{
+use gather_runtime::{
 	AccountId, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig,
 	SudoConfig, IndicesConfig, SystemConfig, WASM_BINARY, 
 };
