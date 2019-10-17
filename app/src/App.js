@@ -14,10 +14,9 @@ import TopBar from './MenuBar';
 export default function App () {
   const [api, setApi] = useState();
   const [apiReady, setApiReady] = useState();
-  const WS_PROVIDER = 'ws://127.0.0.1:9944';
 
   useEffect(() => {
-    const provider = new WsProvider(WS_PROVIDER);
+    const provider = new WsProvider(process.env.REACT_APP_WS_TARGET || 'ws://127.0.0.1:9944');
 
     ApiPromise.create({provider})
       .then((api) => {
