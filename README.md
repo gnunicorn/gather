@@ -1,6 +1,6 @@
 # [Gather](https://gather.wtf)
 
-![Gather logo](https://raw.githubusercontent.com/gnunicorn/gather/master/assets/logo.svg)
+![Gather logo](./assets/logo.svg)
 
 
 ## Development
@@ -41,8 +41,8 @@ yarn start
 This will open the browser showing the JS app locally, connecting to the local blockchain node via an unsecure websocket. It automatically reloads the UI on changes in `/app/src`. 
 
 
-To start the UI connecting to a  remote server, put the address in the enviornment variable `$REACT_APP_WS_TARGET` when starting the server:
+To start the UI connecting to a  remote server, put the address in the enviornment variable `$REACT_APP_WS_TARGET` when starting the server, e.g.:
 
 ```sh
-REACT_APP_WS_TARGET="" yarn start
+REACT_APP_WS_TARGET="ws://otherhost.tld:9944" yarn start
 ```
