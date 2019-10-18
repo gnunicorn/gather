@@ -131,7 +131,7 @@ decl_storage! {
 		Communities: map CommunityId => Option<Community>;
         CommunitiesMembers: map CommunityId => Vec<T::AccountId>;
         MembersCommunities: map T::AccountId => Vec<CommunityId>;
-        CommunitiessGroups: map CommunityId => Vec<GroupId>;
+        CommunitiesGroups: map CommunityId => Vec<GroupId>;
 
 		Groups: map GroupId => Option<Group>;
         GroupsMembers: map GroupId => Vec<T::AccountId>;
@@ -144,7 +144,12 @@ decl_storage! {
 
         Memberships: map (T::AccountId, Reference) => Option<Membership>;
         RSVPs: map (T::AccountId, GatheringId) => Option<RSVP>;
-	}
+
+        // nonces
+        CommunitiesNonce: Reference;
+        GroupsNonce: Reference;
+        GatheringsNonce: Reference;
+    }
 }
 
 // The module's dispatchable functions.
@@ -230,10 +235,28 @@ decl_module! {
 
 decl_event!(
 	pub enum Event<T> where AccountId = <T as system::Trait>::AccountId {
-		// Just a dummy event.
-		// Event `Something` is declared with a parameter of the type `u32` and `AccountId`
-		// To emit this event, we call the deposit funtion, from our runtime funtions
-		SomethingStored(u32, AccountId),
+        // Community Events
+		CommunityCreated(Reference),
+        CommunityUpdated(Reference),
+		CommunityDeleted(Reference),
+        MemberJoinedCommunity(Reference, AccountId),
+        CommunityMembershipChanged(Reference, AccountId),
+
+        // Group Events
+		GroupCreated(Reference),
+        GroupUpdated(Reference),
+		GroupDeleted(Reference),
+        MemberJoinedGroup(Reference, AccountId),
+        GroupMembershipChanged(Reference, AccountId),
+
+        // Gathering driven events
+		GatheringCreated(Reference),
+        GatheringUpdated(Reference),
+		GatheringDeleted(Reference),
+
+        // RSVP
+        MemberRSVPed(Reference, AccountId),
+        RSVPUpdated(Reference, AccountId),
 	}
 );
 
@@ -244,7 +267,7 @@ mod tests {
 
 	use runtime_io::with_externalities;
 	use primitives::{H256, Blake2Hasher};
-	use support::{impl_outer_origin, assert_ok, parameter_types};
+	use support::{impl_outer_origin, assert_ok, assert_err, parameter_types};
 	use sr_primitives::{traits::{BlakeTwo256, IdentityLookup}, testing::Header};
 	use sr_primitives::weights::Weight;
 	use sr_primitives::Perbill;
@@ -295,8 +318,92 @@ mod tests {
 	}
 
 	#[test]
-	fn it_works_for_default_value() {
+	fn full_regular_flow() {
 		with_externalities(&mut new_test_ext(), || {
+
+            let alice = 1u64;
+            let bob = 2u64;
+            let next_community = CommunitiesNonce::get();
+
+			assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
+            let community = Communities::get(next_community).unwrap();
+			assert_eq!(community.metadata, b"IPFSLINK".to_vec());
+			assert_eq!(CommunitiesMembers::<Test>::get(next_community), vec![alice]);
+			assert_eq!(MembersCommunities::<Test>::get(alice), vec![next_community]);
+
+            let a_membership = Memberships::<Test>::get((alice, next_community)).unwrap();
+            assert_eq!(a_membership.role, Role::Admin);
+
+            assert_eq!(Memberships::<Test>::get((bob, next_community)), None);
+			assert_ok!(Gather::join_community(Origin::signed(bob), next_community));
+			assert_eq!(CommunitiesMembers::<Test>::get(next_community), vec![alice, bob]);
+			assert_eq!(MembersCommunities::<Test>::get(bob), vec![next_community]);
+
+            let b_membership = Memberships::<Test>::get((bob, next_community)).unwrap();
+            assert_eq!(a_membership.role, Role::Member);
+
+            // let's create some group
+            let mut next_group = GroupsNonce::get();
+            for _ in 0..3 {
+                assert_ok!(Gather::create_group(Origin::signed(alice), next_community, b"NEWLINK".to_vec()));
+                let group = Groups::get(next_group).unwrap();
+                assert_eq!(group.metadata, b"NEWLINK".to_vec());
+                assert_eq!(group.belongs_to, next_community);
+                assert_eq!(GroupsMembers::<Test>::get(next_group), vec![alice]);
+                assert_eq!(MembersGroups::<Test>::get(alice), vec![next_group]);
+
+                let a_membership = Memberships::<Test>::get((alice, next_group)).unwrap();
+                assert_eq!(a_membership.role, Role::Admin);
+
+                next_group = GroupsNonce::get();
+            }
+
+            // create some event:
+            let mut next_event = GatheringsNonce::get();
+            assert_ok!(Gather::create_gathering(Origin::signed(alice), next_group, b"EVENTLINK".to_vec()));
+            let gathering = Gatherings::get(next_event).unwrap();
+            assert_eq!(gathering.metadata, b"EVENTLINK".to_vec());
+            assert_eq!(gathering.belongs_to, vec![next_group]);
+
+            assert_eq!(GatheringsMembers::<Test>::get(next_event), vec![alice]);
+            assert_eq!(MembersGatherings::<Test>::get(alice), vec![next_event]);
+
+            let rsvp = RSVPs::<Test>::get((alice, next_event)).unwrap();
+            assert_eq!(rsvp.state, RSVPStates::Yes);
+
+            // Let's update that
+
+            assert_ok!(Gather::rsvp_gathering(Origin::signed(alice), next_event, RSVPStates::No));
+            let rsvp = RSVPs::<Test>::get((alice, next_event)).unwrap();
+            assert_eq!(rsvp.state, RSVPStates::Yes);
+
+            // and if bob tried that? fails beccause he ain't a member
+            assert_err!(Gather::rsvp_gathering(Origin::signed(bob), next_event, RSVPStates::No), "");
+
+            assert_eq!(GatheringsMembers::<Test>::get(next_event), vec![alice]);
+            assert_eq!(MembersGatherings::<Test>::get(bob), vec![]);
+
+            let rsvp = RSVPs::<Test>::get((bob, next_event));
+            assert_eq!(rsvp.is_none(), true);
+
+            // but if he joined
+
+            assert_ok!(Gather::join_group(Origin::signed(bob), next_group));
+            assert_eq!(GroupsMembers::<Test>::get(next_group), vec![alice, bob]);
+            assert_eq!(MembersGroups::<Test>::get(bob), vec![next_group]);
+
+            let b_membership = Memberships::<Test>::get((bob, next_group)).unwrap();
+            assert_eq!(a_membership.role, Role::Member);
+
+            // and then tried again
+
+            assert_err!(Gather::rsvp_gathering(Origin::signed(bob), next_event, RSVPStates::No), "");
+
+            assert_eq!(GatheringsMembers::<Test>::get(next_event), vec![alice, bob]);
+            assert_eq!(MembersGatherings::<Test>::get(bob), vec![next_event]);
+
+            let rsvp = RSVPs::<Test>::get((bob, next_event)).unwrap();
+            assert_eq!(rsvp.state, RSVPStates::Yes);
 			
 		});
 	}
