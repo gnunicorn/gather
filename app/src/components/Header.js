@@ -5,7 +5,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 
-import logo from "./logo.png";
+import logo from "../images/logo.png";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -22,11 +22,11 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function ButtonAppBar() {
+export default function Header() {
   const classes = useStyles();
 
   return (
-    <div className={classes.root}>
+    <header className={classes.root}>
       <AppBar position="relative" elevation="0" color="inherit">
         <Toolbar className={classes.toolBar}>
             <img src={logo} style={{width: "2em", "margin-right": "0.5em"}} alt="Logo" />
@@ -36,6 +36,6 @@ export default function ButtonAppBar() {
           <Button color="inherit">Login</Button>
         </Toolbar>
       </AppBar>
-    </div>
+    </header>
   );
 }

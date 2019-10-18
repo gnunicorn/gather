@@ -1,6 +1,22 @@
 
 import { createMuiTheme } from '@material-ui/core/styles';
 
+export const mixins = {
+  absoluteCenteringViaParent: {
+    position: "relative",
+    "& > *:first-child":{
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)"
+    }
+  },
+}
+
+export const constants = {
+  footerArea: 120
+}
+
 // A custom theme for this app
 const theme = createMuiTheme({
   palette: {

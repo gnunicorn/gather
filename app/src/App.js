@@ -7,9 +7,8 @@ import {
   // Link
 } from "react-router-dom";
 
-import Home from "./Home";
-import Footer from "./Footer";
-import TopBar from './MenuBar';
+import Home from "./containers/Home";
+import AppWrapper from "./containers/AppWrapper";
 
 export default function App () {
   const [api, setApi] = useState();
@@ -28,11 +27,9 @@ export default function App () {
   
 
   return (
-    <Router>
-      <header>
-        <TopBar />
-      </header>
-      <Switch>
+    <AppWrapper apiReady={apiReady} api={api} >
+      <Router>
+        <Switch>
           {/* <Route path="/discover">
             <Discover />
           </Route>
@@ -43,7 +40,8 @@ export default function App () {
             <Home />
           </Route>
         </Switch>
-      <Footer apiReady={apiReady} api={api} />
-    </Router>
+      </Router>
+    </AppWrapper>
+   
   );
 }

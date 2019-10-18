@@ -11,5 +11,5 @@ ReactDOM.render(
     <CssBaseline />
     <App />
   </ThemeProvider>,
-  document.querySelector('#root'),
+  document.querySelector('#app'),
 );
