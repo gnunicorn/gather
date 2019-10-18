@@ -47,9 +47,6 @@ export default function CreateEvent(props) {
         <FormControl className={classes.inputWrapper} fullWidth>
           <Field label="Title" name="title" component={TextField} fullWidth />
         </FormControl>
-        <FormControl className={classes.inputWrapper} fullWidth>
-          <Field label="Tagline" name="tagline" component={TextField} fullWidth/>
-        </FormControl>
         <div className={classes.dateFields}>
           <div>
             <Field name="startDate"  label="Start date" component={DateTimePickerCustom} initDate  />

@@ -1,69 +1,40 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-
-import logo from "../assets/logo.svg";
-import ReactSVG from 'react-svg'
+import { Form, Field } from 'formik';
+import { Button, Paper, FormControl } from '@material-ui/core';
+import { TextField } from 'formik-material-ui';
 
 const useStyles = makeStyles(theme => ({
+  paperRoot:{
+    maxWidth: 450,
+    width:"100%"
+  },
   root: {
-    flexGrow: 1,
-    borderBottom: "2px solid #ccc",
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  title: {
-    flexGrow: 1,
-  },
-  toolBar: {
     display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    "& > *":{
-      // Section general
-      display: "flex",
-      flexDirection: "row",
-      alignItems: "center",
-      "&:first-child":{
-        // Left
-        justifyContent: "flex-start",
-        
-      },
-      "&:last-child":{
-        // Right
-        justifyContent: "flex-end",
-      }
-    }
+    flexDirection: "column"
   },
-  logoWrapper: {
-    display: "block",
-    width: "100%",
-    maxWidth: "25px",
-    overflow: "hidden",
-    marginRight: 15,
-    "& > *": {
-      objectFit: "contain"
-    }
+  inputWrapper:{
+    margin: "5px 0"
+  },
+  button:{
+    marginTop: theme.spacing(3),
   }
 }));
 
-export default function CreateGroup() {
+export default function CreateGroup(props) {
   const classes = useStyles();
 
   return (
-    <Form>
-      <Field type="email" name="email" />
-      <ErrorMessage name="email" component="div" />
-      <Field type="password" name="password" />
-      <ErrorMessage name="password" component="div" />
-      <button type="submit" disabled={isSubmitting}>
-        Submit
-      </button>
-    </Form>
+    <Paper square={true} className={classes.paperRoot} elevation={0}>
+      <Form className={classes.root}>
+        <FormControl className={classes.inputWrapper} fullWidth>
+          <Field label="Title" name="title" component={TextField} fullWidth />
+        </FormControl>
+        <FormControl className={classes.inputWrapper} fullWidth>
+          <Field label="Tagline" name="tagline" component={TextField} fullWidth/>
+        </FormControl>
+        <Button variant="contained" color="primary" className={classes.button} type="submit">Submit</Button>
+      </Form>
+    </Paper>
   );
 }

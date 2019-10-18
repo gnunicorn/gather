@@ -5,6 +5,7 @@ import { Typography } from '@material-ui/core';
 import CardGrid from '../components/cards/CardGrid';
 import CardBase from '../components/cards/CardBase';
 import CreateEventContainer from './CreateEventContainer';
+import CreateGroupContainer from './CreateGroupContainer';
 
 
 const useStyles = makeStyles(theme => ({
@@ -84,6 +85,12 @@ export default function UIMasterPage () {
                 onSubmit={(data)=>{console.log("Success", data)}}
                 groupId="1234567i234234"
             ></CreateEventContainer>
+             <Typography variant="h2" component="h2">
+                Create Group Form
+            </Typography>
+            <CreateGroupContainer 
+                onSubmit={(data)=>{console.log("Success", data)}}
+            ></CreateGroupContainer>
            </article>
        </section>
     )

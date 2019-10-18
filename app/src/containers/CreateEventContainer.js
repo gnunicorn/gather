@@ -10,9 +10,6 @@ const EventSchema = Yup.object().shape({
         .min(3, 'Too Short!')
         .max(50, 'Too Long!')
         .required('Required'),
-    tagline: Yup.string()
-        .min(3, 'Too Short!')
-        .max(50, 'Too Long!'),
     groupId: Yup.string()
         .required(),
     startDate: Yup.date()
@@ -36,7 +33,6 @@ export default function CreateEventContainer (props) {
         <Formik
             initialValues={{ 
                 title: '', 
-                tagline: '',
                 groupId: groupId,
                 startDate: new Date(),
                 endDate: new Date()
