@@ -6,7 +6,7 @@ use system::ensure_signed;
 use codec::{Encode, Decode};
 
 // TYPES
-pub type Reference = u128;
+pub type Reference = u64;
 pub type CommunityId = Reference;
 pub type GroupId = Reference;
 pub type GatheringId = Reference;
@@ -30,7 +30,7 @@ pub enum GroupLocation {
 
 /// The role attachted to a specific Membership between Account
 /// and either Group or Community, by increasing privileges
-#[derive(Encode, Decode, PartialEq)]
+#[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Debug))]
 pub enum Role {
     /// Regular Member
@@ -146,9 +146,7 @@ decl_storage! {
         RSVPs: map (T::AccountId, GatheringId) => Option<RSVP>;
 
         // nonces
-        CommunitiesNonce: Reference;
-        GroupsNonce: Reference;
-        GatheringsNonce: Reference;
+        Nonce: Reference;
     }
 }
 
@@ -157,6 +155,8 @@ decl_module! {
 	/// The module declaration.
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
 		fn deposit_event() = default;
+
+        // ---- Community
 
         pub fn create_community(origin, metadata: ExternalData) -> Result {
             let who = ensure_signed(origin)?;
@@ -169,17 +169,28 @@ decl_module! {
             Err("not yet implemented")
         }
 
+        // pub fn delete_community(origin, community: CommunityId) -> Result {
+        //     let who = ensure_signed(origin)?;
+        //     // + ensure has role admin
+        //     Err("not yet implemented")
+        // }
+
+        // ------ Community Membership
+
         pub fn join_community(origin, group: CommunityId) -> Result {
             let who = ensure_signed(origin)?;
             // + ensure not yet member
             Err("not yet implemented")
         }
 
-        pub fn delete_community(origin, community: CommunityId) -> Result {
+        pub fn update_community_membership(origin, community: CommunityId, who: T::AccountId, role: Role) -> Result {
             let who = ensure_signed(origin)?;
             // + ensure has role admin
             Err("not yet implemented")
         }
+
+
+        // ---- Groups
 
         pub fn create_group(origin, community: CommunityId, metadata: ExternalData) -> Result {
             let who = ensure_signed(origin)?;
@@ -193,17 +204,27 @@ decl_module! {
             Err("not yet implemented")
         }
 
-        pub fn delete_group(origin, group: GroupId) -> Result {
-            let who = ensure_signed(origin)?;
-            // + ensure has role admin for group or community
-            Err("not yet implemented")
-        }
+        // pub fn delete_group(origin, group: GroupId) -> Result {
+        //     let who = ensure_signed(origin)?;
+        //     // + ensure has role admin for group or community
+        //     Err("not yet implemented")
+        // }
+
+        // ------- Group Membership
 
         pub fn join_group(origin, group: GroupId) -> Result {
             let who = ensure_signed(origin)?;
             // + ensure not yet member
             Err("not yet implemented")
         }
+
+        pub fn update_group_membership(origin, group: GroupId, who: T::AccountId, role: Role) -> Result {
+            let who = ensure_signed(origin)?;
+            // + ensure has role admin
+            Err("not yet implemented")
+        }
+
+        // --- Gatherinigs
 
         pub fn create_gathering(origin, group: GroupId, metadata: ExternalData) -> Result {
             let who = ensure_signed(origin)?;
@@ -217,11 +238,13 @@ decl_module! {
             Err("not yet implemented")
         }
 
-        pub fn delete_gathering(origin, gathering: GatheringId) -> Result {
-            let who = ensure_signed(origin)?;
-            // + ensure has role admin for gathering or community
-            Err("not yet implemented")
-        }
+        // pub fn delete_gathering(origin, gathering: GatheringId) -> Result {
+        //     let who = ensure_signed(origin)?;
+        //     // + ensure has role admin for gathering or community
+        //     Err("not yet implemented")
+        // }
+
+        // ------- Gathering RSVP
 
         pub fn rsvp_gathering(origin, gathering: GatheringId, rsvp: RSVPStates) -> Result {
             let who = ensure_signed(origin)?;
@@ -323,7 +346,7 @@ mod tests {
 
             let alice = 1u64;
             let bob = 2u64;
-            let next_community = CommunitiesNonce::get();
+            let next_community = Nonce::get();
 
 			assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
             let community = Communities::get(next_community).unwrap();
@@ -340,10 +363,10 @@ mod tests {
 			assert_eq!(MembersCommunities::<Test>::get(bob), vec![next_community]);
 
             let b_membership = Memberships::<Test>::get((bob, next_community)).unwrap();
-            assert_eq!(a_membership.role, Role::Member);
+            assert_eq!(b_membership.role, Role::Member);
 
             // let's create some group
-            let mut next_group = GroupsNonce::get();
+            let mut next_group = Nonce::get();
             for _ in 0..3 {
                 assert_ok!(Gather::create_group(Origin::signed(alice), next_community, b"NEWLINK".to_vec()));
                 let group = Groups::get(next_group).unwrap();
@@ -355,11 +378,11 @@ mod tests {
                 let a_membership = Memberships::<Test>::get((alice, next_group)).unwrap();
                 assert_eq!(a_membership.role, Role::Admin);
 
-                next_group = GroupsNonce::get();
+                next_group = Nonce::get();
             }
 
             // create some event:
-            let mut next_event = GatheringsNonce::get();
+            let next_event = Nonce::get();
             assert_ok!(Gather::create_gathering(Origin::signed(alice), next_group, b"EVENTLINK".to_vec()));
             let gathering = Gatherings::get(next_event).unwrap();
             assert_eq!(gathering.metadata, b"EVENTLINK".to_vec());
@@ -381,7 +404,7 @@ mod tests {
             assert_err!(Gather::rsvp_gathering(Origin::signed(bob), next_event, RSVPStates::No), "");
 
             assert_eq!(GatheringsMembers::<Test>::get(next_event), vec![alice]);
-            assert_eq!(MembersGatherings::<Test>::get(bob), vec![]);
+            assert_eq!(MembersGatherings::<Test>::get(bob).len(), 0);
 
             let rsvp = RSVPs::<Test>::get((bob, next_event));
             assert_eq!(rsvp.is_none(), true);
@@ -393,7 +416,7 @@ mod tests {
             assert_eq!(MembersGroups::<Test>::get(bob), vec![next_group]);
 
             let b_membership = Memberships::<Test>::get((bob, next_group)).unwrap();
-            assert_eq!(a_membership.role, Role::Member);
+            assert_eq!(b_membership.role, Role::Member);
 
             // and then tried again
 
@@ -407,4 +430,82 @@ mod tests {
 			
 		});
 	}
+
+	#[test]
+	fn permissions() {
+		with_externalities(&mut new_test_ext(), || {
+
+            let alice = 1u64;
+            let bob = 2u64;
+            let charly = 3u64;
+            let dave = 4u64;
+            let community = Nonce::get();
+
+			assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
+			assert_ok!(Gather::join_community(Origin::signed(bob), community));
+			assert_ok!(Gather::join_community(Origin::signed(charly), community));
+			assert_ok!(Gather::join_community(Origin::signed(dave), community));
+
+            assert_eq!(Memberships::<Test>::get((alice, community)).unwrap().role, Role::Admin);
+            assert_eq!(Memberships::<Test>::get((bob, community)).unwrap().role, Role::Member);
+            assert_eq!(Memberships::<Test>::get((charly, community)).unwrap().role, Role::Member);
+            assert_eq!(Memberships::<Test>::get((dave, community)).unwrap().role, Role::Member);
+
+			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "");
+			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec()), "");
+
+            // bob can't set it
+			assert_err!(Gather::update_community_membership(Origin::signed(bob), community, bob, Role::Moderator), "");
+            // but alice can
+			assert_ok!(Gather::update_community_membership(Origin::signed(alice), community, bob, Role::Moderator));
+            // still not enough to update the community or create a group
+			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "");
+			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec()), "");
+
+            // so let's bump up again
+			assert_ok!(Gather::update_community_membership(Origin::signed(alice), community, bob, Role::Organiser));
+            // Organiser still not be allowed to update the community
+			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "");
+            // but create a Group
+
+            let group = Nonce::get();
+			assert_ok!(Gather::create_group(Origin::signed(bob), community, b"NewGroup".to_vec()));
+            assert_ok!(Gather::join_group(Origin::signed(charly), group));
+            assert_ok!(Gather::join_group(Origin::signed(dave), group));
+
+			assert_err!(Gather::update_group(Origin::signed(charly), group, b"NewLink".to_vec()), "");
+			assert_err!(Gather::create_gathering(Origin::signed(charly), group, b"NewLink".to_vec()), "");
+            assert_err!(Gather::update_group_membership(Origin::signed(charly), group, charly, Role::Admin), "");
+
+            // but bob can
+            assert_err!(Gather::update_group_membership(Origin::signed(bob), group, charly, Role::Admin), "");
+            // and so can alice, the admin of the Organisation, though not in the Group themselves
+            assert_err!(Gather::update_group_membership(Origin::signed(alice), group, charly, Role::Organiser), "");
+
+            // and as an organiser Charly can create gatherings
+			assert_ok!(Gather::create_gathering(Origin::signed(charly), group, b"NewInfo".to_vec()));
+            // but not update the info.
+			assert_err!(Gather::update_group(Origin::signed(charly), group, b"NewInfo".to_vec()), "");
+
+            // even after alice joined as a regular member
+            assert_ok!(Gather::join_group(Origin::signed(alice), group));
+            // she can still excercise admin rights
+			assert_ok!(Gather::update_group(Origin::signed(alice), group, b"Latest Update".to_vec()));
+        });
+    }
+
+	#[test]
+	fn last_community_admin_cant_demote() {
+		with_externalities(&mut new_test_ext(), || {
+
+            let alice = 1u64;
+            let community = Nonce::get();
+
+			assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
+			assert_err!(Gather::update_community_membership(Origin::signed(alice), community, alice, Role::Moderator), "");
+			assert_err!(Gather::update_community_membership(Origin::signed(alice), community, alice, Role::Organiser), "");
+			assert_err!(Gather::update_community_membership(Origin::signed(alice), community, alice, Role::Member), "");
+        });
+    }
+
 }
