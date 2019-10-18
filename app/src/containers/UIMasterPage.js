@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
 import CardGrid from '../components/cards/CardGrid';
 import CardBase from '../components/cards/CardBase';
+import CreateEventContainer from './CreateEventContainer';
 
 
 const useStyles = makeStyles(theme => ({
@@ -14,6 +15,7 @@ const useStyles = makeStyles(theme => ({
 
 const EventCardDummyData = [
     {
+        id: "1234567io",
         title: "Diffusion 2019",
         subTitle: "19 Oct 2019 - 20 Oct 2019",
         type: "Event",
@@ -21,6 +23,7 @@ const EventCardDummyData = [
         image: null
     },
     {
+        id: "1234567ip",
         title: "Devcon 2020",
         subTitle: "?? ?? 2019 - ? ? 2020",
         type: "Event",
@@ -31,6 +34,7 @@ const EventCardDummyData = [
 
 const GroupCardDummyData = [
     {
+        id: "1234567i234234",
         title: "Department of Decentralisation",
         subTitle: "Additional meta",
         type: "Group",
@@ -48,6 +52,7 @@ export default function UIMasterPage () {
                UI master table
            </Typography>
            <article>
+
             <Typography variant="h2" component="h2">
                 Cards
             </Typography>
@@ -57,7 +62,7 @@ export default function UIMasterPage () {
             <CardGrid>
                 {
                     EventCardDummyData.map(card => 
-                        (<CardBase key={card.title} {...card}></CardBase>)
+                        (<CardBase key={card.id} {...card}></CardBase>)
                     )
                 }
             </CardGrid>
@@ -67,10 +72,18 @@ export default function UIMasterPage () {
             <CardGrid>
                 {
                     GroupCardDummyData.map(card => 
-                        (<CardBase key={card.title} {...card}></CardBase>)
+                        (<CardBase key={card.id} {...card}></CardBase>)
                     )
                 }
             </CardGrid>
+
+            <Typography variant="h2" component="h2">
+                Create Event Form
+            </Typography>
+            <CreateEventContainer 
+                onSubmit={(data)=>{console.log("Success", data)}}
+                groupId="1234567i234234"
+            ></CreateEventContainer>
            </article>
        </section>
     )

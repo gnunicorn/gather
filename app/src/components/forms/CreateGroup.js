@@ -52,29 +52,18 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Header() {
+export default function CreateGroup() {
   const classes = useStyles();
 
   return (
-    <AppBar position="relative" color="inherit">
-      <Toolbar className={classes.toolBar}>
-        <section>
-          <div className={classes.logoWrapper}>
-            <ReactSVG 
-            src={logo} 
-            beforeInjection={svg => {
-              svg.setAttribute('style', 'width: 100%; height: 100%')
-            }} 
-            alt="Logo" />
-          </div>
-          <Typography variant="h6"  className={classes.title}>
-            Gather
-          </Typography>
-        </section>
-        <section>
-          <Button color="inherit">Login</Button>
-        </section>
-      </Toolbar>
-    </AppBar>
+    <Form>
+      <Field type="email" name="email" />
+      <ErrorMessage name="email" component="div" />
+      <Field type="password" name="password" />
+      <ErrorMessage name="password" component="div" />
+      <button type="submit" disabled={isSubmitting}>
+        Submit
+      </button>
+    </Form>
   );
 }
