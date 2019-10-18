@@ -1,10 +1,6 @@
 
 import React from 'react';
-import Container from '@material-ui/core/Container';
-import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import { constants } from '../theme';
 
 import Header from "../components/Header";
@@ -56,7 +52,6 @@ export default function AppWrapper (props) {
         <Header />
         {children}
         <Footer apiReady={apiReady} api={api} />
-
     </div>
     )
 }

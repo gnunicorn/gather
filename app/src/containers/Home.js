@@ -5,7 +5,6 @@ import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import { constants } from '../theme';
 
 
 const useStyles = makeStyles(theme => ({
