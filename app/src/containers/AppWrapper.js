@@ -14,33 +14,9 @@ const useStyles = makeStyles(theme => ({
         minHeight: "100vh",
         paddingBottom: constants.footerArea
     },
-    video: {
-        "position": "absolute",
-        "top": 0,
-        "right": 0,
-        "left": 0,
-        "min-width": "100%",
-        "max-width": "100%",
-        "overflow": "hidden",
-        "z-index": "-1",
-        "transform": "translateY(-20%)",
-    },
-    box: {
-        "z-index": "1",
-        "text-align": "center",
-        "padding": theme.spacing(20)
-    },
-    hl: {
-        "margin": theme.spacing(2),
-        "color": "white",
-    },
-    sub: {
-        "margin": theme.spacing(1),
-        "color": "white",
-    },
-    button: {
-        "margin": theme.spacing(2),
-    },
+    contentArea:{
+        padding: `${theme.spacing(2)}px ${theme.spacing(3)}px`
+    }
   }));
 
 export default function AppWrapper (props) {
@@ -50,7 +26,9 @@ export default function AppWrapper (props) {
     return (
     <div className={classes.root}>
         <Header />
-        {children}
+        <section className={classes.contentArea}>
+            {children}
+        </section>
         <Footer apiReady={apiReady} api={api} />
     </div>
     )

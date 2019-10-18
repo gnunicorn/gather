@@ -33,6 +33,14 @@ const theme = createMuiTheme({
       default: '#fff',
     },
   },
+  overrides:{
+    MuiTypography:{
+      h1:{
+        fontSize: 28,
+        margin: "10px 0 15px"
+      }
+    }
+  }
 });
 
 export default theme;
