@@ -47,7 +47,7 @@ export default function Home () {
             <video
                 className={classes.video}
                 src="https://doc-0c-8s-docs.googleusercontent.com/docs/securesc/ha0ro937gcuc7l7deffksulhg5h7mbp1/3o4avp1ans76bq5h9c06hilep51qskht/1571234400000/07470069817889151082/*/1lebr1VIOViEVX5NLATJOwViyX_kP8JPt?e=download"
-                autoplay="1"
+                autoPlay="1"
                 loop="1"
                 muted="1"
             />

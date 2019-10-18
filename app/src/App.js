@@ -9,6 +9,7 @@ import {
 
 import Home from "./containers/Home";
 import AppWrapper from "./containers/AppWrapper";
+import UIMasterPage from './containers/UIMasterPage';
 
 export default function App () {
   const [api, setApi] = useState();
@@ -36,6 +37,9 @@ export default function App () {
           <Route path="/event">
             <Topics />
           </Route> */}
+          <Route path="/ui-master">
+            <UIMasterPage />
+          </Route>
           <Route path="/">
             <Home />
           </Route>

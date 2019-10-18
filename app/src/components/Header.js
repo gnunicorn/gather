@@ -5,11 +5,13 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 
-import logo from "../images/logo.png";
+import logo from "../assets/logo.svg";
+import ReactSVG from 'react-svg'
 
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
+    borderBottom: "2px solid #ccc",
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -18,24 +20,61 @@ const useStyles = makeStyles(theme => ({
     flexGrow: 1,
   },
   toolBar: {
-    borderBottom: "2px solid #ccc",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    "& > *":{
+      // Section general
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      "&:first-child":{
+        // Left
+        justifyContent: "flex-start",
+        
+      },
+      "&:last-child":{
+        // Right
+        justifyContent: "flex-end",
+      }
+    }
   },
+  logoWrapper: {
+    display: "block",
+    width: "100%",
+    maxWidth: "25px",
+    overflow: "hidden",
+    marginRight: 15,
+    "& > *": {
+      objectFit: "contain"
+    }
+  }
 }));
 
 export default function Header() {
   const classes = useStyles();
 
   return (
-    <header className={classes.root}>
-      <AppBar position="relative" elevation="0" color="inherit">
-        <Toolbar className={classes.toolBar}>
-            <img src={logo} style={{width: "2em", "margin-right": "0.5em"}} alt="Logo" />
-          <Typography variant="h6" className={classes.title}>
+    <AppBar position="relative" color="inherit">
+      <Toolbar className={classes.toolBar}>
+        <section>
+          <div className={classes.logoWrapper}>
+            <ReactSVG 
+            src={logo} 
+            beforeInjection={svg => {
+              svg.setAttribute('style', 'width: 100%; height: 100%')
+            }} 
+            alt="Logo" />
+          </div>
+          <Typography variant="h6"  className={classes.title}>
             Gather
           </Typography>
+        </section>
+        <section>
           <Button color="inherit">Login</Button>
-        </Toolbar>
-      </AppBar>
-    </header>
+        </section>
+      </Toolbar>
+    </AppBar>
   );
 }
