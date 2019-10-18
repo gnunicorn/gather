@@ -61,8 +61,7 @@ pub type Hash = primitives::H256;
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
 
-/// Used for the module template in `./template.rs`
-mod haski;
+mod gather;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -96,9 +95,9 @@ pub mod opaque {
 pub const VERSION: RuntimeVersion = RuntimeVersion {
 	spec_name: create_runtime_str!("gather"),
 	impl_name: create_runtime_str!("gather"),
-	authoring_version: 3,
-	spec_version: 4,
-	impl_version: 4,
+	authoring_version: 1,
+	spec_version: 1,
+	impl_version: 1,
 	apis: RUNTIME_API_VERSIONS,
 };
 
@@ -252,8 +251,7 @@ impl sudo::Trait for Runtime {
 	type Proposal = Call;
 }
 
-/// Used for the module template in `./template.rs`
-impl haski::Trait for Runtime {
+impl gather::Trait for Runtime {
 	type Event = Event;
 }
 
@@ -270,8 +268,7 @@ construct_runtime!(
 		Indices: indices::{default, Config<T>},
 		Balances: balances::{default, Error},
 		Sudo: sudo,
-		// Used for the module template in `./haski.rs`
-		Haski: haski::{Module, Call, Storage, Event<T>},
+		Gather: gather::{Module, Call, Storage, Event<T>},
 	}
 );
 

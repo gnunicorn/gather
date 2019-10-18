@@ -3,34 +3,35 @@
 use rstd::prelude::*;
 use support::{decl_module, decl_storage, decl_event, dispatch::Result};
 use system::ensure_signed;
-use balances::{self, Module as Balances};
-use support::traits::Currency;
-use sr_primitives::{
-	traits::CheckedSub,
-	weights::SimpleDispatchInfo,
-};
+use codec::{Encode, Decode};
 
 // TYPES
-pub type RefId<B as Block> = B::Hash;
-pub type CommunityId<B> = RefId<B>;
-pub type GroupId<B> = RefId<B>;
-pub type GatheringId<B> = RefId<B>;
+pub type Reference = u128;
+pub type CommunityId = Reference;
+pub type GroupId = Reference;
+pub type GatheringId = Reference;
 pub type ExternalData = Vec<u8>; //potentially IPFS CiD
 pub type Location = (u128, u128); // Latitude, Langitude?
 pub type Timezone = u8;
+/// UTC epoch time
+pub type Timestamp = u64; 
 
 /// We have multiple ways to define and understand a location
+#[derive(Encode, Decode, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub enum GroupLocation {
     /// This is a globally acting group, events are everywhere or nowhere
     Global,
     /// This is a remote acting group, but bound to a base timezone
     Remote(Option<Timezone>),
     /// This group is bound to a specific location or Region?
-    Local(Location)
+    Local(Location),
 }
 
 /// The role attachted to a specific Membership between Account
 /// and either Group or Community, by increasing privileges
+#[derive(Encode, Decode, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub enum Role {
     /// Regular Member
     Member,
@@ -45,6 +46,8 @@ pub enum Role {
 }
 
 /// The Community Definition
+#[derive(Encode, Decode, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub struct Community {
     /// Title, description and alike are move off chain
     pub metadata: ExternalData,
@@ -55,7 +58,9 @@ pub struct Community {
 }
 
 /// This is a Group
-pub struct Group<B> {
+#[derive(Encode, Decode, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
+pub struct Group {
     /// Which community does this group belong to
     pub belongs_to: CommunityId,
     /// Where is this group "located"
@@ -68,8 +73,11 @@ pub struct Group<B> {
     pub updated_at: Timestamp,
 }
 
+/// Definition for a specific Gathering
+#[derive(Encode, Decode, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub struct Gathering {
-    pub belomgs_to: Vec<GroupId>,
+    pub belongs_to: Vec<GroupId>,
     /// Where does this take place?
     pub location: GroupLocation,
     /// Further user informational group info
@@ -84,12 +92,16 @@ pub struct Gathering {
 }
 
 /// Define the Roles and thus privileges of a specific member
+#[derive(Encode, Decode, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub struct Membership {
     pub role: Role,
     pub created_at: Timestamp,
     pub updated_at: Timestamp,
 }
 
+#[derive(Encode, Decode, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 pub enum RSVPStates {
     Yes,
     No,
@@ -97,7 +109,9 @@ pub enum RSVPStates {
     Waitinglist,
 }
 
-pub RSVP {
+#[derive(Encode, Decode, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
+pub struct RSVP {
     pub state: RSVPStates,
     pub created_at: Timestamp,
     pub updated_at: Timestamp,
@@ -105,36 +119,31 @@ pub RSVP {
 
 
 /// The module's configuration trait.
-pub trait Trait: system::Trait + balances::Trait {
-	// TODO: Add other types and constants required configure this module.
-
+pub trait Trait: system::Trait {
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 }
 
 // This module's storage items.
 decl_storage! {
-	trait Store for Module<T: Trait> as Gather {
-		Community: map CommunityId => Community;
-        CommunityMembers: map CommunityId => Vec<T::AccountId>;
-        MemberCommunities: map T::AccountId => Vec<CommunityId>;
-        CommunityGroups: map CommunityId => Vec<GroupId>;
+	trait Store for Module<T: Trait> as Gather
+    {
+		Communities: map CommunityId => Option<Community>;
+        CommunitiesMembers: map CommunityId => Vec<T::AccountId>;
+        MembersCommunities: map T::AccountId => Vec<CommunityId>;
+        CommunitiessGroups: map CommunityId => Vec<GroupId>;
 
-		Group: map GroupId => Group;
-        GroupMembers: map GroupId => Vec<T::AccountId>;
-        MemberGroups: map T::AccountId => Vec<GroupId>;
-        GroupGatherings: map GroupId => Vec<GatheringId>;
+		Groups: map GroupId => Option<Group>;
+        GroupsMembers: map GroupId => Vec<T::AccountId>;
+        MembersGroups: map T::AccountId => Vec<GroupId>;
+        GroupsGatherings: map GroupId => Vec<GatheringId>;
 
-        Gathering: map GatheringId => Gathering;
-        GatheringMembers: map GatheringId => Vec<T:AccountId>;
-        MemberGatherings: map T::AccountId => Vec<GatheringId>;
+        Gatherings: map GatheringId => Option<Gathering>;
+        GatheringsMembers: map GatheringId => Vec<T::AccountId>;
+        MembersGatherings: map T::AccountId => Vec<GatheringId>;
 
-        Memberships: map (T::AccountId, RefId) => Membership;
-        RSVPs: map (T::AccountId, GatheringId) => RSVP;
-
-        CommunityNonce: u128;
-        GroupNonce: u128;
-        GatheringNonce: u128;
+        Memberships: map (T::AccountId, Reference) => Option<Membership>;
+        RSVPs: map (T::AccountId, GatheringId) => Option<RSVP>;
 	}
 }
 
@@ -145,69 +154,81 @@ decl_module! {
 		fn deposit_event() = default;
 
         pub fn create_community(origin, metadata: ExternalData) -> Result {
-            let who = ensure_signed!(origin)?;
+            let who = ensure_signed(origin)?;
+            Err("not yet implemented")
         }
 
         pub fn update_community(origin, community: CommunityId, metadata: ExternalData) -> Result {
-            let who = ensure_signed!(origin)?;
+            let who = ensure_signed(origin)?;
             // + ensure has role admin
+            Err("not yet implemented")
         }
 
         pub fn join_community(origin, group: CommunityId) -> Result {
-            let who = ensure_signed!(origin)?;
+            let who = ensure_signed(origin)?;
             // + ensure not yet member
+            Err("not yet implemented")
         }
 
         pub fn delete_community(origin, community: CommunityId) -> Result {
-            let who = ensure_signed!(origin)?;
+            let who = ensure_signed(origin)?;
             // + ensure has role admin
+            Err("not yet implemented")
         }
 
         pub fn create_group(origin, community: CommunityId, metadata: ExternalData) -> Result {
-            let who = ensure_signed!(origin)?;
+            let who = ensure_signed(origin)?;
             // + ensure who has admin rights for community
+            Err("not yet implemented")
         }
 
         pub fn update_group(origin, group: GroupId, metadata: ExternalData) -> Result {
-            let who = ensure_signed!(origin)?;
+            let who = ensure_signed(origin)?;
             // + ensure has role admin for group or community
+            Err("not yet implemented")
         }
 
         pub fn delete_group(origin, group: GroupId) -> Result {
-            let who = ensure_signed!(origin)?;
+            let who = ensure_signed(origin)?;
             // + ensure has role admin for group or community
+            Err("not yet implemented")
         }
 
         pub fn join_group(origin, group: GroupId) -> Result {
-            let who = ensure_signed!(origin)?;
+            let who = ensure_signed(origin)?;
             // + ensure not yet member
+            Err("not yet implemented")
         }
 
         pub fn create_gathering(origin, group: GroupId, metadata: ExternalData) -> Result {
-            let who = ensure_signed!(origin)?;
+            let who = ensure_signed(origin)?;
             // + ensure who has admin rights for community
+            Err("not yet implemented")
         }
 
         pub fn update_gathering(origin, gathering: GatheringId, metadata: ExternalData) -> Result {
-            let who = ensure_signed!(origin)?;
+            let who = ensure_signed(origin)?;
             // + ensure has role admin for gathering or community
+            Err("not yet implemented")
         }
 
         pub fn delete_gathering(origin, gathering: GatheringId) -> Result {
-            let who = ensure_signed!(origin)?;
+            let who = ensure_signed(origin)?;
             // + ensure has role admin for gathering or community
+            Err("not yet implemented")
         }
 
         pub fn rsvp_gathering(origin, gathering: GatheringId, rsvp: RSVPStates) -> Result {
-            let who = ensure_signed!(origin)?;
+            let who = ensure_signed(origin)?;
             // + ensure are a member
             // create or update
+            Err("not yet implemented")
         }
 
 	}
 }
 
-decl_event!(git
+decl_event!(
 	pub enum Event<T> where AccountId = <T as system::Trait>::AccountId {
 		// Just a dummy event.
 		// Event `Something` is declared with a parameter of the type `u32` and `AccountId`
@@ -236,6 +257,7 @@ mod tests {
 	// first constructing a configuration type (`Test`) which `impl`s each of the
 	// configuration traits of modules we want to use.
 	#[derive(Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
 	pub struct Test;
 	parameter_types! {
 		pub const BlockHashCount: u64 = 250;
@@ -264,7 +286,7 @@ mod tests {
 	impl Trait for Test {
 		type Event = ();
 	}
-	type Haski = Module<Test>;
+	type Gather = Module<Test>;
 
 	// This function basically just builds a genesis storage key/value store according to
 	// our desired mockup.
@@ -275,11 +297,7 @@ mod tests {
 	#[test]
 	fn it_works_for_default_value() {
 		with_externalities(&mut new_test_ext(), || {
-			// Just a dummy test for the dummy funtion `do_something`
-			// calling the `do_something` function with a value 42
-			assert_ok!(Haski::do_something(Origin::signed(1), 42));
-			// asserting that the stored value is equal to what we stored
-			assert_eq!(Haski::something(), Some(42));
+			
 		});
 	}
 }
