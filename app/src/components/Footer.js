@@ -10,7 +10,7 @@ import { Link } from '@material-ui/core';
 const useStyles = makeStyles(theme => ({
   footerRoot: {
     padding: theme.spacing(2),
-    backgroundColor: "#424242", // grey.A700,
+    backgroundColor: grey.A700, 
     color: grey.A200,
     minHeight: 80,
     position: "absolute",
