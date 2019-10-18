@@ -11,26 +11,43 @@ export const mixins = {
       transform: "translate(-50%, -50%)"
     }
   },
+  ellipsisOverflow:{
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    width: "100%"
+  }
 }
 
 export const constants = {
-  footerArea: 120
+  footerArea: 120,
+  colors:{
+    pink: "#ff1864",
+    pinkDark: "#F40052",
+    orange: "#FF5318",
+    purple: "#541388",
+    blue: "#30C5FF",
+    green: "#388659",
+    white: "#FFF",
+    red: "#D90429"
+  }
 }
+
 
 // A custom theme for this app
 const theme = createMuiTheme({
   palette: {
     primary: {
-      main: '#ff1864',
+      main: constants.colors.pink,
     },
     secondary: {
-      main: '#FF5318',
+      main: constants.colors.orange,
     },
     error: {
-      main: "#F40052",
+      main: constants.colors.pinkDark,
     },
     background: {
-      default: '#fff',
+      default: constants.colors.white,
     },
   },
   overrides:{
@@ -38,6 +55,14 @@ const theme = createMuiTheme({
       h1:{
         fontSize: 28,
         margin: "10px 0 15px"
+      },
+      h2:{
+        fontSize: 24,
+        margin: "8px 0 12px"
+      },
+      h3:{
+        fontSize: 18,
+        margin: "4px 0 8px"
       }
     }
   }
