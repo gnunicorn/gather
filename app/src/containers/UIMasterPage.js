@@ -20,7 +20,7 @@ const EventCardDummyData = [
         title: "Diffusion 2019",
         subTitle: "19 Oct 2019 - 20 Oct 2019",
         type: "Event",
-        link: "/event/diffusion-2019",
+        link: "/events/diffusion-2019",
         image: null
     },
     {
@@ -28,7 +28,7 @@ const EventCardDummyData = [
         title: "Devcon 2020",
         subTitle: "?? ?? 2019 - ? ? 2020",
         type: "Event",
-        link: "/event/devcon-2020",
+        link: "/events/devcon-2020",
         image: null
     }
 ]

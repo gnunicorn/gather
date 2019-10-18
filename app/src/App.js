@@ -10,6 +10,10 @@ import {
 import Home from "./containers/Home";
 import AppWrapper from "./containers/AppWrapper";
 import UIMasterPage from './containers/UIMasterPage';
+import CreateEventContainer from './containers/CreateEventContainer';
+import CreateGroupContainer from './containers/CreateGroupContainer';
+import EventsPageContainer from './containers/EventsPageContainer';
+import GroupsPageContainer from './containers/GroupsPageContainer';
 
 export default function App () {
   const [api, setApi] = useState();
@@ -37,6 +41,18 @@ export default function App () {
           <Route path="/event">
             <Topics />
           </Route> */}
+          <Route path="/create-event">
+            <CreateEventContainer />
+          </Route>
+          <Route path="/create-group">
+            <CreateGroupContainer />
+          </Route>
+          <Route path="/events">
+            <EventsPageContainer />
+          </Route>
+          <Route path="/groups">
+            <GroupsPageContainer />
+          </Route>
           <Route path="/ui-master">
             <UIMasterPage />
           </Route>

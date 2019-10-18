@@ -6,7 +6,6 @@ import { grey } from '@material-ui/core/colors';
 import NodeInfo from "./NodeInfo";
 import { Link } from '@material-ui/core';
 
-
 const useStyles = makeStyles(theme => ({
   footerRoot: {
     padding: theme.spacing(2),
@@ -47,11 +46,11 @@ export default function Footer(props) {
   return (<footer className={classes.footerRoot}>
     <section className={classes.footerInner}>
       <nav>
-        <Link>
-          Menu 1
+        <Link to="/events">
+          Events
         </Link>
-        <Link>
-          Menu 2
+        <Link to="/groups">
+          Groups
         </Link>
       </nav>
       <article className={classes.nodeInfo}>
