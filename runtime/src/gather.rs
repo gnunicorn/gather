@@ -156,8 +156,8 @@ decl_storage! {
         GatheringsMembers get(gatherings_members) config(): map GatheringId => Vec<T::AccountId>;
         MembersGatherings get(members_gatherings) config(): map T::AccountId => Vec<GatheringId>;
 
-        Memberships: map (T::AccountId, Reference) => Membership;
-        RSVPs: map (T::AccountId, GatheringId) => RSVP;
+        Memberships get(memberships): map (T::AccountId, Reference) => Option<Membership>;
+        RSVPs get(rsvps): map (T::AccountId, GatheringId) => Option<RSVP>;
 
         // nonces
         Nonce get(nonce) config(): Reference;
