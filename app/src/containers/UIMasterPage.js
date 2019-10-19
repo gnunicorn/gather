@@ -2,7 +2,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
-import CardGrid from '../components/cards/CardGrid';
+import StandardGrid from '../components/general/StandardGrid';
 import CardBase from '../components/cards/CardBase';
 import CreateEventContainer from './CreateEventContainer';
 import CreateGroupContainer from './CreateGroupContainer';
@@ -31,23 +31,23 @@ export default function UIMasterPage () {
             <Typography variant="h3" component="h3">
                 Events
             </Typography>
-            <CardGrid>
+            <StandardGrid>
                 {
                     EventCardDummyData.map(card => 
                         (<CardBase key={card.id} {...card}></CardBase>)
                     )
                 }
-            </CardGrid>
+            </StandardGrid>
             <Typography variant="h3" component="h3">
                 Groups
             </Typography>
-            <CardGrid>
+            <StandardGrid>
                 {
                     GroupCardDummyData.map(card => 
                         (<CardBase key={card.id} {...card}></CardBase>)
                     )
                 }
-            </CardGrid>
+            </StandardGrid>
 
             <Typography variant="h2" component="h2">
                 Create Event Form
