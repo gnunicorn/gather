@@ -17,6 +17,7 @@ export default function ViewGroupContainer (props) {
         meta: {
             title: GroupCardDummyData[0].title,
             subtitle: GroupCardDummyData[0].subtitle,
+            id: groupId
         },
         members: MembersDummyData,
         events: EventCardDummyData
