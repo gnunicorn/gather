@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TopBanner from '../general/TopBanner';
-import { Typography, AppBar, Tabs, Tab } from '@material-ui/core';
+import { Typography, AppBar, Tabs, Tab, Fab } from '@material-ui/core';
 import Slides from '../general/Slides';
 import StandardGrid from '../general/StandardGrid';
 import CardBase from '../cards/CardBase';
 import MemberStub from '../general/MemberStub';
+import { Link } from "react-router-dom";
+import AddIcon from '@material-ui/icons/Add';
+import { mixins } from '../../theme';
 
 const useStyles = makeStyles(theme => ({
     root:{
@@ -20,6 +23,9 @@ const useStyles = makeStyles(theme => ({
     },
     contentSlide:{
         padding: "10px 15px",
+    },
+    floatingCta:{
+        ...mixins.floatingCta
     }
   }));
   
@@ -81,5 +87,20 @@ export default function ViewGroup(props) {
                 </StandardGrid>
            </div>
        </Slides>
+       {/* 
+            TODO: Wire up user state to correctly control this 
+        */}
+       {/* {
+           isAdmin === true && <Link className={classes.floatingCta} to={`/events/${meta.id}/new`}>
+           <Fab color="primary">
+               <AddIcon />
+           </Fab>
+        </Link>
+       } */}
+       <Link className={classes.floatingCta} to={`/events/${meta.id}/new`}>
+           <Fab color="primary">
+               <AddIcon />
+           </Fab>
+        </Link>
     </article>)
 }

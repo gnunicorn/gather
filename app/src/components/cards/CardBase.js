@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
   card:{
     position: "relative",
     padding: 0,
-    maxWidth: "40vw",
+    maxWidth: "450px",
     backgroundColor: grey.A700,
     width: "100%",
   },
