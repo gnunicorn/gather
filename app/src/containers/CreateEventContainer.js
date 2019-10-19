@@ -25,7 +25,6 @@ const EventSchema = Yup.object().shape({
 
 export default function CreateEventContainer (props) {
     const {
-        onSubmit,
         match:{
             params:{
                 groupId
@@ -45,11 +44,11 @@ export default function CreateEventContainer (props) {
             validationSchema={EventSchema}
 
             onSubmit={(values, { setSubmitting }) => {
-                onSubmit(values)
+                console.log("Create event success", values)
             }}
         >
              {(props) => (
-                <EventForm {...props}></EventForm>
+                <EventForm newEvent={true} {...props}></EventForm>
             )}
         </Formik>
     )

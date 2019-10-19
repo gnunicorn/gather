@@ -53,6 +53,12 @@ const useStyles = makeStyles(theme => ({
     "& > *": {
       objectFit: "contain"
     }
+  },
+  accountControl: {
+    "& > *":{
+      textDecoration: "none",
+      marginLeft: "5px"
+    }
   }
 }));
 
@@ -77,8 +83,13 @@ export default function Header() {
             </Typography>
           </Link>
         </section>
-        <section>
-          <Button color="inherit">Login</Button>
+        <section className={classes.accountControl}>
+          <Link to="/login" underline="none">
+            <Button variant="contained" color="primary">Login</Button>
+          </Link>
+          <Link to="/signup" underline="none">
+            <Button variant="contained" color="primary">Signup</Button>
+          </Link>
         </section>
       </Toolbar>
     </AppBar>

@@ -18,6 +18,8 @@ import ViewEventContainer from './containers/ViewEventContainer';
 import ViewGroupContainer from './containers/ViewGroupContainer';
 import EditGroupContainer from './containers/EditGroupContainer';
 import EditEventContainer from './containers/EditEventContainer';
+import SignupContainer from './containers/SignupContainer';
+import LoginContainer from './containers/LoginContainer';
 
 export default function App () {
   const [api, setApi] = useState();
@@ -39,16 +41,19 @@ export default function App () {
     <Router>
       <AppWrapper apiReady={apiReady} api={api} >
         <Switch>
-          <Route exact path="/create-group" component={CreateGroupContainer}/>
-          <Route exact path="/group/:groupId/edit" component={EditGroupContainer}/>
+          <Route exact path="/groups/new" component={CreateGroupContainer}/>
+          <Route exact path="/groups/:groupId/edit" component={EditGroupContainer}/>
           <Route exact path="/groups/:groupId"  component={ViewGroupContainer}/>
           <Route exact path="/groups" component={GroupsPageContainer}/>
 
-          <Route exact path="/create-event/:groupId" component={CreateEventContainer}/>
           <Route exact path="/events/:eventId/edit" component={EditEventContainer}/>
           <Route exact path="/events/:eventId"  component={ViewEventContainer} />
+          <Route exact path="/events/new/:groupId" component={CreateEventContainer}/>
           <Route exact path="/events" component={EventsPageContainer}/>
          
+          <Route exact path="/signup" component={SignupContainer}/>
+          <Route exact path="/login" component={LoginContainer}/>
+
           <Route exact path="/ui-master" render={(props) => <UIMasterPage {...props}></UIMasterPage>}/>
 
           <Route exact path="/" component={HomeContainer}/>

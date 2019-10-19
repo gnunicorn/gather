@@ -28,7 +28,6 @@ const EventSchema = Yup.object().shape({
 export default function EditEventContainer (props) {
     // TODO: check user permission level, redirect if not appropriate
     const {
-        onSubmit,
         match:{
             params:{
                 eventId
@@ -55,11 +54,11 @@ export default function EditEventContainer (props) {
             validationSchema={EventSchema}
 
             onSubmit={(values, { setSubmitting }) => {
-                onSubmit(values)
+                console.log("Edit event success", values)
             }}
         >
              {(props) => (
-                <EventForm {...props}></EventForm>
+                <EventForm newEvent={false} {...props}></EventForm>
             )}
         </Formik>
     )

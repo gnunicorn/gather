@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, Fragment} from 'react';
 
 export default function NodeInfo(props) {
   const {api} = props;
@@ -24,9 +24,9 @@ export default function NodeInfo(props) {
   },[api.rpc.system]);
   
   return (
-    <>
+    <Fragment>
       {nodeInfo.chain} - {nodeInfo.nodeName} (v{nodeInfo.nodeVersion})
       <hr/>
-    </>
+    </Fragment>
   )
 }

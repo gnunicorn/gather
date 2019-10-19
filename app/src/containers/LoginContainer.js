@@ -3,37 +3,34 @@ import React from 'react';
 
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import EventForm from '../components/forms/EventForm';
+import AccessForm from '../components/forms/AccessForm';
 
 const LoginSchema = Yup.object().shape({
     email: Yup.string()
+        .email("Please use a valid email")
         .required('Required'),
     password: Yup.string()
+        .min(6, "Password too short")
+        .max(22, "Password too long")
         .required(),
   });
 
 export default function LoginContainer (props) {
-    const {
-        onSubmit
-    } = props;
-
     return (
         <Formik
             initialValues={{ 
-                title: '', 
-                groupId: groupId,
-                startDate: new Date(),
-                endDate: new Date()
+                email: '', 
+                password: '',
             }}
             
-            validationSchema={EventSchema}
+            validationSchema={LoginSchema}
 
             onSubmit={(values, { setSubmitting }) => {
-                onSubmit(values)
+                console.log("Login success", values)
             }}
         >
              {(props) => (
-                <EventForm {...props}></EventForm>
+                <AccessForm newUser={false} {...props}></AccessForm>
             )}
         </Formik>
     )

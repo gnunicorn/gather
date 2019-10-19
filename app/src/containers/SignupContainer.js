@@ -7,16 +7,15 @@ import AccessForm from '../components/forms/AccessForm';
 
 const LoginSchema = Yup.object().shape({
     email: Yup.string()
+        .email("Please use a valid email")
         .required('Required'),
     password: Yup.string()
+        .min(6, "Password too short")
+        .max(22, "Password too long")
         .required(),
   });
 
 export default function SignupContainer (props) {
-    const {
-        onSubmit
-    } = props;
-
     return (
         <Formik
             initialValues={{ 
@@ -27,11 +26,11 @@ export default function SignupContainer (props) {
             validationSchema={LoginSchema}
 
             onSubmit={(values, { setSubmitting }) => {
-                onSubmit(values)
+                console.log("Signup success", values)
             }}
         >
              {(props) => (
-                <AccessForm newUser="true" {...props}></AccessForm>
+                <AccessForm newUser={true} {...props}></AccessForm>
             )}
         </Formik>
     )

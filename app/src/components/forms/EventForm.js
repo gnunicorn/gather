@@ -1,14 +1,15 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Form, Field } from 'formik';
-import { Button, Paper, FormControl } from '@material-ui/core';
+import { Button, Paper, FormControl, Typography } from '@material-ui/core';
 import DateTimePickerCustom from './datetimepicker';
 import { TextField } from 'formik-material-ui';
 
 const useStyles = makeStyles(theme => ({
   paperRoot:{
     maxWidth: 450,
-    width:"100%"
+    width:"100%",
+    margin: "20px auto 0"
   },
   root: {
     display: "flex",
@@ -37,11 +38,15 @@ export default function EventForm(props) {
   const {
     errors,
     touched,
+    newEvent
   } = props;
   const classes = useStyles();
 
   return (
     <Paper square={true} className={classes.paperRoot} elevation={0}>
+      <Typography variant="h1" component="h1">
+          { newEvent ? "Create Event Form" : "Edit Event"}
+      </Typography>
       <Form className={classes.root}>
         <Field name="id" type="hidden"></Field>
         <Field name="groupId" type="hidden"></Field>

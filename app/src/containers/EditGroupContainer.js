@@ -18,9 +18,8 @@ const GroupSchema = Yup.object().shape({
 export default function EditGroupContainer (props) {
     // TODO: check user permission level, redirect if not appropriate
     const {
-        onSubmit,
         match:{
-            param:{
+            params:{
                 groupId
             }
         }
@@ -42,11 +41,11 @@ export default function EditGroupContainer (props) {
             validationSchema={GroupSchema}
 
             onSubmit={(values, { setSubmitting }) => {
-                onSubmit(values)
+                console.log("Edit group success", values)
             }}
         >
              {(props) => (
-                <GroupForm {...props}></GroupForm>
+                <GroupForm newGroup={false} {...props}></GroupForm>
             )}
         </Formik>
     )
