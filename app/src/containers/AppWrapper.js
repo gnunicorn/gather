@@ -3,8 +3,8 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { constants } from '../theme';
 
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import Header from "../components/general/Header";
+import Footer from "../components/general/Footer";
 
 
 const useStyles = makeStyles(theme => ({
