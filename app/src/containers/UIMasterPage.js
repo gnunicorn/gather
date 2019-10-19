@@ -39,7 +39,7 @@ const GroupCardDummyData = [
         title: "Department of Decentralisation",
         subTitle: "Additional meta",
         type: "Group",
-        link: "/group/department-of-decentralisation",
+        link: "/groups/department-of-decentralisation",
         image: null
     },
 ]

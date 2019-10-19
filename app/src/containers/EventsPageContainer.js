@@ -3,12 +3,12 @@ import { Typography } from '@material-ui/core';
 import CardGrid from '../components/cards/CardGrid';
 import CardBase from '../components/cards/CardBase';
 import { makeStyles } from '@material-ui/core/styles';
-import { constants } from '../theme';
+import { mixins } from '../theme';
 
 
 const useStyles = makeStyles(theme => ({
     root: {
-        ...constants.standardContentWrapper
+        ...mixins.standardContentWrapper
     },
   }));
 

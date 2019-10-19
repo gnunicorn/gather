@@ -6,7 +6,9 @@ import { grey } from '@material-ui/core/colors';
 
 import logo from "../../assets/logo.svg";
 import ReactSVG from 'react-svg'
-import { Link, Card, CardActionArea, CardContent } from '@material-ui/core';
+import { Card, CardActionArea, CardContent } from '@material-ui/core';
+import { Link } from "react-router-dom";
+
 import Blockies from 'react-blockies';
 
 const useStyles = makeStyles(theme => ({
@@ -17,6 +19,7 @@ const useStyles = makeStyles(theme => ({
     width: "100%",
   },
   link:{
+    textDecoration: "none",
     "&:hover":{
       textDecoration: "none"
     }
@@ -77,7 +80,7 @@ export default function CardBase(props) {
   const classes = useStyles();
   return (
     <Card className={classes.card}>
-      <Link to={link} className={classes.link} >
+      <Link to={link} underline="none" className={classes.link} >
         <CardActionArea>
           <div className={classes.stamp}>
             <ReactSVG 

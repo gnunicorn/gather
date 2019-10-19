@@ -47,6 +47,9 @@ export default function Footer(props) {
   return (<footer className={classes.footerRoot}>
     <section className={classes.footerInner}>
       <nav>
+        <Link to="/">
+          Home
+        </Link>
         <Link to="/events">
           Events
         </Link>
