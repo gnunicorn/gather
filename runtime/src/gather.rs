@@ -561,8 +561,9 @@ mod tests {
             assert_eq!(b_membership.role, Role::Member);
 
             // let's create some group
-            let mut next_group = Nonce::get();
+            let mut next_group = Reference::default();
             for _ in 0..3 {
+                next_group = Nonce::get();
                 assert_ok!(Gather::create_group(Origin::signed(alice), next_community, b"NEWLINK".to_vec(), None));
                 let group = Groups::get(next_group).unwrap();
                 assert_eq!(group.metadata, b"NEWLINK".to_vec());
@@ -573,14 +574,12 @@ mod tests {
                 let a_membership = Memberships::<Test>::get((alice, next_group)).unwrap();
                 assert_eq!(a_membership.role, Role::Admin);
 
-                next_group = Nonce::get();
             }
 
             // create some event:
             let next_event = Nonce::get();
-            assert_ok!(Gather::create_gathering(Origin::signed(alice), next_group, b"EVENTLINK".to_vec()));
+            assert_ok!(Gather::create_gathering(Origin::signed(alice), next_group, GatheringInput::default()));
             let gathering = Gatherings::get(next_event).unwrap();
-            assert_eq!(gathering.metadata, b"EVENTLINK".to_vec());
             assert_eq!(gathering.belongs_to, vec![next_group]);
 
             assert_eq!(GatheringsMembers::<Test>::get(next_event), vec![alice]);
@@ -646,21 +645,21 @@ mod tests {
             assert_eq!(Memberships::<Test>::get((charly, community)).unwrap().role, Role::Member);
             assert_eq!(Memberships::<Test>::get((dave, community)).unwrap().role, Role::Member);
 
-			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "");
-			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "");
+			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "Only the admin can update the group info");
+			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "Only the community admins can create groups");
 
             // bob can't set it
-			assert_err!(Gather::update_community_membership(Origin::signed(bob), community, bob, Role::Moderator), "");
+			assert_err!(Gather::update_community_membership(Origin::signed(bob), community, bob, Role::Moderator), "Only the admin can update the membership");
             // but alice can
 			assert_ok!(Gather::update_community_membership(Origin::signed(alice), community, bob, Role::Moderator));
             // still not enough to update the community or create a group
-			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "");
-			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "");
+			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "Only the admin can update the group info");
+			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "Only the community admins can create groups");
 
             // so let's bump up again
 			assert_ok!(Gather::update_community_membership(Origin::signed(alice), community, bob, Role::Organiser));
             // Organiser still not be allowed to update the community
-			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "");
+			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "Only the admin can update the group info");
             // but create a Group
 
             let group = Nonce::get();
@@ -669,7 +668,7 @@ mod tests {
             assert_ok!(Gather::join_group(Origin::signed(dave), group));
 
 			assert_err!(Gather::update_group(Origin::signed(charly), group, Some(b"NewLink".to_vec()), None), "");
-			assert_err!(Gather::create_gathering(Origin::signed(charly), group, b"NewLink".to_vec()), "");
+			assert_err!(Gather::create_gathering(Origin::signed(charly), group, GatheringInput::default()), "");
             assert_err!(Gather::update_group_membership(Origin::signed(charly), group, charly, Role::Admin), "");
 
             // but bob can
@@ -678,7 +677,7 @@ mod tests {
             assert_err!(Gather::update_group_membership(Origin::signed(alice), group, charly, Role::Organiser), "");
 
             // and as an organiser Charly can create gatherings
-			assert_ok!(Gather::create_gathering(Origin::signed(charly), group, b"NewInfo".to_vec()));
+			assert_ok!(Gather::create_gathering(Origin::signed(charly), group, GatheringInput::default()));
             // but not update the info.
 			assert_err!(Gather::update_group(Origin::signed(charly), group, Some(b"NewInfo".to_vec()), None), "");
 
