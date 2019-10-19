@@ -16,6 +16,7 @@ const useStyles = makeStyles(theme => ({
     position: "relative",
     padding: 0,
     maxWidth: "40vw",
+    backgroundColor: grey.A700,
     width: "100%",
   },
   link:{
@@ -44,7 +45,6 @@ const useStyles = makeStyles(theme => ({
     }
   },
   cardContent:{
-    backgroundColor: grey.A700,
     color: constants.colors.white,
   },
   title:{

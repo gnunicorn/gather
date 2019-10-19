@@ -33,5 +33,6 @@ export default function ViewGroup(props) {
                 {meta.subtitle}
             </Typography>
         </div>
+        
     </article>)
 }
