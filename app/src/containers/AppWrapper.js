@@ -12,10 +12,10 @@ const useStyles = makeStyles(theme => ({
         "position": "relative",
         "overflow": "hidden",
         minHeight: "100vh",
-        paddingBottom: constants.footerArea
+        paddingBottom: constants.footerArea,
     },
     contentArea:{
-        padding: `${theme.spacing(2)}px ${theme.spacing(3)}px`
+        // padding: `${theme.spacing(2)}px ${theme.spacing(3)}px`
     }
   }));
 

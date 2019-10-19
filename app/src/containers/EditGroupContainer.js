@@ -15,16 +15,18 @@ const GroupSchema = Yup.object().shape({
         .max(50, 'Too Long!'),
   });
 
-export default function CreateGroupContainer (props) {
+export default function EditGroupContainer (props) {
     const {
         onSubmit,
+        groupData
     } = props;
 
     return (
         <Formik
             initialValues={{ 
-                title: '', 
-                tagline: '',
+                id: groupdData.id,
+                title: groupData.title, 
+                tagline: groupdData.tagline,
             }}
             
             validationSchema={GroupSchema}

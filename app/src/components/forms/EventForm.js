@@ -33,7 +33,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function CreateEvent(props) {
+export default function EventForm(props) {
   const {
     errors,
     touched,
@@ -43,6 +43,7 @@ export default function CreateEvent(props) {
   return (
     <Paper square={true} className={classes.paperRoot} elevation={0}>
       <Form className={classes.root}>
+        <Field name="id" type="hidden"></Field>
         <Field name="groupId" type="hidden"></Field>
         <FormControl className={classes.inputWrapper} fullWidth>
           <Field label="Title" name="title" component={TextField} fullWidth />

@@ -7,6 +7,8 @@ import Button from '@material-ui/core/Button';
 
 import logo from "../assets/logo.svg";
 import ReactSVG from 'react-svg'
+import { Link } from "react-router-dom";
+import { grey } from '@material-ui/core/colors';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -18,6 +20,8 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     flexGrow: 1,
+    color: grey.A400,
+    textDecoration: "none"
   },
   toolBar: {
     display: "flex",
@@ -59,17 +63,19 @@ export default function Header() {
     <AppBar position="relative" color="inherit">
       <Toolbar className={classes.toolBar}>
         <section>
-          <div className={classes.logoWrapper}>
+          <Link to="/" className={classes.logoWrapper}>
             <ReactSVG 
             src={logo} 
             beforeInjection={svg => {
               svg.setAttribute('style', 'width: 100%; height: 100%')
             }} 
             alt="Logo" />
-          </div>
-          <Typography variant="h6"  className={classes.title}>
-            Gather
-          </Typography>
+          </Link>
+          <Link to="/" className={classes.title}>
+            <Typography variant="h6"  >
+              Gather
+            </Typography>
+          </Link>
         </section>
         <section>
           <Button color="inherit">Login</Button>

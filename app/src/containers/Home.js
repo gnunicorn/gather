@@ -5,23 +5,26 @@ import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import { constants } from '../theme';
 
 
 const useStyles = makeStyles(theme => ({
     root: {
+        position: "relative",
+        height: `calc(100vh - (${constants.footerArea}px + ${constants.headerArea}px))`,
+        width: "100%"
     },
     video: {
-        "position": "absolute",
-        "top": 0,
-        "right": 0,
-        "left": 0,
-        "min-width": "100%",
-        "max-width": "100%",
-        "overflow": "hidden",
-        "z-index": "-1",
-        "transform": "translateY(-20%)",
+        objectFit: "cover",
+        objectPosition: "center",
+        width: "100%",
+        height: "100%",
     },
     box: {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
         "z-index": "1",
         "text-align": "center",
         "padding": theme.spacing(20)

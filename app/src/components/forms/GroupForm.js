@@ -21,12 +21,13 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function CreateGroup(props) {
+export default function GroupForm(props) {
   const classes = useStyles();
 
   return (
     <Paper square={true} className={classes.paperRoot} elevation={0}>
       <Form className={classes.root}>
+        <Field name="id" type="hidden"></Field>
         <FormControl className={classes.inputWrapper} fullWidth>
           <Field label="Title" name="title" component={TextField} fullWidth />
         </FormControl>

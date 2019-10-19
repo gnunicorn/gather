@@ -20,7 +20,8 @@ export const mixins = {
 }
 
 export const constants = {
-  footerArea: 120,
+  footerArea: 80,
+  headerArea: 64,
   colors:{
     pink: "#ff1864",
     pinkDark: "#F40052",

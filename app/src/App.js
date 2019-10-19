@@ -32,8 +32,8 @@ export default function App () {
   
 
   return (
-    <AppWrapper apiReady={apiReady} api={api} >
-      <Router>
+    <Router>
+      <AppWrapper apiReady={apiReady} api={api} >
         <Switch>
           {/* <Route path="/discover">
             <Discover />
@@ -60,8 +60,8 @@ export default function App () {
             <Home />
           </Route>
         </Switch>
-      </Router>
-    </AppWrapper>
+      </AppWrapper>
+    </Router>
    
   );
 }

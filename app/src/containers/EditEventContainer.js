@@ -6,6 +6,8 @@ import * as Yup from 'yup';
 import EventForm from '../components/forms/EventForm';
 
 const EventSchema = Yup.object().shape({
+    id: Yup.string()
+        .required(),
     title: Yup.string()
         .min(3, 'Too Short!')
         .max(50, 'Too Long!')
@@ -23,19 +25,20 @@ const EventSchema = Yup.object().shape({
         .required(),
   });
 
-export default function CreateEventContainer (props) {
+export default function EditEventContainer (props) {
     const {
         onSubmit,
-        groupId
+        eventData
     } = props;
 
     return (
         <Formik
             initialValues={{ 
-                title: '', 
-                groupId: groupId,
-                startDate: new Date(),
-                endDate: new Date()
+                id: eventData.id,
+                title: eventData.title, 
+                groupId: eventData.groupId,
+                startDate: eventData.startDate,
+                endDate: eventData.endDate
             }}
             
             validationSchema={EventSchema}

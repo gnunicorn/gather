@@ -2,9 +2,8 @@ import React from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { makeStyles } from '@material-ui/core/styles';
 import { grey } from '@material-ui/core/colors';
-
+import { Link } from "react-router-dom";
 import NodeInfo from "./NodeInfo";
-import { Link } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   footerRoot: {
@@ -28,6 +27,8 @@ const useStyles = makeStyles(theme => ({
       justifyContent: "space-between",
       alignItems: "center",
       "& *":{
+        marginRight: 5,
+        color: grey.A200,
         cursor: "pointer"
       }
     }
@@ -54,9 +55,6 @@ export default function Footer(props) {
         </Link>
       </nav>
       <article className={classes.nodeInfo}>
-        <span>
-          Node
-        </span>
         {apiReady ? <NodeInfo api={api} /> : <CircularProgress color="inherit" />}
       </article>
     </section>
