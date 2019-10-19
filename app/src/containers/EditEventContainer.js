@@ -4,6 +4,7 @@ import React from 'react';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EventForm from '../components/forms/EventForm';
+import useReactRouter from 'use-react-router';
 
 const EventSchema = Yup.object().shape({
     id: Yup.string()
@@ -40,6 +41,7 @@ export default function EditEventContainer (props) {
     }
     // TODO: effect to get the data 
 
+    const { history } = useReactRouter();
 
     return (
         <Formik
@@ -55,6 +57,7 @@ export default function EditEventContainer (props) {
 
             onSubmit={(values, { setSubmitting }) => {
                 console.log("Edit event success", values)
+                history.push(`/events/${values.id}`)
             }}
         >
              {(props) => (

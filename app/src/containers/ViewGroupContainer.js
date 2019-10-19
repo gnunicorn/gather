@@ -12,7 +12,7 @@ export default function ViewGroupContainer (props) {
         } 
     } = props;
 
-    // TODO Resolve group Data 
+    // TODO Resolve group Data via group ID
     let data = {
         meta: {
             title: GroupCardDummyData[0].title,

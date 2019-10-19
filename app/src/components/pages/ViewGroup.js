@@ -3,8 +3,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import TopBanner from '../general/TopBanner';
 import { Typography, AppBar, Tabs, Tab } from '@material-ui/core';
 import Slides from '../general/Slides';
-import CardGrid from '../cards/CardGrid';
+import StandardGrid from '../general/StandardGrid';
 import CardBase from '../cards/CardBase';
+import MemberStub from '../general/MemberStub';
 
 const useStyles = makeStyles(theme => ({
     root:{
@@ -59,18 +60,25 @@ export default function ViewGroup(props) {
                 <Typography variant="h2" component="h2">
                     Events    
                 </Typography>
-                <CardGrid>
+                <StandardGrid>
                     {
                         events.map(card => 
                             (<CardBase key={card.id} {...card}></CardBase>)
                         )
                     }
-                </CardGrid>
+                </StandardGrid>
            </div>
            <div className={classes.contentSlide}>
                 <Typography variant="h2" component="h2">
                     Members    
                 </Typography>
+                <StandardGrid>
+                    {
+                        members.map(member => 
+                            (<MemberStub {...member}></MemberStub>)
+                        )
+                    }
+                </StandardGrid>
            </div>
        </Slides>
     </article>)

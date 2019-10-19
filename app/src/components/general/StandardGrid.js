@@ -16,7 +16,7 @@ const useStyles = makeStyles(theme => ({
   
 }));
 
-export default function CardGrid(props) {
+export default function StandardGrid(props) {
   const {
     children
   } = props;

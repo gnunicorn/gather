@@ -32,8 +32,7 @@ export default function LoginContainer (props) {
             onSubmit={(values, { setSubmitting }) => {
                 console.log("Login success", values);
                 const login = userService.login(values.email, values.password);
-                if(true) {
-                    // navigate to another page - events or groups or something
+                if(login) {
                     history.push("/events/")
                 }
             }}

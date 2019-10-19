@@ -1,5 +1,5 @@
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 
@@ -34,7 +34,7 @@ export default function Slides(props) {
   return (<section className={classes.root}>
       {
         React.Children.map(children, (child, i) => 
-        <div className={classNames(classes.slide, i == slideIndex ? "active" : "")}>
+        <div className={classNames(classes.slide, i === slideIndex ? "active" : "")}>
             {child}
         </div>
         )}

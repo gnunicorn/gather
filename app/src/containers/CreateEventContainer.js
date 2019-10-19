@@ -4,6 +4,7 @@ import React from 'react';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EventForm from '../components/forms/EventForm';
+import useReactRouter from 'use-react-router';
 
 const EventSchema = Yup.object().shape({
     title: Yup.string()
@@ -31,6 +32,7 @@ export default function CreateEventContainer (props) {
             }
         } 
     } = props;
+    const { history } = useReactRouter();
     // TODO: check user permission level of group, redirect if not appropriate
     return (
         <Formik
@@ -45,6 +47,11 @@ export default function CreateEventContainer (props) {
 
             onSubmit={(values, { setSubmitting }) => {
                 console.log("Create event success", values)
+                // TODO: wire up to chain
+                const newEventId = false;
+                if(newEventId) {
+                    history.push(`/events/${newEventId}`)
+                }
             }}
         >
              {(props) => (
