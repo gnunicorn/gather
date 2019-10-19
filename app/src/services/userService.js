@@ -4,6 +4,7 @@ import Buffer from 'buffer/';
 
 export function signup(email, password) {
     var keypair = getKeypairFromEmailPassword(email, password);
+    
 }
 
 export function login(email, password) {
