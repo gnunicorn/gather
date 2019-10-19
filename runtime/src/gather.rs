@@ -331,6 +331,13 @@ decl_module! {
                 return Err("Only the admin can update the membership")
             }
 
+            if author == who && role != Role::Admin && CommunitiesMembers::<T>::get(&community).iter().find(|other|{
+                    **other != author && Memberships::<T>::get( (other, &community) )
+                            .map(|m| m.role == Role::Admin).unwrap_or_default()
+            }).is_none() {
+                return Err("The last Admin can't demote themselfes");
+            }
+
             let mut membership = Memberships::<T>::get( (&who, community) ).ok_or("Account not a Member")?;
             membership.updated_at = Self::now();
             membership.role = role;
@@ -822,9 +829,9 @@ mod tests {
             let community = Nonce::get();
 
 			assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
-			assert_err!(Gather::update_community_membership(Origin::signed(alice), community, alice, Role::Moderator), "");
-			assert_err!(Gather::update_community_membership(Origin::signed(alice), community, alice, Role::Organiser), "");
-			assert_err!(Gather::update_community_membership(Origin::signed(alice), community, alice, Role::Member), "");
+			assert_err!(Gather::update_community_membership(Origin::signed(alice), community, alice, Role::Moderator), "The last Admin can\'t demote themselfes");
+			assert_err!(Gather::update_community_membership(Origin::signed(alice), community, alice, Role::Organiser), "The last Admin can\'t demote themselfes");
+			assert_err!(Gather::update_community_membership(Origin::signed(alice), community, alice, Role::Member), "The last Admin can\'t demote themselfes");
         });
     }
 
