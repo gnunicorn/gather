@@ -9,7 +9,8 @@ const useStyles = makeStyles(theme => ({
   paperRoot:{
     maxWidth: 450,
     width:"100%",
-    margin: "20px auto 0"
+    margin: "20px auto 0",
+    padding: 20
   },
   root: {
     display: "flex",

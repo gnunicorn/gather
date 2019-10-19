@@ -2,8 +2,8 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import React, { useState, useEffect } from 'react';
 import {
   BrowserRouter as Router,
-  Switch,
   Route,
+  Switch
   // Link
 } from "react-router-dom";
 
@@ -22,7 +22,6 @@ import SignupContainer from './containers/SignupContainer';
 import LoginContainer from './containers/LoginContainer';
 
 // import * as gatherService from './services/gatherService';
-
 export default function App () {
   const [api, setApi] = useState();
   const [apiReady, setApiReady] = useState();
