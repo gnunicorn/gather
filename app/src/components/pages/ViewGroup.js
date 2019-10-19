@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TopBanner from '../general/TopBanner';
-import { Typography, AppBar, Tabs, Tab, Fab } from '@material-ui/core';
+import { Typography, AppBar, Tabs, Tab, Fab, Button } from '@material-ui/core';
 import Slides from '../general/Slides';
 import StandardGrid from '../general/StandardGrid';
 import CardBase from '../cards/CardBase';
 import MemberStub from '../general/MemberStub';
 import { Link } from "react-router-dom";
-import AddIcon from '@material-ui/icons/Add';
+import EditIcon from '@material-ui/icons/Edit';
 import { mixins } from '../../theme';
 
 const useStyles = makeStyles(theme => ({
@@ -26,6 +26,15 @@ const useStyles = makeStyles(theme => ({
     },
     floatingCta:{
         ...mixins.floatingCta
+    },
+    buttonArea:{
+        display:"flex",
+        justifyContent: "center",
+        flexWrap: "wrap",
+        flexDirection: "row",
+        "& > *":{
+            margin: "10px 5px"
+        }
     }
   }));
   
@@ -49,6 +58,13 @@ export default function ViewGroup(props) {
             <Typography variant="h2" component="h2">
                 {meta.subtitle}
             </Typography>
+        </div>
+        <div className={classes.buttonArea}>
+            <Button variant="contained" color="primary" onClick={() => {
+                console.log("RSVP Action triggered")
+            }}>
+                Create Event
+            </Button>
         </div>
         <AppBar position="static" className={classes.tabs}>
           <Tabs
@@ -97,9 +113,9 @@ export default function ViewGroup(props) {
            </Fab>
         </Link>
        } */}
-       <Link className={classes.floatingCta} to={`/events/${meta.id}/new`}>
+       <Link className={classes.floatingCta} to={`/groups/${meta.id}/edit`}>
            <Fab color="primary">
-               <AddIcon />
+               <EditIcon />
            </Fab>
         </Link>
     </article>)

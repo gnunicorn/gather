@@ -28,7 +28,7 @@ const useStyles = makeStyles(theme => ({
         flexWrap: "wrap",
         flexDirection: "row",
         "& > *":{
-            margin: 5
+            margin: "10px 5px"
         }
     }
   }));
