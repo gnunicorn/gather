@@ -114,6 +114,46 @@ pub struct Gathering {
     pub updated_at: Timestamp,
 }
 
+/// Definition for a specific Gathering
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+pub struct GatheringInput {
+    pub location: Option<Location>,
+    pub rsvp_opens: Option<Timestamp>,
+    pub rsvp_closes: Option<Timestamp>,
+    pub max_rsvps: Option<u32>,
+    pub metadata: Option<ExternalData>,
+}
+
+impl GatheringInput {
+    fn as_new(self, id: GroupId, now: Timestamp) -> Gathering {
+        Gathering {
+            belongs_to: vec![id],
+            created_at: now,
+            updated_at: now,
+            location: self.location.unwrap_or_default(),
+            rsvp_opens: self.rsvp_opens,
+            rsvp_closes: self.rsvp_closes,
+            max_rsvps: self.max_rsvps,
+            metadata: self.metadata.unwrap_or_default(),
+        }
+    }
+    fn update(self, gathering: Gathering, now: Timestamp) -> Gathering {
+        Gathering {
+            belongs_to: gathering.belongs_to,
+            created_at: gathering.created_at,
+            updated_at: now,
+            location: self.location.unwrap_or(gathering.location),
+            rsvp_opens: self.rsvp_opens.map_or(gathering.rsvp_opens, |m| Some(m)),
+            rsvp_closes: self.rsvp_closes.map_or(gathering.rsvp_closes, |m| Some(m)),
+            max_rsvps: self.max_rsvps.map_or(gathering.max_rsvps, |m| Some(m)),
+            metadata: self.metadata.unwrap_or(gathering.metadata),
+        }
+
+    }
+}
+
+
 /// Define the Roles and thus privileges of a specific member
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
@@ -300,7 +340,6 @@ decl_module! {
             MembersGroups::<T>::append_or_insert(who, &[id][..]);
             CommunitiesGroups::append_or_insert(community, &[id][..]);
 
-
             Self::deposit_event(RawEvent::GroupCreated(community, id));
 
             Ok(())
@@ -334,10 +373,37 @@ decl_module! {
 
         // --- Gatherinigs
 
-        pub fn create_gathering(origin, group: GroupId, metadata: ExternalData) -> Result {
+        pub fn create_gathering(origin, group_id: GroupId, details: GatheringInput) -> Result {
             let who = ensure_signed(origin)?;
-            // + ensure who has admin rights for community
-            Err("not yet implemented")
+            let group = Groups::get(group_id).ok_or("Group doesn't exist")?;
+            let filter = |m: Membership| match m.role {
+                Role::Admin | Role::Organiser => Some(m),
+                _ => None
+            };
+            // must be Admin or Organiser of Group or Community this group belongs to
+            let _ = Memberships::<T>::get( (&who, group_id) )
+                .map(filter)
+                .or_else(||
+                    Memberships::<T>::get( (&who, &group.belongs_to) )
+                    .map(filter)
+                ).ok_or("You are not an Admins or Organiser of the Group or Community")?;
+
+            let id = Self::next_id();
+            let now = Self::now();
+            Gatherings::insert(id, details.as_new(group_id, now));
+            RSVPs::<T>::insert((&who, id), RSVP {
+                created_at: now,
+                updated_at: now,
+                state: RSVPStates::Yes,
+            });
+
+            GatheringsMembers::<T>::insert(id,vec![&who]);
+            MembersGatherings::<T>::append_or_insert(&who, &[id][..]);
+            GroupsGatherings::append_or_insert(group_id, &[id][..]);
+
+            Self::deposit_event(RawEvent::GatheringCreated(group_id, id));
+
+            Ok(())
         }
 
         pub fn update_gathering(origin, gathering: GatheringId, metadata: ExternalData) -> Result {
