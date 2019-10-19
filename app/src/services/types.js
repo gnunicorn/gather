@@ -1,4 +1,4 @@
-{
+export const customTypes = {
     "Reference": "u64",
     "CommunityId": "Reference",
     "GroupId": "Reference",
