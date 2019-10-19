@@ -1,5 +1,7 @@
 
 import React from 'react';
+import ViewGroup from '../components/pages/ViewGroup';
+import { GroupCardDummyData, EventCardDummyData, MembersDummyData } from '../dummyData';
 
 export default function ViewGroupContainer (props) {
     const {
@@ -10,9 +12,17 @@ export default function ViewGroupContainer (props) {
         } 
     } = props;
 
+    // TODO Resolve group Data 
+    let data = {
+        meta: {
+            title: GroupCardDummyData[0].title,
+            subtitle: GroupCardDummyData[0].subtitle,
+        },
+        members: MembersDummyData,
+        events: EventCardDummyData
+    }
+
     return (
-    <div >
-       ViewGroupContainer {groupId}
-    </div>
+        <ViewGroup {...data}></ViewGroup>
     )
 }

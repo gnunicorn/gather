@@ -4,6 +4,7 @@ import CardGrid from '../components/cards/CardGrid';
 import CardBase from '../components/cards/CardBase';
 import { makeStyles } from '@material-ui/core/styles';
 import { mixins } from '../theme';
+import { GroupCardDummyData } from '../dummyData';
 
 
 const useStyles = makeStyles(theme => ({
@@ -11,17 +12,6 @@ const useStyles = makeStyles(theme => ({
         ...mixins.standardContentWrapper
     },
   }));
-
-const GroupCardDummyData = [
-    {
-        id: "1234567i234234",
-        title: "Department of Decentralisation",
-        subTitle: "Additional meta",
-        type: "Group",
-        link: "/groups/department-of-decentralisation",
-        image: null
-    },
-]
 
 export default function GroupsPageContainer (props) {
     const classes = useStyles();

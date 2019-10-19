@@ -21,6 +21,8 @@ import EditEventContainer from './containers/EditEventContainer';
 import SignupContainer from './containers/SignupContainer';
 import LoginContainer from './containers/LoginContainer';
 
+// import * as gatherService from './services/gatherService';
+
 export default function App () {
   const [api, setApi] = useState();
   const [apiReady, setApiReady] = useState();
@@ -35,7 +37,9 @@ export default function App () {
       })
       .catch((e) => console.error(e));
   }, []);
-  
+
+  // gatherService.createGroup({ name: 'group1' }).then(console.log);
+  // gatherService.getGroupDetails('').then(console.log);
 
   return (
     <Router>

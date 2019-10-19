@@ -6,6 +6,7 @@ import CardGrid from '../components/cards/CardGrid';
 import CardBase from '../components/cards/CardBase';
 import CreateEventContainer from './CreateEventContainer';
 import CreateGroupContainer from './CreateGroupContainer';
+import { EventCardDummyData, GroupCardDummyData } from '../dummyData';
 
 
 const useStyles = makeStyles(theme => ({
@@ -13,36 +14,6 @@ const useStyles = makeStyles(theme => ({
         
     },
   }));
-
-const EventCardDummyData = [
-    {
-        id: "1234567io",
-        title: "Diffusion 2019",
-        subTitle: "19 Oct 2019 - 20 Oct 2019",
-        type: "Event",
-        link: "/events/diffusion-2019",
-        image: null
-    },
-    {
-        id: "1234567ip",
-        title: "Devcon 2020",
-        subTitle: "?? ?? 2019 - ? ? 2020",
-        type: "Event",
-        link: "/events/devcon-2020",
-        image: null
-    }
-]
-
-const GroupCardDummyData = [
-    {
-        id: "1234567i234234",
-        title: "Department of Decentralisation",
-        subTitle: "Additional meta",
-        type: "Group",
-        link: "/groups/department-of-decentralisation",
-        image: null
-    },
-]
 
 export default function UIMasterPage () {
     const classes = useStyles();
