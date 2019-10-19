@@ -1,7 +1,7 @@
 use primitives::{Pair, Public};
 use gather_runtime::{
 	AccountId, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig,
-	SudoConfig, IndicesConfig, SystemConfig, WASM_BINARY, 
+	SudoConfig, IndicesConfig, SystemConfig, GatherConfig, WASM_BINARY, 
 };
 use babe_primitives::{AuthorityId as BabeId};
 use grandpa_primitives::{AuthorityId as GrandpaId};
@@ -109,7 +109,8 @@ impl Alternative {
 fn testnet_genesis(initial_authorities: Vec<(AccountId, AccountId, GrandpaId, BabeId)>,
 	root_key: AccountId, 
 	endowed_accounts: Vec<AccountId>,
-	_enable_println: bool) -> GenesisConfig {
+	_enable_println: bool
+) -> GenesisConfig {
 	GenesisConfig {
 		system: Some(SystemConfig {
 			code: WASM_BINARY.to_vec(),
@@ -131,5 +132,21 @@ fn testnet_genesis(initial_authorities: Vec<(AccountId, AccountId, GrandpaId, Ba
 		grandpa: Some(GrandpaConfig {
 			authorities: initial_authorities.iter().map(|x| (x.2.clone(), 1)).collect(),
 		}),
+		gather: Some(GatherConfig {
+			communities: Default::default(),
+			communities_members: Default::default(),
+			members_communities: Default::default(),
+			communities_groups: Default::default(),
+			groups: Default::default(),
+			groups_members: Default::default(),
+			members_groups: Default::default(),
+			groups_gatherings: Default::default(),
+			gatherings: Default::default(),
+			gatherings_members: Default::default(),
+			members_gatherings: Default::default(),
+			// memberships: Default::default(),
+			// rsvps: ,
+			nonce: Default::default(),
+		})
 	}
 }
