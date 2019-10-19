@@ -66,6 +66,13 @@ const useStyles = makeStyles(theme => ({
     "&> *":{
       fontWeight: 800
     }
+  },
+  actionArea:{
+    display: "flex",
+    height: "100%",
+    flexDirection: "column",
+    justifyContent: "flex-start",
+    alignItems: "flex-start"
   }
 }));
 
@@ -81,7 +88,7 @@ export default function CardBase(props) {
   return (
     <Card className={classes.card}>
       <Link to={link} underline="none" className={classes.link} >
-        <CardActionArea>
+        <CardActionArea className={classes.actionArea}>
           <div className={classes.stamp}>
             <ReactSVG 
               src={logo} 

@@ -15,6 +15,7 @@
     "@polkadot/ui-keyring": "^0.45.1",
     "blockies": "^0.0.2",
     "buffer": "^5.4.3",
+    "classnames": "^2.2.6",
     "clsx": "latest",
     "formik": "^1.5.8",
     "formik-material-ui": "^0.0.22",
