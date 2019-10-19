@@ -14,7 +14,7 @@ pub type CommunityId = Reference;
 pub type GroupId = Reference;
 pub type GatheringId = Reference;
 pub type ExternalData = Vec<u8>; //potentially IPFS CiD
-pub type LatLang = (u64, u64); // Latitude, Langitude?
+pub type LatLong = (u64, u64); // Latitude, Longitude
 pub type Timezone = u8;
 /// UTC epoch time
 pub type Timestamp = u64; 
@@ -28,7 +28,7 @@ pub enum Location {
     /// This is a remote acting group, but bound to a base timezone
     Remote(Option<Timezone>),
     /// This group is bound to a specific location or Region?
-    Local(LatLang),
+    Local(LatLong),
 }
 
 impl Default for Location {
