@@ -114,6 +114,46 @@ pub struct Gathering {
     pub updated_at: Timestamp,
 }
 
+/// Definition for a specific Gathering
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+pub struct GatheringInput {
+    pub location: Option<Location>,
+    pub rsvp_opens: Option<Timestamp>,
+    pub rsvp_closes: Option<Timestamp>,
+    pub max_rsvps: Option<u32>,
+    pub metadata: Option<ExternalData>,
+}
+
+impl GatheringInput {
+    fn as_new(self, id: GroupId, now: Timestamp) -> Gathering {
+        Gathering {
+            belongs_to: vec![id],
+            created_at: now,
+            updated_at: now,
+            location: self.location.unwrap_or_default(),
+            rsvp_opens: self.rsvp_opens,
+            rsvp_closes: self.rsvp_closes,
+            max_rsvps: self.max_rsvps,
+            metadata: self.metadata.unwrap_or_default(),
+        }
+    }
+    fn update(self, gathering: Gathering, now: Timestamp) -> Gathering {
+        Gathering {
+            belongs_to: gathering.belongs_to,
+            created_at: gathering.created_at,
+            updated_at: now,
+            location: self.location.unwrap_or(gathering.location),
+            rsvp_opens: self.rsvp_opens.map_or(gathering.rsvp_opens, |m| Some(m)),
+            rsvp_closes: self.rsvp_closes.map_or(gathering.rsvp_closes, |m| Some(m)),
+            max_rsvps: self.max_rsvps.map_or(gathering.max_rsvps, |m| Some(m)),
+            metadata: self.metadata.unwrap_or(gathering.metadata),
+        }
+
+    }
+}
+
+
 /// Define the Roles and thus privileges of a specific member
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
@@ -156,8 +196,8 @@ decl_storage! {
         GatheringsMembers get(gatherings_members) config(): map GatheringId => Vec<T::AccountId>;
         MembersGatherings get(members_gatherings) config(): map T::AccountId => Vec<GatheringId>;
 
-        Memberships get(memberships): map (T::AccountId, Reference) => Option<Membership>;
-        RSVPs get(rsvps): map (T::AccountId, GatheringId) => Option<RSVP>;
+        Memberships get(memberships) config(): map (T::AccountId, Reference) => Option<Membership>;
+        RSVPs get(rsvps) config(): map (T::AccountId, GatheringId) => Option<RSVP>;
 
         // nonces
         Nonce get(nonce) config(): Reference;
@@ -300,7 +340,6 @@ decl_module! {
             MembersGroups::<T>::append_or_insert(who, &[id][..]);
             CommunitiesGroups::append_or_insert(community, &[id][..]);
 
-
             Self::deposit_event(RawEvent::GroupCreated(community, id));
 
             Ok(())
@@ -334,10 +373,37 @@ decl_module! {
 
         // --- Gatherinigs
 
-        pub fn create_gathering(origin, group: GroupId, metadata: ExternalData) -> Result {
+        pub fn create_gathering(origin, group_id: GroupId, details: GatheringInput) -> Result {
             let who = ensure_signed(origin)?;
-            // + ensure who has admin rights for community
-            Err("not yet implemented")
+            let group = Groups::get(group_id).ok_or("Group doesn't exist")?;
+            let filter = |m: Membership| match m.role {
+                Role::Admin | Role::Organiser => Some(m),
+                _ => None
+            };
+            // must be Admin or Organiser of Group or Community this group belongs to
+            let _ = Memberships::<T>::get( (&who, group_id) )
+                .map(filter)
+                .or_else(||
+                    Memberships::<T>::get( (&who, &group.belongs_to) )
+                    .map(filter)
+                ).ok_or("You are not an Admins or Organiser of the Group or Community")?;
+
+            let id = Self::next_id();
+            let now = Self::now();
+            Gatherings::insert(id, details.as_new(group_id, now));
+            RSVPs::<T>::insert((&who, id), RSVP {
+                created_at: now,
+                updated_at: now,
+                state: RSVPStates::Yes,
+            });
+
+            GatheringsMembers::<T>::insert(id,vec![&who]);
+            MembersGatherings::<T>::append_or_insert(&who, &[id][..]);
+            GroupsGatherings::append_or_insert(group_id, &[id][..]);
+
+            Self::deposit_event(RawEvent::GatheringCreated(group_id, id));
+
+            Ok(())
         }
 
         pub fn update_gathering(origin, gathering: GatheringId, metadata: ExternalData) -> Result {
@@ -409,7 +475,6 @@ decl_event!(
 mod tests {
 	use super::*;
 
-	use runtime_io::with_externalities;
 	use primitives::{H256, Blake2Hasher};
 	use support::{impl_outer_origin, assert_ok, assert_err, parameter_types};
 	use sr_primitives::{traits::{BlakeTwo256, IdentityLookup}, testing::Header};
@@ -442,7 +507,6 @@ mod tests {
 		type AccountId = u64;
 		type Lookup = IdentityLookup<Self::AccountId>;
 		type Header = Header;
-		type WeightMultiplierUpdate = ();
 		type Event = ();
 		type BlockHashCount = BlockHashCount;
 		type MaximumBlockWeight = MaximumBlockWeight;
@@ -465,13 +529,13 @@ mod tests {
 
 	// This function basically just builds a genesis storage key/value store according to
 	// our desired mockup.
-	fn new_test_ext() -> runtime_io::TestExternalities<Blake2Hasher> {
+	fn new_test_ext() -> runtime_io::TestExternalities {
 		system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
 	}
 
 	#[test]
 	fn full_regular_flow() {
-		with_externalities(&mut new_test_ext(), || {
+		new_test_ext().execute_with(|| {
 
             let alice = 1u64;
             let bob = 2u64;
@@ -495,8 +559,9 @@ mod tests {
             assert_eq!(b_membership.role, Role::Member);
 
             // let's create some group
-            let mut next_group = Nonce::get();
+            let mut next_group = Reference::default();
             for _ in 0..3 {
+                next_group = Nonce::get();
                 assert_ok!(Gather::create_group(Origin::signed(alice), next_community, b"NEWLINK".to_vec(), None));
                 let group = Groups::get(next_group).unwrap();
                 assert_eq!(group.metadata, b"NEWLINK".to_vec());
@@ -507,14 +572,12 @@ mod tests {
                 let a_membership = Memberships::<Test>::get((alice, next_group)).unwrap();
                 assert_eq!(a_membership.role, Role::Admin);
 
-                next_group = Nonce::get();
             }
 
             // create some event:
             let next_event = Nonce::get();
-            assert_ok!(Gather::create_gathering(Origin::signed(alice), next_group, b"EVENTLINK".to_vec()));
+            assert_ok!(Gather::create_gathering(Origin::signed(alice), next_group, GatheringInput::default()));
             let gathering = Gatherings::get(next_event).unwrap();
-            assert_eq!(gathering.metadata, b"EVENTLINK".to_vec());
             assert_eq!(gathering.belongs_to, vec![next_group]);
 
             assert_eq!(GatheringsMembers::<Test>::get(next_event), vec![alice]);
@@ -562,7 +625,7 @@ mod tests {
 
 	#[test]
 	fn permissions() {
-		with_externalities(&mut new_test_ext(), || {
+		new_test_ext().execute_with(|| {
 
             let alice = 1u64;
             let bob = 2u64;
@@ -580,21 +643,21 @@ mod tests {
             assert_eq!(Memberships::<Test>::get((charly, community)).unwrap().role, Role::Member);
             assert_eq!(Memberships::<Test>::get((dave, community)).unwrap().role, Role::Member);
 
-			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "");
-			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "");
+			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "Only the admin can update the group info");
+			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "Only the community admins can create groups");
 
             // bob can't set it
-			assert_err!(Gather::update_community_membership(Origin::signed(bob), community, bob, Role::Moderator), "");
+			assert_err!(Gather::update_community_membership(Origin::signed(bob), community, bob, Role::Moderator), "Only the admin can update the membership");
             // but alice can
 			assert_ok!(Gather::update_community_membership(Origin::signed(alice), community, bob, Role::Moderator));
             // still not enough to update the community or create a group
-			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "");
-			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "");
+			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "Only the admin can update the group info");
+			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "Only the community admins can create groups");
 
             // so let's bump up again
 			assert_ok!(Gather::update_community_membership(Origin::signed(alice), community, bob, Role::Organiser));
             // Organiser still not be allowed to update the community
-			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "");
+			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "Only the admin can update the group info");
             // but create a Group
 
             let group = Nonce::get();
@@ -603,7 +666,7 @@ mod tests {
             assert_ok!(Gather::join_group(Origin::signed(dave), group));
 
 			assert_err!(Gather::update_group(Origin::signed(charly), group, Some(b"NewLink".to_vec()), None), "");
-			assert_err!(Gather::create_gathering(Origin::signed(charly), group, b"NewLink".to_vec()), "");
+			assert_err!(Gather::create_gathering(Origin::signed(charly), group, GatheringInput::default()), "");
             assert_err!(Gather::update_group_membership(Origin::signed(charly), group, charly, Role::Admin), "");
 
             // but bob can
@@ -612,7 +675,7 @@ mod tests {
             assert_err!(Gather::update_group_membership(Origin::signed(alice), group, charly, Role::Organiser), "");
 
             // and as an organiser Charly can create gatherings
-			assert_ok!(Gather::create_gathering(Origin::signed(charly), group, b"NewInfo".to_vec()));
+			assert_ok!(Gather::create_gathering(Origin::signed(charly), group, GatheringInput::default()));
             // but not update the info.
 			assert_err!(Gather::update_group(Origin::signed(charly), group, Some(b"NewInfo".to_vec()), None), "");
 
@@ -625,7 +688,7 @@ mod tests {
 
 	#[test]
 	fn last_community_admin_cant_demote() {
-		with_externalities(&mut new_test_ext(), || {
+		new_test_ext().execute_with(|| {
 
             let alice = 1u64;
             let community = Nonce::get();
