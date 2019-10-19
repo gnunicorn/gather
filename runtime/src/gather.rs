@@ -395,15 +395,31 @@ decl_module! {
 
         // ------- Group Membership
 
-        pub fn join_group(origin, group: GroupId) -> Result {
+        pub fn join_group(origin, id: GroupId) -> Result {
             let who = ensure_signed(origin)?;
-            // + ensure not yet member
-            Err("not yet implemented")
+            if Memberships::<T>::exists( (&who, id)) {
+                return Err("You already have a membership status with the group");
+            }
+
+            let now = Self::now();
+
+            Memberships::<T>::insert( (&who, id), Membership {
+                updated_at: now,
+                created_at: now,
+                role: Role::Member,
+            });
+
+            GroupsMembers::<T>::append(&id, &[&who][..]);
+            MembersGroups::<T>::append_or_insert(&who, &[&id][..]);
+
+            Self::deposit_event(RawEvent::MemberJoinedGroup(id, who));
+
+            Ok(())
         }
 
-        pub fn update_group_membership(origin, group: GroupId, who: T::AccountId, role: Role) -> Result {
+        pub fn update_group_membership(origin, id: GroupId, whom: T::AccountId, role: Role) -> Result {
             let who = ensure_signed(origin)?;
-            // + ensure has role admin
+            let membership = Memberships::<T>::get( (&whom, id)).ok_or("Is not a member");
             Err("not yet implemented")
         }
 
@@ -683,13 +699,13 @@ mod tests {
 
             // and then tried again
 
-            assert_err!(Gather::rsvp_gathering(Origin::signed(bob), next_event, RSVPStates::No), "");
+            assert_ok!(Gather::rsvp_gathering(Origin::signed(bob), next_event, RSVPStates::No));
 
             assert_eq!(GatheringsMembers::<Test>::get(next_event), vec![alice, bob]);
             assert_eq!(MembersGatherings::<Test>::get(bob), vec![next_event]);
 
             let rsvp = RSVPs::<Test>::get((bob, next_event)).unwrap();
-            assert_eq!(rsvp.state, RSVPStates::Yes);
+            assert_eq!(rsvp.state, RSVPStates::No);
 			
 		});
 	}
