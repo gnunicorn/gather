@@ -28,14 +28,23 @@ const EventSchema = Yup.object().shape({
 export default function EditEventContainer (props) {
     // TODO: check user permission level, redirect if not appropriate
     const {
-        onSubmit,
-        eventData
+        match:{
+            params:{
+                eventId
+            }
+        } 
     } = props;
+
+    let eventData = {
+        
+    }
+    // TODO: effect to get the data 
+
 
     return (
         <Formik
             initialValues={{ 
-                id: eventData.id,
+                id: eventId,
                 title: eventData.title, 
                 groupId: eventData.groupId,
                 startDate: eventData.startDate,
@@ -45,11 +54,11 @@ export default function EditEventContainer (props) {
             validationSchema={EventSchema}
 
             onSubmit={(values, { setSubmitting }) => {
-                onSubmit(values)
+                console.log("Edit event success", values)
             }}
         >
              {(props) => (
-                <EventForm {...props}></EventForm>
+                <EventForm newEvent={false} {...props}></EventForm>
             )}
         </Formik>
     )

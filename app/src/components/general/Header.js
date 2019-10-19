@@ -5,7 +5,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 
-import logo from "../assets/logo.svg";
+import logo from "../../assets/logo.svg";
 import ReactSVG from 'react-svg'
 import { Link } from "react-router-dom";
 import { grey } from '@material-ui/core/colors';
@@ -53,6 +53,12 @@ const useStyles = makeStyles(theme => ({
     "& > *": {
       objectFit: "contain"
     }
+  },
+  accountControl: {
+    "& > *":{
+      textDecoration: "none",
+      marginLeft: "5px"
+    }
   }
 }));
 
@@ -77,8 +83,13 @@ export default function Header() {
             </Typography>
           </Link>
         </section>
-        <section>
-          <Button color="inherit">Login</Button>
+        <section className={classes.accountControl}>
+          <Link to="/login" underline="none">
+            <Button variant="contained" color="primary">Login</Button>
+          </Link>
+          <Link to="/signup" underline="none">
+            <Button variant="contained" color="primary">Signup</Button>
+          </Link>
         </section>
       </Toolbar>
     </AppBar>

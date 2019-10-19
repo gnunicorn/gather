@@ -6,7 +6,9 @@ import { grey } from '@material-ui/core/colors';
 
 import logo from "../../assets/logo.svg";
 import ReactSVG from 'react-svg'
-import { Link, Card, CardActionArea, CardContent } from '@material-ui/core';
+import { Card, CardActionArea, CardContent } from '@material-ui/core';
+import { Link } from "react-router-dom";
+
 import Blockies from 'react-blockies';
 
 const useStyles = makeStyles(theme => ({
@@ -17,6 +19,7 @@ const useStyles = makeStyles(theme => ({
     width: "100%",
   },
   link:{
+    textDecoration: "none",
     "&:hover":{
       textDecoration: "none"
     }
@@ -69,15 +72,15 @@ const useStyles = makeStyles(theme => ({
 export default function CardBase(props) {
   const {
     title,
-    subTitle,
+    subtitle,
     type,
     link,
-    image
+    bannerImage
   } = props;
   const classes = useStyles();
   return (
     <Card className={classes.card}>
-      <Link to={link} className={classes.link} >
+      <Link to={link} underline="none" className={classes.link} >
         <CardActionArea>
           <div className={classes.stamp}>
             <ReactSVG 
@@ -99,7 +102,7 @@ export default function CardBase(props) {
             title={title} />
           } */}
           {
-            !image && <section className={classes.bannerImage}>
+            !bannerImage && <section className={classes.bannerImage}>
               <Blockies
                 seed={`${type}-${title}`}
                 size={50}
@@ -115,8 +118,8 @@ export default function CardBase(props) {
             <Typography color="inherit" className={classes.title} variant="h5" component="h3" gutterBottom>
               {title}
             </Typography>
-            <Typography color="inherit" className={classes.subTitle} variant="h5" component="h3" gutterBottom>
-              {subTitle}
+            <Typography color="inherit" className={classes.subtitle} variant="h5" component="h3" gutterBottom>
+              {subtitle}
             </Typography>
           </CardContent>
         </CardActionArea>

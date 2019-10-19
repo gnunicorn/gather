@@ -16,6 +16,9 @@ export const mixins = {
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     width: "100%"
+  },
+  standardContentWrapper:{
+    padding: `10px 15px`
   }
 }
 

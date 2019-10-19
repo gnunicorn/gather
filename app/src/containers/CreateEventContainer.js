@@ -24,12 +24,14 @@ const EventSchema = Yup.object().shape({
   });
 
 export default function CreateEventContainer (props) {
-    // TODO: check user permission level, redirect if not appropriate
     const {
-        onSubmit,
-        groupId
+        match:{
+            params:{
+                groupId
+            }
+        } 
     } = props;
-
+    // TODO: check user permission level of group, redirect if not appropriate
     return (
         <Formik
             initialValues={{ 
@@ -42,11 +44,11 @@ export default function CreateEventContainer (props) {
             validationSchema={EventSchema}
 
             onSubmit={(values, { setSubmitting }) => {
-                onSubmit(values)
+                console.log("Create event success", values)
             }}
         >
              {(props) => (
-                <EventForm {...props}></EventForm>
+                <EventForm newEvent={true} {...props}></EventForm>
             )}
         </Formik>
     )

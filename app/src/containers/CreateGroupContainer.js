@@ -16,10 +16,6 @@ const GroupSchema = Yup.object().shape({
   });
 
 export default function CreateGroupContainer (props) {
-    const {
-        onSubmit,
-    } = props;
-
     return (
         <Formik
             initialValues={{ 
@@ -30,11 +26,11 @@ export default function CreateGroupContainer (props) {
             validationSchema={GroupSchema}
 
             onSubmit={(values, { setSubmitting }) => {
-                onSubmit(values)
+                console.log("Create group success", values)
             }}
         >
              {(props) => (
-                <GroupForm {...props}></GroupForm>
+                <GroupForm newGroup={true} {...props}></GroupForm>
             )}
         </Formik>
     )

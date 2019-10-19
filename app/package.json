@@ -24,6 +24,7 @@
     "react-blockies": "^1.4.1",
     "react-dom": "latest",
     "react-router-dom": "^5.1.2",
+    "react-router-transition": "^1.4.0",
     "react-scripts": "latest",
     "react-svg": "^10.0.23",
     "yup": "^0.27.0"
