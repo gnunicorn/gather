@@ -14,7 +14,7 @@ pub type CommunityId = Reference;
 pub type GroupId = Reference;
 pub type GatheringId = Reference;
 pub type ExternalData = Vec<u8>; //potentially IPFS CiD
-pub type Location = (u128, u128); // Latitude, Langitude?
+pub type LatLang = (u64, u64); // Latitude, Langitude?
 pub type Timezone = u8;
 /// UTC epoch time
 pub type Timestamp = u64; 
@@ -22,17 +22,17 @@ pub type Timestamp = u64;
 /// We have multiple ways to define and understand a location
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
-pub enum GroupLocation {
+pub enum Location {
     /// This is a globally acting group, events are everywhere or nowhere
     Global,
     /// This is a remote acting group, but bound to a base timezone
     Remote(Option<Timezone>),
     /// This group is bound to a specific location or Region?
-    Local(Location),
+    Local(LatLang),
 }
 
-impl Default for GroupLocation {
-    fn default() -> Self { GroupLocation::Global }
+impl Default for Location {
+    fn default() -> Self { Location::Global }
 }
 
 /// The role attachted to a specific Membership between Account
@@ -87,7 +87,7 @@ pub struct Group {
     /// Which community does this group belong to
     pub belongs_to: CommunityId,
     /// Where is this group "located"
-    pub location: GroupLocation,
+    pub location: Location,
     /// Further user informational group info
     pub metadata: ExternalData,
     /// when was this created?
@@ -102,7 +102,7 @@ pub struct Group {
 pub struct Gathering {
     pub belongs_to: Vec<GroupId>,
     /// Where does this take place?
-    pub location: GroupLocation,
+    pub location: Location,
     /// Further user informational group info
     pub rsvp_opens: Option<Timestamp>,
     pub rsvp_closes: Option<Timestamp>,
@@ -240,27 +240,73 @@ decl_module! {
             });
 
             CommunitiesMembers::<T>::append(id, &[&who][..]);
-            MembersCommunities::<T>::append_or_insert(who, &[id][..]);
+            MembersCommunities::<T>::append_or_insert(&who, &[id][..]);
+
+            Self::deposit_event(RawEvent::CommunityMembershipChanged(id, who));
 
             Ok(())
         }
 
         pub fn update_community_membership(origin, community: CommunityId, who: T::AccountId, role: Role) -> Result {
-            let who = ensure_signed(origin)?;
-            // + ensure has role admin
-            Err("not yet implemented")
+            let author = ensure_signed(origin)?;
+            let membership = Memberships::<T>::get( (&author, community) ).ok_or("Signer not a Member")?;
+
+            if membership.role != Role::Admin {
+                return Err("Only the admin can update the membership")
+            }
+
+            let mut membership = Memberships::<T>::get( (&who, community) ).ok_or("Account not a Member")?;
+            membership.updated_at = Self::now();
+            membership.role = role;
+
+            Memberships::<T>::insert((&who, community), membership);
+
+            Self::deposit_event(RawEvent::CommunityMembershipChanged(community, who));
+            Ok(())
         }
 
 
         // ---- Groups
 
-        pub fn create_group(origin, community: CommunityId, metadata: ExternalData) -> Result {
+        pub fn create_group(origin, community: CommunityId, metadata: ExternalData, location: Option<Location>) -> Result {
             let who = ensure_signed(origin)?;
-            // + ensure who has admin rights for community
-            Err("not yet implemented")
+            let membership = Memberships::<T>::get( (&who, community) ).ok_or("Not a member of the Community")?;
+            if !Communities::exists(community) {
+                return Err("Unknown community")
+            }
+
+            if membership.role != Role::Admin {
+                return Err("Only the community admins can create groups")
+            }
+
+            let id = Self::next_id();
+            let now = Self::now();
+
+            Groups::insert(id, Group {
+                belongs_to: community,
+                created_at: now,
+                updated_at: now,
+                location: location.unwrap_or_default(),
+                metadata
+            });
+
+            Memberships::<T>::insert( (&who, id), Membership {
+                created_at: now,
+                updated_at: now,
+                role: Role::Admin,
+            });
+
+            GroupsMembers::<T>::insert(id, vec![&who]);
+            MembersGroups::<T>::append_or_insert(who, &[id][..]);
+            CommunitiesGroups::append_or_insert(community, &[id][..]);
+
+
+            Self::deposit_event(RawEvent::GroupCreated(community, id));
+
+            Ok(())
         }
 
-        pub fn update_group(origin, group: GroupId, metadata: ExternalData) -> Result {
+        pub fn update_group(origin, group: GroupId, metadata: Option<ExternalData>, location: Option<Location>) -> Result {
             let who = ensure_signed(origin)?;
             // + ensure has role admin for group or community
             Err("not yet implemented")
@@ -334,27 +380,27 @@ impl<T: Trait> Module<T> {
 decl_event!(
 	pub enum Event<T> where AccountId = <T as system::Trait>::AccountId {
         // Community Events
-		CommunityCreated(Reference),
-        CommunityUpdated(Reference),
-		CommunityDeleted(Reference),
-        MemberJoinedCommunity(Reference, AccountId),
-        CommunityMembershipChanged(Reference, AccountId),
+		CommunityCreated(CommunityId),
+        CommunityUpdated(CommunityId),
+		CommunityDeleted(CommunityId),
+        MemberJoinedCommunity(CommunityId, AccountId),
+        CommunityMembershipChanged(CommunityId, AccountId),
 
         // Group Events
-		GroupCreated(Reference),
-        GroupUpdated(Reference),
-		GroupDeleted(Reference),
-        MemberJoinedGroup(Reference, AccountId),
-        GroupMembershipChanged(Reference, AccountId),
+		GroupCreated(CommunityId, GroupId),
+        GroupUpdated(GroupId),
+		GroupDeleted(GroupId),
+        MemberJoinedGroup(GroupId, AccountId),
+        GroupMembershipChanged(GroupId, AccountId),
 
         // Gathering driven events
-		GatheringCreated(Reference),
-        GatheringUpdated(Reference),
-		GatheringDeleted(Reference),
+		GatheringCreated(GroupId, GatheringId),
+        GatheringUpdated(GatheringId),
+		GatheringDeleted(GatheringId),
 
         // RSVP
-        MemberRSVPed(Reference, AccountId),
-        RSVPUpdated(Reference, AccountId),
+        MemberRSVPed(GatheringId, AccountId),
+        RSVPUpdated(GatheringId, AccountId),
 	}
 );
 
@@ -451,12 +497,12 @@ mod tests {
             // let's create some group
             let mut next_group = Nonce::get();
             for _ in 0..3 {
-                assert_ok!(Gather::create_group(Origin::signed(alice), next_community, b"NEWLINK".to_vec()));
+                assert_ok!(Gather::create_group(Origin::signed(alice), next_community, b"NEWLINK".to_vec(), None));
                 let group = Groups::get(next_group).unwrap();
                 assert_eq!(group.metadata, b"NEWLINK".to_vec());
                 assert_eq!(group.belongs_to, next_community);
                 assert_eq!(GroupsMembers::<Test>::get(next_group), vec![alice]);
-                assert_eq!(MembersGroups::<Test>::get(alice), vec![next_group]);
+                assert_eq!(MembersGroups::<Test>::get(alice).contains(&next_group), true);
 
                 let a_membership = Memberships::<Test>::get((alice, next_group)).unwrap();
                 assert_eq!(a_membership.role, Role::Admin);
@@ -535,7 +581,7 @@ mod tests {
             assert_eq!(Memberships::<Test>::get((dave, community)).unwrap().role, Role::Member);
 
 			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "");
-			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec()), "");
+			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "");
 
             // bob can't set it
 			assert_err!(Gather::update_community_membership(Origin::signed(bob), community, bob, Role::Moderator), "");
@@ -543,7 +589,7 @@ mod tests {
 			assert_ok!(Gather::update_community_membership(Origin::signed(alice), community, bob, Role::Moderator));
             // still not enough to update the community or create a group
 			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "");
-			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec()), "");
+			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "");
 
             // so let's bump up again
 			assert_ok!(Gather::update_community_membership(Origin::signed(alice), community, bob, Role::Organiser));
@@ -552,11 +598,11 @@ mod tests {
             // but create a Group
 
             let group = Nonce::get();
-			assert_ok!(Gather::create_group(Origin::signed(bob), community, b"NewGroup".to_vec()));
+			assert_ok!(Gather::create_group(Origin::signed(bob), community, b"NewGroup".to_vec(), None));
             assert_ok!(Gather::join_group(Origin::signed(charly), group));
             assert_ok!(Gather::join_group(Origin::signed(dave), group));
 
-			assert_err!(Gather::update_group(Origin::signed(charly), group, b"NewLink".to_vec()), "");
+			assert_err!(Gather::update_group(Origin::signed(charly), group, Some(b"NewLink".to_vec()), None), "");
 			assert_err!(Gather::create_gathering(Origin::signed(charly), group, b"NewLink".to_vec()), "");
             assert_err!(Gather::update_group_membership(Origin::signed(charly), group, charly, Role::Admin), "");
 
@@ -568,12 +614,12 @@ mod tests {
             // and as an organiser Charly can create gatherings
 			assert_ok!(Gather::create_gathering(Origin::signed(charly), group, b"NewInfo".to_vec()));
             // but not update the info.
-			assert_err!(Gather::update_group(Origin::signed(charly), group, b"NewInfo".to_vec()), "");
+			assert_err!(Gather::update_group(Origin::signed(charly), group, Some(b"NewInfo".to_vec()), None), "");
 
             // even after alice joined as a regular member
             assert_ok!(Gather::join_group(Origin::signed(alice), group));
             // she can still excercise admin rights
-			assert_ok!(Gather::update_group(Origin::signed(alice), group, b"Latest Update".to_vec()));
+			assert_ok!(Gather::update_group(Origin::signed(alice), group, Some(b"Latest Update".to_vec()), None));
         });
     }
 
