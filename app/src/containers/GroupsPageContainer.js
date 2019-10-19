@@ -1,16 +1,20 @@
 import React from 'react';
-import { Typography } from '@material-ui/core';
+import { Typography, Fab } from '@material-ui/core';
 import StandardGrid from '../components/general/StandardGrid';
 import CardBase from '../components/cards/CardBase';
 import { makeStyles } from '@material-ui/core/styles';
 import { mixins } from '../theme';
 import { GroupCardDummyData } from '../dummyData';
+import { Link } from "react-router-dom";
 
-
+import AddIcon from '@material-ui/icons/Add';
 const useStyles = makeStyles(theme => ({
     root: {
         ...mixins.standardContentWrapper
     },
+    floatingCta:{
+        ...mixins.floatingCta
+    }
   }));
 
 export default function GroupsPageContainer (props) {
@@ -28,6 +32,11 @@ export default function GroupsPageContainer (props) {
                     )
                 }
             </StandardGrid>
+            <Link className={classes.floatingCta} to="/groups/new">
+                <Fab color="primary">
+                    <AddIcon />
+                </Fab>
+            </Link>
         </section>
     )
 }

@@ -10,7 +10,8 @@ const useStyles = makeStyles(theme => ({
       transitionDuration: "400ms",
       margin: `${theme.spacing(4)}px 0`,
       "& > *":{
-          padding: `${theme.spacing(2)}px`
+          padding: `${theme.spacing(2)}px`,
+          marginBottom: 15
       }
     }
   

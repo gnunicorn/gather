@@ -1,6 +1,23 @@
 
 import { createMuiTheme } from '@material-ui/core/styles';
 
+
+
+export const constants = {
+  footerArea: 80,
+  headerArea: 64,
+  colors:{
+    pink: "#ff1864",
+    pinkDark: "#F40052",
+    orange: "#FF5318",
+    purple: "#541388",
+    blue: "#30C5FF",
+    green: "#388659",
+    white: "#FFF",
+    red: "#D90429"
+  }
+}
+
 export const mixins = {
   absoluteCenteringViaParent: {
     position: "relative",
@@ -19,21 +36,11 @@ export const mixins = {
   },
   standardContentWrapper:{
     padding: `10px 15px`
-  }
-}
-
-export const constants = {
-  footerArea: 80,
-  headerArea: 64,
-  colors:{
-    pink: "#ff1864",
-    pinkDark: "#F40052",
-    orange: "#FF5318",
-    purple: "#541388",
-    blue: "#30C5FF",
-    green: "#388659",
-    white: "#FFF",
-    red: "#D90429"
+  },
+  floatingCta:{
+    position: "fixed",
+    bottom: constants.footerArea + 15,
+    right: 10,    
   }
 }
 

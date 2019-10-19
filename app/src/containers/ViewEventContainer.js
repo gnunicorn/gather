@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { EventCardDummyData, MembersDummyData } from '../dummyData';
+import ViewEvent from '../components/pages/ViewEvent';
 
 export default function ViewEventContainer (props) {
     const {  
@@ -9,11 +11,19 @@ export default function ViewEventContainer (props) {
             }
         } 
     } = props;
-    //
-    
+
+    // TODO Resolve event Data via event ID
+    let data = {
+        meta: {
+            title: EventCardDummyData[0].title,
+            subtitle: EventCardDummyData[0].subtitle,
+            id: eventId
+        },
+        members: MembersDummyData,
+    }
+
     return (
-    <div>
-       ViewEventContainer {eventId}
-    </div>
+        <ViewEvent {...data}></ViewEvent>
+
     )
 }

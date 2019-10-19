@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { grey } from '@material-ui/core/colors';
 import { Link } from "react-router-dom";
 import NodeInfo from "../NodeInfo";
+import BlockNumber from "../BlockNumber";
 
 const useStyles = makeStyles(theme => ({
   footerRoot: {
@@ -58,7 +59,7 @@ export default function Footer(props) {
         </Link>
       </nav>
       <article className={classes.nodeInfo}>
-        {apiReady ? <NodeInfo api={api} /> : <CircularProgress color="inherit" />}
+        {apiReady ? <div><NodeInfo api={api} /> <BlockNumber api={api} /> </div> : <CircularProgress color="inherit" />}
       </article>
     </section>
   </footer>)
