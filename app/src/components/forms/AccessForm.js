@@ -4,6 +4,8 @@ import { Form, Field } from 'formik';
 import { Button, Paper, FormControl, Typography } from '@material-ui/core';
 import { TextField } from 'formik-material-ui';
 
+import * as userService from '../../services/userService';
+
 const useStyles = makeStyles(theme => ({
   paperRoot:{
     maxWidth: 450,
