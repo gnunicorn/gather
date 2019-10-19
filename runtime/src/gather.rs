@@ -172,22 +172,30 @@ decl_module! {
 
         // ---- Community
 
-        pub fn create_community(origin, id: CommunityId, metadata: ExternalData) -> Result {
+        pub fn create_community(origin, metadata: ExternalData) -> Result {
             let who = ensure_signed(origin)?;
+            let id = Self::nonce();
 
-            if !<communities<T>>::exists(&id){
-                let now_timestamp = <timestamp::Module<T>>::now();
+            let now = 0; //<timestamp::Module<T>>::now();
 
-                let new_community = Community {
-                        metadata: metadata,
-                        created_at: now_timestamp,
-                        updated_at: now_timestamp
-                    };
+            Communities::insert(id, Community {
+                    metadata: metadata,
+                    created_at: now,
+                    updated_at: now
+            });
 
-                <communities<T>>::insert(&new_community);
-            } else {
-                 Err("comunity exists")
-            }
+            // Memberships::insert( (who, id), Membership {
+            //     role: Role::Admin,
+            //     created_at: now,
+            //     updated_at: now
+            // });
+
+            // CommunitiesMembers::<Self>::insert(id, vec![id]);
+            // MembersCommunities::insert_or()
+
+            // Nonce::set(id + 1); // COULD OVERFLOW
+
+            Ok(())
         }
 
         pub fn update_community(origin, community: CommunityId, metadata: ExternalData) -> Result {
