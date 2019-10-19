@@ -13,6 +13,7 @@
     "@polkadot/keyring": "^1.5.1",
     "@polkadot/react-identicon": "^0.45.1",
     "@polkadot/ui-keyring": "^0.45.1",
+    "avataaars": "^1.2.1",
     "blockies": "^0.0.2",
     "buffer": "^5.4.3",
     "classnames": "^2.2.6",
