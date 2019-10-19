@@ -1,10 +1,9 @@
-
 import React from 'react';
-
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import GroupForm from '../components/forms/GroupForm';
 import useReactRouter from 'use-react-router';
+import * as gatherService from '../services/gatherService';
 
 const GroupSchema = Yup.object().shape({
     title: Yup.string()
@@ -29,11 +28,11 @@ export default function CreateGroupContainer (props) {
 
             onSubmit={(values, { setSubmitting }) => {
                 console.log("Create group success", values)
-                // TODO: wire up to chain
-                const newGroupId = false;
-                if(newGroupId) {
-                    history.push(`/groups/${newGroupId}`)
-                }
+                gatherService.createGroup(values).then((res) => {
+                    if(res) {
+                        history.push(`/groups/${res}`)
+                    }
+                })                
             }}
         >
              {(props) => (

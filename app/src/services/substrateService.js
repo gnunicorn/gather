@@ -14,7 +14,7 @@ export async function fundAccount(address) {
         const alice = keyring.addFromUri('//Alice');
         console.log(address);
         api.tx.balances
-            .transfer(address, 1000)
+            .transfer(address, 100000)
             .signAndSend(alice, (result) => {
             if (result.status.isFinalized) {
                 console.log(`Transaction included at blockHash ${result.status.asFinalized}`);
