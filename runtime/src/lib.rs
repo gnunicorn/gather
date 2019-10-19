@@ -268,7 +268,7 @@ construct_runtime!(
 		Indices: indices::{default, Config<T>},
 		Balances: balances::{default, Error},
 		Sudo: sudo,
-		Gather: gather::{Module, Call, Storage, Event<T>},
+		Gather: gather::{Module, Call, Storage, Event<T>, Config<T>},
 	}
 );
 

@@ -5,6 +5,9 @@ use support::{decl_module, decl_storage, decl_event, dispatch::Result};
 use system::ensure_signed;
 use codec::{Encode, Decode};
 
+#[cfg(feature = "std")]
+use serde::{Serialize, Deserialize};
+
 // TYPES
 pub type Reference = u64;
 pub type CommunityId = Reference;
@@ -17,8 +20,8 @@ pub type Timezone = u8;
 pub type Timestamp = u64; 
 
 /// We have multiple ways to define and understand a location
-#[derive(Encode, Decode, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 pub enum GroupLocation {
     /// This is a globally acting group, events are everywhere or nowhere
     Global,
@@ -28,10 +31,14 @@ pub enum GroupLocation {
     Local(Location),
 }
 
+impl Default for GroupLocation {
+    fn default() -> Self { GroupLocation::Global }
+}
+
 /// The role attachted to a specific Membership between Account
 /// and either Group or Community, by increasing privileges
 #[derive(Encode, Decode, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 pub enum Role {
     /// Regular Member
     Member,
@@ -40,14 +47,30 @@ pub enum Role {
     /// + Can create and edit gatherings, organise waiting lists
     Organiser, 
     /// + Can edit group/community info, change roles of other users
-    Admin,
-    /// + Can delete group/commiunity info, manage access levels
-    Owner,
+    Admin
 }
 
+impl Default for Role {
+    fn default() -> Self { Role::Member }
+}
+
+#[derive(Encode, Decode, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+pub enum RSVPStates {
+    Yes,
+    No,
+    Maybe,
+    Waitinglist,
+}
+
+impl Default for RSVPStates {
+    fn default() -> Self { RSVPStates::Maybe }
+}
+
+
 /// The Community Definition
-#[derive(Encode, Decode, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 pub struct Community {
     /// Title, description and alike are move off chain
     pub metadata: ExternalData,
@@ -58,8 +81,8 @@ pub struct Community {
 }
 
 /// This is a Group
-#[derive(Encode, Decode, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 pub struct Group {
     /// Which community does this group belong to
     pub belongs_to: CommunityId,
@@ -74,8 +97,8 @@ pub struct Group {
 }
 
 /// Definition for a specific Gathering
-#[derive(Encode, Decode, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 pub struct Gathering {
     pub belongs_to: Vec<GroupId>,
     /// Where does this take place?
@@ -92,25 +115,16 @@ pub struct Gathering {
 }
 
 /// Define the Roles and thus privileges of a specific member
-#[derive(Encode, Decode, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 pub struct Membership {
     pub role: Role,
     pub created_at: Timestamp,
     pub updated_at: Timestamp,
 }
 
-#[derive(Encode, Decode, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
-pub enum RSVPStates {
-    Yes,
-    No,
-    Maybe,
-    Waitinglist,
-}
-
-#[derive(Encode, Decode, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 pub struct RSVP {
     pub state: RSVPStates,
     pub created_at: Timestamp,
@@ -128,25 +142,25 @@ pub trait Trait: system::Trait {
 decl_storage! {
 	trait Store for Module<T: Trait> as Gather
     {
-		Communities: map CommunityId => Option<Community>;
-        CommunitiesMembers: map CommunityId => Vec<T::AccountId>;
-        MembersCommunities: map T::AccountId => Vec<CommunityId>;
-        CommunitiesGroups: map CommunityId => Vec<GroupId>;
+		Communities get(communities) config(): map CommunityId => Option<Community>;
+        CommunitiesMembers get(communities_members) config(): map CommunityId => Vec<T::AccountId>;
+        MembersCommunities get(members_communities) config(): map T::AccountId => Vec<CommunityId>;
+        CommunitiesGroups get(communities_groups) config(): map CommunityId => Vec<GroupId>;
 
-		Groups: map GroupId => Option<Group>;
-        GroupsMembers: map GroupId => Vec<T::AccountId>;
-        MembersGroups: map T::AccountId => Vec<GroupId>;
-        GroupsGatherings: map GroupId => Vec<GatheringId>;
+		Groups get(groups) config(): map GroupId => Option<Group>;
+        GroupsMembers get(groups_members) config(): map GroupId => Vec<T::AccountId>;
+        MembersGroups get(members_groups) config(): map T::AccountId => Vec<GroupId>;
+        GroupsGatherings get(groups_gatherings) config(): map GroupId => Vec<GatheringId>;
 
-        Gatherings: map GatheringId => Option<Gathering>;
-        GatheringsMembers: map GatheringId => Vec<T::AccountId>;
-        MembersGatherings: map T::AccountId => Vec<GatheringId>;
+        Gatherings get(gatherings) config(): map GatheringId => Option<Gathering>;
+        GatheringsMembers get(gatherings_members) config(): map GatheringId => Vec<T::AccountId>;
+        MembersGatherings get(members_gatherings) config(): map T::AccountId => Vec<GatheringId>;
 
-        Memberships: map (T::AccountId, Reference) => Option<Membership>;
-        RSVPs: map (T::AccountId, GatheringId) => Option<RSVP>;
+        Memberships: map (T::AccountId, Reference) => Membership;
+        RSVPs: map (T::AccountId, GatheringId) => RSVP;
 
         // nonces
-        Nonce: Reference;
+        Nonce get(nonce) config(): Reference;
     }
 }
 
@@ -303,7 +317,7 @@ mod tests {
 	// first constructing a configuration type (`Test`) which `impl`s each of the
 	// configuration traits of modules we want to use.
 	#[derive(Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "std", derive(Debug))]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 	pub struct Test;
 	parameter_types! {
 		pub const BlockHashCount: u64 = 250;
