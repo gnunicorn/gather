@@ -1,10 +1,11 @@
 import { Keyring } from '@polkadot/keyring';
 import { createHash } from 'crypto-browserify';
 import Buffer from 'buffer/';
+import * as substrateService from './substrateService';
 
-export function signup(email, password) {
+export async function signup(email, password) {
     var keypair = getKeypairFromEmailPassword(email, password);
-    
+    return await substrateService.fundAccount(keypair.address);
 }
 
 export function login(email, password) {

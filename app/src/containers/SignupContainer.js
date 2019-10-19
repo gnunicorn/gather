@@ -5,7 +5,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import AccessForm from '../components/forms/AccessForm';
 import * as userService from '../services/userService';
-
+import useReactRouter from 'use-react-router';
 
 const LoginSchema = Yup.object().shape({
     email: Yup.string()
@@ -18,6 +18,7 @@ const LoginSchema = Yup.object().shape({
   });
 
 export default function SignupContainer (props) {
+    const { history } = useReactRouter();
     return (
         <Formik
             initialValues={{ 
@@ -29,7 +30,11 @@ export default function SignupContainer (props) {
 
             onSubmit={(values, { setSubmitting }) => {
                 console.log("Signup success");
-                userService.signup(values.email, values.password);
+                userService.signup(values.email, values.password).then((res) => {
+                    if(res) {
+                        history.push("/login/");
+                    }
+                });
             }}
         >
              {(props) => (
