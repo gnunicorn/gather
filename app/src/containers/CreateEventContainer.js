@@ -24,6 +24,7 @@ const EventSchema = Yup.object().shape({
   });
 
 export default function CreateEventContainer (props) {
+    // TODO: check user permission level, redirect if not appropriate
     const {
         onSubmit,
         groupId

@@ -16,6 +16,7 @@ const GroupSchema = Yup.object().shape({
   });
 
 export default function EditGroupContainer (props) {
+    // TODO: check user permission level, redirect if not appropriate
     const {
         onSubmit,
         groupData

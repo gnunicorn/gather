@@ -26,6 +26,7 @@ const EventSchema = Yup.object().shape({
   });
 
 export default function EditEventContainer (props) {
+    // TODO: check user permission level, redirect if not appropriate
     const {
         onSubmit,
         eventData
