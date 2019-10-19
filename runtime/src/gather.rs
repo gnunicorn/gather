@@ -159,7 +159,13 @@ impl GatheringInput {
             max_rsvps: self.max_rsvps.map_or(gathering.max_rsvps, |m| Some(m)),
             metadata: self.metadata.unwrap_or(gathering.metadata),
         }
+    }
 
+    #[cfg(test)]
+    fn then(then: Timestamp) -> GatheringInput {
+        let mut g = GatheringInput::default();
+        g.starts_at = Some(then);
+        g
     }
 }
 
@@ -604,6 +610,7 @@ mod tests {
             let alice = 1u64;
             let bob = 2u64;
             let next_community = Nonce::get();
+            let soon = Gather::now() + 10000;
 
 			assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
             let community = Communities::get(next_community).unwrap();
@@ -640,7 +647,7 @@ mod tests {
 
             // create some event:
             let next_event = Nonce::get();
-            assert_ok!(Gather::create_gathering(Origin::signed(alice), next_group, GatheringInput::default()));
+            assert_ok!(Gather::create_gathering(Origin::signed(alice), next_group, GatheringInput::then(soon)));
             let gathering = Gatherings::get(next_event).unwrap();
             assert_eq!(gathering.belongs_to, vec![next_group]);
 
@@ -654,10 +661,10 @@ mod tests {
 
             assert_ok!(Gather::rsvp_gathering(Origin::signed(alice), next_event, RSVPStates::No));
             let rsvp = RSVPs::<Test>::get((alice, next_event)).unwrap();
-            assert_eq!(rsvp.state, RSVPStates::Yes);
+            assert_eq!(rsvp.state, RSVPStates::No);
 
             // and if bob tried that? fails beccause he ain't a member
-            assert_err!(Gather::rsvp_gathering(Origin::signed(bob), next_event, RSVPStates::No), "");
+            assert_err!(Gather::rsvp_gathering(Origin::signed(bob), next_event, RSVPStates::No), "Not a Member of the Group");
 
             assert_eq!(GatheringsMembers::<Test>::get(next_event), vec![alice]);
             assert_eq!(MembersGatherings::<Test>::get(bob).len(), 0);
@@ -697,6 +704,8 @@ mod tests {
             let dave = 4u64;
             let community = Nonce::get();
 
+            let soon = Gather::now() + 10000;
+
 			assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
 			assert_ok!(Gather::join_community(Origin::signed(bob), community));
 			assert_ok!(Gather::join_community(Origin::signed(charly), community));
@@ -730,7 +739,7 @@ mod tests {
             assert_ok!(Gather::join_group(Origin::signed(dave), group));
 
 			assert_err!(Gather::update_group(Origin::signed(charly), group, Some(b"NewLink".to_vec()), None), "");
-			assert_err!(Gather::create_gathering(Origin::signed(charly), group, GatheringInput::default()), "");
+			assert_err!(Gather::create_gathering(Origin::signed(charly), group, GatheringInput::then(soon)), "");
             assert_err!(Gather::update_group_membership(Origin::signed(charly), group, charly, Role::Admin), "");
 
             // but bob can
@@ -739,7 +748,7 @@ mod tests {
             assert_err!(Gather::update_group_membership(Origin::signed(alice), group, charly, Role::Organiser), "");
 
             // and as an organiser Charly can create gatherings
-			assert_ok!(Gather::create_gathering(Origin::signed(charly), group, GatheringInput::default()));
+			assert_ok!(Gather::create_gathering(Origin::signed(charly), group, GatheringInput::then(soon)));
             // but not update the info.
 			assert_err!(Gather::update_group(Origin::signed(charly), group, Some(b"NewInfo".to_vec()), None), "");
 
