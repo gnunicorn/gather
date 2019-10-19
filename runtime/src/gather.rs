@@ -475,7 +475,6 @@ decl_event!(
 mod tests {
 	use super::*;
 
-	use runtime_io::with_externalities;
 	use primitives::{H256, Blake2Hasher};
 	use support::{impl_outer_origin, assert_ok, assert_err, parameter_types};
 	use sr_primitives::{traits::{BlakeTwo256, IdentityLookup}, testing::Header};
@@ -531,13 +530,13 @@ mod tests {
 
 	// This function basically just builds a genesis storage key/value store according to
 	// our desired mockup.
-	fn new_test_ext() -> runtime_io::TestExternalities<Blake2Hasher> {
+	fn new_test_ext() -> runtime_io::TestExternalities {
 		system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
 	}
 
 	#[test]
 	fn full_regular_flow() {
-		with_externalities(&mut new_test_ext(), || {
+		new_test_ext().execute_with(|| {
 
             let alice = 1u64;
             let bob = 2u64;
@@ -627,7 +626,7 @@ mod tests {
 
 	#[test]
 	fn permissions() {
-		with_externalities(&mut new_test_ext(), || {
+		new_test_ext().execute_with(|| {
 
             let alice = 1u64;
             let bob = 2u64;
@@ -690,7 +689,7 @@ mod tests {
 
 	#[test]
 	fn last_community_admin_cant_demote() {
-		with_externalities(&mut new_test_ext(), || {
+		new_test_ext().execute_with(|| {
 
             let alice = 1u64;
             let community = Nonce::get();
