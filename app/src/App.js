@@ -7,13 +7,17 @@ import {
   // Link
 } from "react-router-dom";
 
-import Home from "./containers/Home";
+import HomeContainer from "./containers/HomeContainer";
 import AppWrapper from "./containers/AppWrapper";
 import UIMasterPage from './containers/UIMasterPage';
 import CreateEventContainer from './containers/CreateEventContainer';
 import CreateGroupContainer from './containers/CreateGroupContainer';
 import EventsPageContainer from './containers/EventsPageContainer';
 import GroupsPageContainer from './containers/GroupsPageContainer';
+import ViewEventContainer from './containers/ViewEventContainer';
+import ViewGroupContainer from './containers/ViewGroupContainer';
+import EditGroupContainer from './containers/EditGroupContainer';
+import EditEventContainer from './containers/EditEventContainer';
 
 export default function App () {
   const [api, setApi] = useState();
@@ -35,30 +39,19 @@ export default function App () {
     <Router>
       <AppWrapper apiReady={apiReady} api={api} >
         <Switch>
-          {/* <Route path="/discover">
-            <Discover />
-          </Route>
-          <Route path="/event">
-            <Topics />
-          </Route> */}
-          <Route path="/create-event">
-            <CreateEventContainer />
-          </Route>
-          <Route path="/create-group">
-            <CreateGroupContainer />
-          </Route>
-          <Route path="/events">
-            <EventsPageContainer />
-          </Route>
-          <Route path="/groups">
-            <GroupsPageContainer />
-          </Route>
-          <Route path="/ui-master">
-            <UIMasterPage />
-          </Route>
-          <Route path="/">
-            <Home />
-          </Route>
+          <Route exact path="/create-group" component={CreateGroupContainer}/>
+          <Route exact path="/group/:groupId/edit" component={EditGroupContainer}/>
+          <Route exact path="/groups/:groupId"  component={ViewGroupContainer}/>
+          <Route exact path="/groups" component={GroupsPageContainer}/>
+
+          <Route exact path="/create-event/:groupId" component={CreateEventContainer}/>
+          <Route exact path="/events/:eventId/edit" component={EditEventContainer}/>
+          <Route exact path="/events/:eventId"  component={ViewEventContainer} />
+          <Route exact path="/events" component={EventsPageContainer}/>
+         
+          <Route exact path="/ui-master" render={(props) => <UIMasterPage {...props}></UIMasterPage>}/>
+
+          <Route exact path="/" component={HomeContainer}/>
         </Switch>
       </AppWrapper>
     </Router>

@@ -5,34 +5,18 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import EventForm from '../components/forms/EventForm';
 
-const EventSchema = Yup.object().shape({
-    title: Yup.string()
-        .min(3, 'Too Short!')
-        .max(50, 'Too Long!')
+const LoginSchema = Yup.object().shape({
+    email: Yup.string()
         .required('Required'),
-    groupId: Yup.string()
-        .required(),
-    startDate: Yup.date()
-        .required(),
-    endDate: Yup.date()
-        .when(
-          'startDate',
-          (startDate, schema) => (startDate && schema.min(startDate, "End date must be after the start date"))
-          
-        )
+    password: Yup.string()
         .required(),
   });
 
-export default function CreateEventContainer (props) {
+export default function LoginContainer (props) {
     const {
-        onSubmit,
-        match:{
-            params:{
-                groupId
-            }
-        } 
+        onSubmit
     } = props;
-    // TODO: check user permission level of group, redirect if not appropriate
+
     return (
         <Formik
             initialValues={{ 

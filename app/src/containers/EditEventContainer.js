@@ -29,13 +29,23 @@ export default function EditEventContainer (props) {
     // TODO: check user permission level, redirect if not appropriate
     const {
         onSubmit,
-        eventData
+        match:{
+            params:{
+                eventId
+            }
+        } 
     } = props;
+
+    let eventData = {
+        
+    }
+    // TODO: effect to get the data 
+
 
     return (
         <Formik
             initialValues={{ 
-                id: eventData.id,
+                id: eventId,
                 title: eventData.title, 
                 groupId: eventData.groupId,
                 startDate: eventData.startDate,
