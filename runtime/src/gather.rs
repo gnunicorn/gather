@@ -351,8 +351,8 @@ decl_module! {
                 return Err("Unknown community")
             }
 
-            if membership.role != Role::Admin {
-                return Err("Only the community admins can create groups")
+            if membership.role != Role::Admin && membership.role != Role::Organiser {
+                return Err("Only the community admins and organisers can create groups")
             }
 
             let id = Self::next_id();
@@ -381,10 +381,29 @@ decl_module! {
             Ok(())
         }
 
-        pub fn update_group(origin, group: GroupId, metadata: Option<ExternalData>, location: Option<Location>) -> Result {
+        pub fn update_group(origin, id: GroupId, metadata: Option<ExternalData>, location: Option<Location>) -> Result {
             let who = ensure_signed(origin)?;
-            // + ensure has role admin for group or community
-            Err("not yet implemented")
+            let mut group = Groups::get(id).ok_or("Group doesn't exist")?;
+            // must be Admin or Organiser of Group or Community this group belongs to
+            let _ = Memberships::<T>::get( (&who, id) )
+                .and_then(|m| if m.role == Role::Admin { Some(m) } else {None})
+                .or_else(||
+                    Memberships::<T>::get( (&who, &group.belongs_to) )
+                    .and_then(|m: Membership| match m.role {
+                            Role::Admin | Role::Organiser => Some(m),
+                            _ => None
+                        })
+                ).ok_or("You are neither a Group-Admin nor Organiser or Admin of the Community")?;
+
+            group.metadata = metadata.unwrap_or(group.metadata);
+            group.location = location.unwrap_or(group.location);
+            group.updated_at = Self::now();
+
+            Groups::insert(id, group);
+
+            Self::deposit_event(RawEvent::GroupUpdated(id));
+
+            Ok(())
         }
 
         // pub fn delete_group(origin, group: GroupId) -> Result {
@@ -419,8 +438,28 @@ decl_module! {
 
         pub fn update_group_membership(origin, id: GroupId, whom: T::AccountId, role: Role) -> Result {
             let who = ensure_signed(origin)?;
-            let membership = Memberships::<T>::get( (&whom, id)).ok_or("Is not a member");
-            Err("not yet implemented")
+            let group = Groups::get(id).ok_or("Group doesn't exist")?;
+            let filter = |m: Membership| match m.role {
+                Role::Admin | Role::Organiser => Some(m),
+                _ => None
+            };
+            // must be Admin or Organiser of Group or Community this group belongs to
+            let _ = Memberships::<T>::get( (&who, id) )
+                .and_then(filter)
+                .or_else(||
+                    Memberships::<T>::get( (&who, &group.belongs_to) )
+                    .and_then(filter)
+                ).ok_or("You are neither an Admin nor Organiser of the Group or Community")?;
+
+
+            let mut membership = Memberships::<T>::get( (&whom, id)).ok_or("Is not a member")?;
+            membership.role = role;
+            membership.updated_at = Self::now();
+            Memberships::<T>::insert( (&whom, id), membership);
+
+            Self::deposit_event(RawEvent::GroupMembershipChanged(id, whom));
+
+            Ok(())
         }
 
         // --- Gatherinigs
@@ -434,11 +473,11 @@ decl_module! {
             };
             // must be Admin or Organiser of Group or Community this group belongs to
             let _ = Memberships::<T>::get( (&who, group_id) )
-                .map(filter)
+                .and_then(filter)
                 .or_else(||
                     Memberships::<T>::get( (&who, &group.belongs_to) )
-                    .map(filter)
-                ).ok_or("You are not an Admins or Organiser of the Group or Community")?;
+                    .and_then(filter)
+                ).ok_or("You are neither an Admin nor Organiser of the Group or Community")?;
 
             let id = Self::next_id();
             let now = Self::now();
@@ -733,7 +772,7 @@ mod tests {
             assert_eq!(Memberships::<Test>::get((dave, community)).unwrap().role, Role::Member);
 
 			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "Only the admin can update the group info");
-			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "Only the community admins can create groups");
+			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "Only the community admins and organisers can create groups");
 
             // bob can't set it
 			assert_err!(Gather::update_community_membership(Origin::signed(bob), community, bob, Role::Moderator), "Only the admin can update the membership");
@@ -741,7 +780,7 @@ mod tests {
 			assert_ok!(Gather::update_community_membership(Origin::signed(alice), community, bob, Role::Moderator));
             // still not enough to update the community or create a group
 			assert_err!(Gather::update_community(Origin::signed(bob), community, b"NewLink".to_vec()), "Only the admin can update the group info");
-			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "Only the community admins can create groups");
+			assert_err!(Gather::create_group(Origin::signed(bob), community, b"NewLink".to_vec(), None), "Only the community admins and organisers can create groups");
 
             // so let's bump up again
 			assert_ok!(Gather::update_community_membership(Origin::signed(alice), community, bob, Role::Organiser));
@@ -754,19 +793,19 @@ mod tests {
             assert_ok!(Gather::join_group(Origin::signed(charly), group));
             assert_ok!(Gather::join_group(Origin::signed(dave), group));
 
-			assert_err!(Gather::update_group(Origin::signed(charly), group, Some(b"NewLink".to_vec()), None), "");
-			assert_err!(Gather::create_gathering(Origin::signed(charly), group, GatheringInput::then(soon)), "");
-            assert_err!(Gather::update_group_membership(Origin::signed(charly), group, charly, Role::Admin), "");
+			assert_err!(Gather::update_group(Origin::signed(charly), group, Some(b"NewLink".to_vec()), None), "You are neither a Group-Admin nor Organiser or Admin of the Community");
+			assert_err!(Gather::create_gathering(Origin::signed(charly), group, GatheringInput::then(soon)), "You are neither an Admin nor Organiser of the Group or Community");
+            assert_err!(Gather::update_group_membership(Origin::signed(charly), group, charly, Role::Admin), "You are neither an Admin nor Organiser of the Group or Community");
 
             // but bob can
-            assert_err!(Gather::update_group_membership(Origin::signed(bob), group, charly, Role::Admin), "");
+            assert_ok!(Gather::update_group_membership(Origin::signed(bob), group, charly, Role::Admin));
             // and so can alice, the admin of the Organisation, though not in the Group themselves
-            assert_err!(Gather::update_group_membership(Origin::signed(alice), group, charly, Role::Organiser), "");
+            assert_ok!(Gather::update_group_membership(Origin::signed(alice), group, charly, Role::Organiser));
 
             // and as an organiser Charly can create gatherings
 			assert_ok!(Gather::create_gathering(Origin::signed(charly), group, GatheringInput::then(soon)));
             // but not update the info.
-			assert_err!(Gather::update_group(Origin::signed(charly), group, Some(b"NewInfo".to_vec()), None), "");
+			assert_err!(Gather::update_group(Origin::signed(charly), group, Some(b"NewInfo".to_vec()), None), "You are neither a Group-Admin nor Organiser or Admin of the Community");
 
             // even after alice joined as a regular member
             assert_ok!(Gather::join_group(Origin::signed(alice), group));
