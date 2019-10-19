@@ -1,10 +1,12 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TopBanner from '../general/TopBanner';
-import { Typography } from '@material-ui/core';
+import { Typography, Fab, Button } from '@material-ui/core';
 import StandardGrid from '../general/StandardGrid';
 import MemberStub from '../general/MemberStub';
 import { mixins } from '../../theme';
+import { Link } from "react-router-dom";
+import EditIcon from '@material-ui/icons/Edit';
 
 const useStyles = makeStyles(theme => ({
     root:{
@@ -20,6 +22,15 @@ const useStyles = makeStyles(theme => ({
     floatingCta:{
         ...mixins.floatingCta
     },
+    buttonArea:{
+        display:"flex",
+        justifyContent: "center",
+        flexWrap: "wrap",
+        flexDirection: "row",
+        "& > *":{
+            margin: 5
+        }
+    }
   }));
   
 export default function ViewEvent(props) {
@@ -42,6 +53,11 @@ export default function ViewEvent(props) {
             </Typography>
         </div>
        <section className={classes.memberSection}>
+            <div className={classes.buttonArea}>
+                <Button variant="contained" color="primary" onClick={() => {
+                    console.log("RSVP Action triggered")
+                }}>RSVP</Button>
+            </div>
             <Typography variant="h2" component="h2">
                 Attendees    
             </Typography>
@@ -52,6 +68,18 @@ export default function ViewEvent(props) {
                     )
                 }
             </StandardGrid>
+             {/* {
+                isAdmin === true && <Link className={classes.floatingCta} to={`/events/${meta.id}/new`}>
+                <Fab color="primary">
+                    <AddIcon />
+                </Fab>
+                </Link>
+            } */}
+            <Link className={classes.floatingCta} to={`/events/${meta.id}/edit`}>
+                <Fab color="primary">
+                    <EditIcon />
+                </Fab>
+            </Link>
        </section>
     </article>)
 }

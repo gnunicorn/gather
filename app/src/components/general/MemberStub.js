@@ -19,7 +19,8 @@ const useStyles = makeStyles(theme => ({
         margin: "10px auto",
         borderRadius: "0 10px 0 10px",
         backgroundColor: grey.A200,
-        alignItems: "center"
+        alignItems: "center",
+        cursor: "pointer"
     },
     avatar:{
         marginRight: 20,
