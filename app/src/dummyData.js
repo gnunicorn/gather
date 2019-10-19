@@ -34,18 +34,21 @@ export const GroupCardDummyData = [
 export const MembersDummyData = [
     {
         id: "asdasd123123",
+        accountAddress: "DmPcLNKzCknkC9v9uG4insNqQeLLKxLxfKHwTECMm8w5uKH",
         name: "Sophia",
         email: "nah@nope.com",
         role: USER_TYPE.MEMBER,
     },
     {
         id: "a2127293389247",
+        accountAddress: "oStrithcesARentliKeleMONSlikeGRapES",
         name: "Greg",
         email: "meh@eish.com",
         role: USER_TYPE.ORGANIZER,
     },
     {
         id: "a2127293389248",
+        accountAddress: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         name: "Not Greg",
         email: "hmm@bah.com",
         role: USER_TYPE.ADMIN,
