@@ -110,7 +110,8 @@ impl Alternative {
 fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 	root_key: AccountId, 
 	endowed_accounts: Vec<AccountId>,
-_enable_println: bool) -> GenesisConfig {
+	_enable_println: bool
+) -> GenesisConfig {
 
 	let alice = get_from_seed::<AccountId>("Alice");
 	let bob = get_from_seed::<AccountId>("Bob");
