@@ -1,8 +1,6 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 
-import logo from "../../assets/logo.svg";
-import ReactSVG from 'react-svg'
 import { constants, mixins } from '../../theme';
 import Blockies from 'react-blockies';
 import { grey } from '@material-ui/core/colors';
@@ -26,7 +24,6 @@ const useStyles = makeStyles(theme => ({
     avatar:{
         marginRight: 20,
         overflow: "hidden",
-        borderRadius: "1000px",
         position: "relative",
         height: avatarSize,
         width: avatarSize,
@@ -50,7 +47,6 @@ export default function MemberStub(props) {
     const classes = useStyles();
 
     const {
-        name,
         accountAddress,
         role
     } = props;
@@ -74,13 +70,13 @@ export default function MemberStub(props) {
            </Typography>
            <Typography>
                {
-                   role == 0 ? "Member" : ""
+                   role === 0 ? "Member" : ""
                }
                {
-                   role == 1 ? "Organizer" : ""
+                   role === 1 ? "Organizer" : ""
                }
                {
-                   role == 2 ? "Admin" : ""
+                   role === 2 ? "Admin" : ""
                }
            </Typography>
        </div>
