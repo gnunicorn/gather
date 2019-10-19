@@ -174,9 +174,8 @@ decl_module! {
 
         pub fn create_community(origin, metadata: ExternalData) -> Result {
             let who = ensure_signed(origin)?;
-            let id = Self::nonce();
-
-            let now = 0; //<timestamp::Module<T>>::now();
+            let id = Self::next_id();
+            let now = Self::now();
 
             Communities::insert(id, Community {
                     metadata: metadata,
@@ -195,8 +194,6 @@ decl_module! {
 
             Self::deposit_event(RawEvent::CommunityCreated(id));
 
-            Nonce::put(id + 1); // COULD OVERFLOW
-
             Ok(())
         }
 
@@ -214,10 +211,22 @@ decl_module! {
 
         // ------ Community Membership
 
-        pub fn join_community(origin, group: CommunityId) -> Result {
+        pub fn join_community(origin, id: CommunityId) -> Result {
             let who = ensure_signed(origin)?;
-            // + ensure not yet member
-            Err("not yet implemented")
+            let membership = Memberships::<T>::get( (&who, id) ).ok_or("Already a member")?;
+            let community = Communities::get(id).ok_or("Unknown Community")?;
+            let now = Self::now();
+
+            Memberships::<T>::insert( (&who, id), Membership {
+                role: Role::Member,
+                created_at: now,
+                updated_at: now,
+            });
+
+            CommunitiesMembers::<T>::append(id, &[&who][..]);
+            MembersCommunities::<T>::append_or_insert(who, &[id][..]);
+
+            Ok(())
         }
 
         pub fn update_community_membership(origin, community: CommunityId, who: T::AccountId, role: Role) -> Result {
@@ -291,6 +300,19 @@ decl_module! {
         }
 
 	}
+}
+
+// We've moved the  helper functions outside of the main decleration for briefety.
+impl<T: Trait> Module<T> {
+    fn now() -> Timestamp {
+        // FIXME: <timestamp::Module<T>>::now();
+        0
+    }
+    fn next_id() -> Reference {
+        let id = Nonce::get();
+        Nonce::put(id + 1); //FIXME: COULD OVERFLOW
+        id
+    }
 }
 
 decl_event!(
