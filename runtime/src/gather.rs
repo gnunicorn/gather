@@ -47,7 +47,9 @@ pub enum Role {
     /// + Can create and edit gatherings, organise waiting lists
     Organiser, 
     /// + Can edit group/community info, change roles of other users
-    Admin
+    Admin,
+    /// GTFO
+    Banned,
 }
 
 impl Default for Role {
@@ -103,6 +105,8 @@ pub struct Gathering {
     pub belongs_to: Vec<GroupId>,
     /// Where does this take place?
     pub location: Location,
+    pub starts_at: Timestamp,
+    pub ends_at: Option<Timestamp>,
     /// Further user informational group info
     pub rsvp_opens: Option<Timestamp>,
     pub rsvp_closes: Option<Timestamp>,
@@ -119,6 +123,8 @@ pub struct Gathering {
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 pub struct GatheringInput {
     pub location: Option<Location>,
+    pub starts_at: Option<Timestamp>,
+    pub ends_at: Option<Timestamp>,
     pub rsvp_opens: Option<Timestamp>,
     pub rsvp_closes: Option<Timestamp>,
     pub max_rsvps: Option<u32>,
@@ -132,6 +138,8 @@ impl GatheringInput {
             created_at: now,
             updated_at: now,
             location: self.location.unwrap_or_default(),
+            starts_at: self.starts_at.unwrap_or_default(),
+            ends_at: self.ends_at,
             rsvp_opens: self.rsvp_opens,
             rsvp_closes: self.rsvp_closes,
             max_rsvps: self.max_rsvps,
@@ -144,6 +152,8 @@ impl GatheringInput {
             created_at: gathering.created_at,
             updated_at: now,
             location: self.location.unwrap_or(gathering.location),
+            starts_at: self.starts_at.unwrap_or(gathering.starts_at),
+            ends_at: self.ends_at.map_or(gathering.ends_at, |m| Some(m)),
             rsvp_opens: self.rsvp_opens.map_or(gathering.rsvp_opens, |m| Some(m)),
             rsvp_closes: self.rsvp_closes.map_or(gathering.rsvp_closes, |m| Some(m)),
             max_rsvps: self.max_rsvps.map_or(gathering.max_rsvps, |m| Some(m)),
@@ -440,11 +450,46 @@ decl_module! {
 
         // ------- Gathering RSVP
 
-        pub fn rsvp_gathering(origin, gathering: GatheringId, rsvp: RSVPStates) -> Result {
+        pub fn rsvp_gathering(origin, id: GatheringId, state: RSVPStates) -> Result {
             let who = ensure_signed(origin)?;
-            // + ensure are a member
-            // create or update
-            Err("not yet implemented")
+            let now = Self::now();
+            let gathering =  Gatherings::get(id).ok_or("Don't know that gathering")?;
+
+            if gathering.starts_at <= now {
+                return Err("You can't change your RSVP after the event started");
+            }
+            let rsvp = match RSVPs::<T>::get( (&who, id) ) {
+                Some(mut rsvp) => {
+                    rsvp.state = state;
+                    rsvp.updated_at = now;
+                    rsvp
+                }
+                _ => {
+
+                   if gathering.belongs_to.iter().filter(
+                        |group| Memberships::<T>::get( (&who, group) )
+                                .map(|m| m.role != Role::Banned).is_some())
+                    .next()
+                    .is_none() {
+                        return Err("Not a Member of the Group");
+                    };
+
+                    GatheringsMembers::<T>::append_or_insert(&id, &[&who][..]);
+                    MembersGatherings::<T>::append_or_insert(&who, &[&id][..]);
+                    RSVP {
+                        created_at: now,
+                        updated_at: now,
+                        state
+                    }
+                }
+            };
+           
+            // Update an existing gathering
+            RSVPs::<T>::insert( (&who, id), rsvp);
+
+            Self::deposit_event(RawEvent::RSVPUpdated(id, who));
+
+            Ok(())
         }
 
 	}
@@ -485,7 +530,6 @@ decl_event!(
 		GatheringDeleted(GatheringId),
 
         // RSVP
-        MemberRSVPed(GatheringId, AccountId),
         RSVPUpdated(GatheringId, AccountId),
 	}
 );
