@@ -184,16 +184,18 @@ decl_module! {
                     updated_at: now
             });
 
-            Memberships::<T>::insert( (who, id), Membership {
+            Memberships::<T>::insert( (&who, id), Membership {
                 role: Role::Admin,
                 created_at: now,
                 updated_at: now
             });
 
-            // CommunitiesMembers::<Self>::insert(id, vec![id]);
-            // MembersCommunities::insert_or()
+            CommunitiesMembers::<T>::insert(id, vec![&who]);
+            MembersCommunities::<T>::append_or_insert(who, &[id][..]);
 
-            // Nonce::set(id + 1); // COULD OVERFLOW
+            Self::deposit_event(RawEvent::CommunityCreated(id));
+
+            Nonce::put(id + 1); // COULD OVERFLOW
 
             Ok(())
         }
