@@ -133,7 +133,7 @@ pub struct RSVP {
 
 
 /// The module's configuration trait.
-pub trait Trait: system::Trait {
+pub trait Trait: system::Trait + timestamp::Trait {
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 }
@@ -174,7 +174,27 @@ decl_module! {
 
         pub fn create_community(origin, metadata: ExternalData) -> Result {
             let who = ensure_signed(origin)?;
-            Err("not yet implemented")
+            let id = Self::next_id();
+            let now = Self::now();
+
+            Communities::insert(id, Community {
+                    metadata: metadata,
+                    created_at: now,
+                    updated_at: now
+            });
+
+            Memberships::<T>::insert( (&who, id), Membership {
+                role: Role::Admin,
+                created_at: now,
+                updated_at: now
+            });
+
+            CommunitiesMembers::<T>::insert(id, vec![&who]);
+            MembersCommunities::<T>::append_or_insert(who, &[id][..]);
+
+            Self::deposit_event(RawEvent::CommunityCreated(id));
+
+            Ok(())
         }
 
         pub fn update_community(origin, community: CommunityId, metadata: ExternalData) -> Result {
@@ -191,10 +211,22 @@ decl_module! {
 
         // ------ Community Membership
 
-        pub fn join_community(origin, group: CommunityId) -> Result {
+        pub fn join_community(origin, id: CommunityId) -> Result {
             let who = ensure_signed(origin)?;
-            // + ensure not yet member
-            Err("not yet implemented")
+            let membership = Memberships::<T>::get( (&who, id) ).ok_or("Already a member")?;
+            let community = Communities::get(id).ok_or("Unknown Community")?;
+            let now = Self::now();
+
+            Memberships::<T>::insert( (&who, id), Membership {
+                role: Role::Member,
+                created_at: now,
+                updated_at: now,
+            });
+
+            CommunitiesMembers::<T>::append(id, &[&who][..]);
+            MembersCommunities::<T>::append_or_insert(who, &[id][..]);
+
+            Ok(())
         }
 
         pub fn update_community_membership(origin, community: CommunityId, who: T::AccountId, role: Role) -> Result {
@@ -268,6 +300,19 @@ decl_module! {
         }
 
 	}
+}
+
+// We've moved the  helper functions outside of the main decleration for briefety.
+impl<T: Trait> Module<T> {
+    fn now() -> Timestamp {
+        // FIXME: <timestamp::Module<T>>::now();
+        0
+    }
+    fn next_id() -> Reference {
+        let id = Nonce::get();
+        Nonce::put(id + 1); //FIXME: COULD OVERFLOW
+        id
+    }
 }
 
 decl_event!(
@@ -346,6 +391,14 @@ mod tests {
 	impl Trait for Test {
 		type Event = ();
 	}
+
+    impl timestamp::Trait for Test {
+        /// A timestamp: milliseconds since the unix epoch.
+        type Moment = u64;
+        type OnTimestampSet = ();
+        type MinimumPeriod = ();
+    }
+
 	type Gather = Module<Test>;
 
 	// This function basically just builds a genesis storage key/value store according to
