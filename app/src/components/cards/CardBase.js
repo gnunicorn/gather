@@ -72,10 +72,10 @@ const useStyles = makeStyles(theme => ({
 export default function CardBase(props) {
   const {
     title,
-    subTitle,
+    subtitle,
     type,
     link,
-    image
+    bannerImage
   } = props;
   const classes = useStyles();
   return (
@@ -102,7 +102,7 @@ export default function CardBase(props) {
             title={title} />
           } */}
           {
-            !image && <section className={classes.bannerImage}>
+            !bannerImage && <section className={classes.bannerImage}>
               <Blockies
                 seed={`${type}-${title}`}
                 size={50}
@@ -118,8 +118,8 @@ export default function CardBase(props) {
             <Typography color="inherit" className={classes.title} variant="h5" component="h3" gutterBottom>
               {title}
             </Typography>
-            <Typography color="inherit" className={classes.subTitle} variant="h5" component="h3" gutterBottom>
-              {subTitle}
+            <Typography color="inherit" className={classes.subtitle} variant="h5" component="h3" gutterBottom>
+              {subtitle}
             </Typography>
           </CardContent>
         </CardActionArea>
