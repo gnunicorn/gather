@@ -19,15 +19,24 @@ export default function EditGroupContainer (props) {
     // TODO: check user permission level, redirect if not appropriate
     const {
         onSubmit,
-        groupData
+        match:{
+            param:{
+                groupId
+            }
+        }
     } = props;
 
+    let groupData = {
+
+    }
+
+    // TODO Effect to get data
     return (
         <Formik
             initialValues={{ 
-                id: groupdData.id,
+                id: groupId,
                 title: groupData.title, 
-                tagline: groupdData.tagline,
+                tagline: groupData.tagline,
             }}
             
             validationSchema={GroupSchema}

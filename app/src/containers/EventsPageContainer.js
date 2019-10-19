@@ -1,4 +1,7 @@
 import React from 'react';
+import { Typography } from '@material-ui/core';
+import CardGrid from '../components/cards/CardGrid';
+import CardBase from '../components/cards/CardBase';
 
 const EventCardDummyData = [
     {
@@ -20,12 +23,19 @@ const EventCardDummyData = [
 ]
 
 export default function EventsPageContainer (props) {
-    const {
-    } = props;
-
+    // TODO: use effect to fetch data
     return (
         <section>
-            Events Page
+            <Typography variant="h3" component="h3">
+                Events
+            </Typography>
+            <CardGrid>
+                {
+                    EventCardDummyData.map(card => 
+                        (<CardBase key={card.id} {...card}></CardBase>)
+                    )
+                }
+            </CardGrid>
         </section>
     )
 }

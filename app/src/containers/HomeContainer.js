@@ -32,17 +32,19 @@ const useStyles = makeStyles(theme => ({
     hl: {
         "margin": theme.spacing(2),
         "color": "white",
+        fontSize: "60px"
     },
     sub: {
         "margin": theme.spacing(1),
         "color": "white",
+        fontSize: "34px"
     },
     button: {
         "margin": theme.spacing(2),
     },
   }));
 
-export default function Home () {
+export default function HomeContainer () {
     const classes = useStyles();
 
     return (
