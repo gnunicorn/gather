@@ -133,7 +133,7 @@ pub struct RSVP {
 
 
 /// The module's configuration trait.
-pub trait Trait: system::Trait {
+pub trait Trait: system::Trait + timestamp::Trait + balances::Trait {
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 }
@@ -172,9 +172,22 @@ decl_module! {
 
         // ---- Community
 
-        pub fn create_community(origin, metadata: ExternalData) -> Result {
+        pub fn create_community(origin, id: CommunityId, metadata: ExternalData) -> Result {
             let who = ensure_signed(origin)?;
-            Err("not yet implemented")
+
+            if !<communities<T>>::exists(&id){
+                let now_timestamp = <timestamp::Module<T>>::now();
+
+                let new_community = Community {
+                        metadata: metadata,
+                        created_at: now_timestamp,
+                        updated_at: now_timestamp
+                    };
+
+                <communities<T>>::insert(&new_community);
+            } else {
+                 Err("comunity exists")
+            }
         }
 
         pub fn update_community(origin, community: CommunityId, metadata: ExternalData) -> Result {
