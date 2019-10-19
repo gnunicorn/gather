@@ -3,7 +3,6 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import logo from "../../assets/logo.svg";
 import ReactSVG from 'react-svg'
-import { Typography } from '@material-ui/core';
 import { constants } from '../../theme';
 import Blockies from 'react-blockies';
 import { grey } from '@material-ui/core/colors';
