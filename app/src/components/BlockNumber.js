@@ -13,7 +13,7 @@ export default function BlockNumner(props) {
     }).catch(console.error);
 
     return () => unsubscribeAll && unsubscribeAll();
-  }, []);
+  },[api.derive.chain]);
 
   return (
     <Fragment>
