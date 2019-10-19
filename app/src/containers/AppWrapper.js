@@ -10,7 +10,6 @@ import Footer from "../components/general/Footer";
 const useStyles = makeStyles(theme => ({
     root: {
         "position": "relative",
-        "overflow": "hidden",
         minHeight: "100vh",
         paddingBottom: constants.footerArea,
     },

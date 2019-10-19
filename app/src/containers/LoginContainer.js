@@ -5,6 +5,8 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import AccessForm from '../components/forms/AccessForm';
 
+import * as userService from '../services/userService';
+
 const LoginSchema = Yup.object().shape({
     email: Yup.string()
         .email("Please use a valid email")
@@ -26,7 +28,11 @@ export default function LoginContainer (props) {
             validationSchema={LoginSchema}
 
             onSubmit={(values, { setSubmitting }) => {
-                console.log("Login success", values)
+                console.log("Login success", values);
+                const login = userService.login(values.email, values.password);
+                if(login) {
+                    // navigate to another page - events or groups or something
+                }
             }}
         >
              {(props) => (

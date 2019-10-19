@@ -14,7 +14,7 @@ pub type CommunityId = Reference;
 pub type GroupId = Reference;
 pub type GatheringId = Reference;
 pub type ExternalData = Vec<u8>; //potentially IPFS CiD
-pub type LatLang = (u64, u64); // Latitude, Langitude?
+pub type LatLong = (u64, u64); // Latitude, Longitude
 pub type Timezone = u8;
 /// UTC epoch time
 pub type Timestamp = u64; 
@@ -28,7 +28,7 @@ pub enum Location {
     /// This is a remote acting group, but bound to a base timezone
     Remote(Option<Timezone>),
     /// This group is bound to a specific location or Region?
-    Local(LatLang),
+    Local(LatLong),
 }
 
 impl Default for Location {
@@ -495,7 +495,6 @@ decl_event!(
 mod tests {
 	use super::*;
 
-	use runtime_io::with_externalities;
 	use primitives::{H256, Blake2Hasher};
 	use support::{impl_outer_origin, assert_ok, assert_err, parameter_types};
 	use sr_primitives::{traits::{BlakeTwo256, IdentityLookup}, testing::Header};
@@ -528,7 +527,6 @@ mod tests {
 		type AccountId = u64;
 		type Lookup = IdentityLookup<Self::AccountId>;
 		type Header = Header;
-		type WeightMultiplierUpdate = ();
 		type Event = ();
 		type BlockHashCount = BlockHashCount;
 		type MaximumBlockWeight = MaximumBlockWeight;
@@ -551,13 +549,13 @@ mod tests {
 
 	// This function basically just builds a genesis storage key/value store according to
 	// our desired mockup.
-	fn new_test_ext() -> runtime_io::TestExternalities<Blake2Hasher> {
+	fn new_test_ext() -> runtime_io::TestExternalities {
 		system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
 	}
 
 	#[test]
 	fn full_regular_flow() {
-		with_externalities(&mut new_test_ext(), || {
+		new_test_ext().execute_with(|| {
 
             let alice = 1u64;
             let bob = 2u64;
@@ -647,7 +645,7 @@ mod tests {
 
 	#[test]
 	fn permissions() {
-		with_externalities(&mut new_test_ext(), || {
+		new_test_ext().execute_with(|| {
 
             let alice = 1u64;
             let bob = 2u64;
@@ -710,7 +708,7 @@ mod tests {
 
 	#[test]
 	fn last_community_admin_cant_demote() {
-		with_externalities(&mut new_test_ext(), || {
+		new_test_ext().execute_with(|| {
 
             let alice = 1u64;
             let community = Nonce::get();
