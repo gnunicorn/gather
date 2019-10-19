@@ -1,9 +1,9 @@
 use primitives::{Pair, Public};
 use gather_runtime::{
-	AccountId, BabeConfig, BalancesConfig, GenesisConfig, GrandpaConfig,
-	SudoConfig, IndicesConfig, SystemConfig, GatherConfig, WASM_BINARY, 
+	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, GatherConfig,
+	SudoConfig, IndicesConfig, SystemConfig, WASM_BINARY, 
 };
-use babe_primitives::{AuthorityId as BabeId};
+use aura_primitives::sr25519::{AuthorityId as AuraId};
 use grandpa_primitives::{AuthorityId as GrandpaId};
 use substrate_service;
 
@@ -14,7 +14,7 @@ use substrate_service;
 pub type ChainSpec = substrate_service::ChainSpec<GenesisConfig>;
 
 /// The chain specification option. This is expected to come in from the CLI and
-/// is little more than one of a number of alternatives which can easily be converted
+/// is little more than one of a number of alternatives whicGatherConfigh can easily be converted
 /// from a string (`--chain=...`) into a `ChainSpec`.
 #[derive(Clone, Debug)]
 pub enum Alternative {
@@ -31,13 +31,11 @@ pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Pu
 		.public()
 }
 
-/// Helper function to generate stash, controller and session key from seed
-pub fn get_authority_keys_from_seed(seed: &str) -> (AccountId, AccountId, GrandpaId, BabeId) {
+/// Helper function to generate an authority key for Aura
+pub fn get_authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId) { 
 	(
-		get_from_seed::<AccountId>(&format!("{}//stash", seed)),
-		get_from_seed::<AccountId>(seed),
-		get_from_seed::<GrandpaId>(seed),
-		get_from_seed::<BabeId>(seed),
+		get_from_seed::<AuraId>(s),
+		get_from_seed::<GrandpaId>(s),
 	)
 }
 
@@ -106,11 +104,10 @@ impl Alternative {
 	}
 }
 
-fn testnet_genesis(initial_authorities: Vec<(AccountId, AccountId, GrandpaId, BabeId)>,
+fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 	root_key: AccountId, 
 	endowed_accounts: Vec<AccountId>,
-	_enable_println: bool
-) -> GenesisConfig {
+	_enable_println: bool) -> GenesisConfig {
 	GenesisConfig {
 		system: Some(SystemConfig {
 			code: WASM_BINARY.to_vec(),
@@ -126,11 +123,11 @@ fn testnet_genesis(initial_authorities: Vec<(AccountId, AccountId, GrandpaId, Ba
 		sudo: Some(SudoConfig {
 			key: root_key,
 		}),
-		babe: Some(BabeConfig {
-			authorities: initial_authorities.iter().map(|x| (x.3.clone(), 1)).collect(),
+		aura: Some(AuraConfig {
+			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
 		}),
 		grandpa: Some(GrandpaConfig {
-			authorities: initial_authorities.iter().map(|x| (x.2.clone(), 1)).collect(),
+			authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
 		}),
 		gather: Some(GatherConfig {
 			communities: Default::default(),
@@ -144,9 +141,10 @@ fn testnet_genesis(initial_authorities: Vec<(AccountId, AccountId, GrandpaId, Ba
 			gatherings: Default::default(),
 			gatherings_members: Default::default(),
 			members_gatherings: Default::default(),
-			// memberships: Default::default(),
-			// rsvps: ,
+			memberships: Default::default(),
+			rsvps: Default::default(),
 			nonce: Default::default(),
+		
 		})
 	}
 }
