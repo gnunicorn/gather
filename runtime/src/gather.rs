@@ -197,10 +197,21 @@ decl_module! {
             Ok(())
         }
 
-        pub fn update_community(origin, community: CommunityId, metadata: ExternalData) -> Result {
+        pub fn update_community(origin, id: CommunityId, metadata: ExternalData) -> Result {
             let who = ensure_signed(origin)?;
-            // + ensure has role admin
-            Err("not yet implemented")
+            let membership = Memberships::<T>::get( (&who, id) ).ok_or("Not a Member")?;
+
+            if membership.role != Role::Admin {
+                return Err("Only the admin can update the group info")
+            }
+            
+            let mut community = Communities::get(id).ok_or("Unknown Community")?; // this should never happen,  but let's be safe.
+            community.updated_at = Self::now();
+            community.metadata = metadata;
+            Communities::insert(id, community);
+
+            Self::deposit_event(RawEvent::CommunityUpdated(id));
+            Ok(())
         }
 
         // pub fn delete_community(origin, community: CommunityId) -> Result {
@@ -213,8 +224,13 @@ decl_module! {
 
         pub fn join_community(origin, id: CommunityId) -> Result {
             let who = ensure_signed(origin)?;
-            let membership = Memberships::<T>::get( (&who, id) ).ok_or("Already a member")?;
-            let community = Communities::get(id).ok_or("Unknown Community")?;
+            if !Communities::exists(id) {
+                return Err("Unknown community")
+            }
+            if Memberships::<T>::exists( (&who, id) ) {
+                return Err("Already a member")
+            }
+
             let now = Self::now();
 
             Memberships::<T>::insert( (&who, id), Membership {
