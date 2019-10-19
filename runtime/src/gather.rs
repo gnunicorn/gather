@@ -14,7 +14,7 @@ pub type CommunityId = Reference;
 pub type GroupId = Reference;
 pub type GatheringId = Reference;
 pub type ExternalData = Vec<u8>; //potentially IPFS CiD
-pub type LatLang = (u64, u64); // Latitude, Langitude?
+pub type LatLong = (u64, u64); // Latitude, Longitude
 pub type Timezone = u8;
 /// UTC epoch time
 pub type Timestamp = u64; 
@@ -28,7 +28,7 @@ pub enum Location {
     /// This is a remote acting group, but bound to a base timezone
     Remote(Option<Timezone>),
     /// This group is bound to a specific location or Region?
-    Local(LatLang),
+    Local(LatLong),
 }
 
 impl Default for Location {
@@ -163,12 +163,32 @@ pub struct Membership {
     pub updated_at: Timestamp,
 }
 
+impl Membership {
+    pub fn admin(now: Option<Timestamp>) -> Membership {
+        Membership {
+            role: Role::Admin,
+            created_at: now.unwrap_or_default(),
+            updated_at: now.unwrap_or_default(),
+        }
+    }
+}
+
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 pub struct RSVP {
     pub state: RSVPStates,
     pub created_at: Timestamp,
     pub updated_at: Timestamp,
+}
+
+impl RSVP {
+    pub fn yes(now: Option<Timestamp>) -> RSVP {
+        RSVP {
+            state: RSVPStates::Yes,
+            created_at: now.unwrap_or_default(),
+            updated_at: now.unwrap_or_default(),
+        }
+    }
 }
 
 
