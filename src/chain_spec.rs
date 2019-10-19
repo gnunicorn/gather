@@ -1,7 +1,10 @@
 use primitives::{Pair, Public};
 use gather_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, GatherConfig,
-	SudoConfig, IndicesConfig, SystemConfig, WASM_BINARY, 
+	SudoConfig, IndicesConfig, SystemConfig, WASM_BINARY,
+	gather::{
+		Community, Group, Gathering, Membership, RSVP
+	}
 };
 use aura_primitives::sr25519::{AuthorityId as AuraId};
 use grandpa_primitives::{AuthorityId as GrandpaId};
@@ -107,7 +110,11 @@ impl Alternative {
 fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 	root_key: AccountId, 
 	endowed_accounts: Vec<AccountId>,
-	_enable_println: bool) -> GenesisConfig {
+_enable_println: bool) -> GenesisConfig {
+
+	let alice = get_from_seed::<AccountId>("Alice");
+	let bob = get_from_seed::<AccountId>("Bob");
+
 	GenesisConfig {
 		system: Some(SystemConfig {
 			code: WASM_BINARY.to_vec(),
@@ -130,20 +137,75 @@ fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 			authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
 		}),
 		gather: Some(GatherConfig {
-			communities: Default::default(),
-			communities_members: Default::default(),
-			members_communities: Default::default(),
-			communities_groups: Default::default(),
-			groups: Default::default(),
-			groups_members: Default::default(),
-			members_groups: Default::default(),
-			groups_gatherings: Default::default(),
-			gatherings: Default::default(),
-			gatherings_members: Default::default(),
-			members_gatherings: Default::default(),
-			memberships: Default::default(),
-			rsvps: Default::default(),
-			nonce: Default::default(),
+			communities: vec![
+				(1u64, Community::default()),
+				(2u64, Community::default()),
+			],
+			communities_members: vec![
+				(1u64, vec![alice.clone(), bob.clone()]),
+				(2u64, vec![alice.clone(), bob.clone()]),
+			],
+			members_communities: vec![
+				(alice.clone(), vec![1u64, 2u64]),
+				(bob.clone(), vec![1u64, 2u64]),
+			],
+			communities_groups: vec![
+				(1, vec![3, 4]),
+				(2, vec![5]),
+			],
+			groups: vec![
+				(3u64, Group::default()),
+				(4u64, Group::default()),
+				(5u64, Group::default()),
+			],
+			groups_members: vec![
+				(3u64, vec![alice.clone(), bob.clone()]),
+				(4u64, vec![alice.clone(), bob.clone()]),
+				(5u64, vec![]),
+			],
+			members_groups: vec![
+				(alice.clone(), vec![3u64, 4u64]),
+				(bob.clone(), vec![3u64, 4u64]),
+			],
+			groups_gatherings: vec![
+				(3u64, vec![6, 7]),
+				(4u64, vec![]),
+				(5u64, vec![8, 9]),
+			],
+			gatherings: vec![
+				(6u64, Gathering::default()),
+				(7u64, Gathering::default()),
+				(8u64, Gathering::default()),
+				(9u64, Gathering::default()),
+			],
+			gatherings_members: vec![
+				(6u64, vec![alice.clone(), bob.clone()]),
+				(7u64, vec![bob.clone()]),
+				(8u64, vec![]),
+				(9u64, vec![]),
+			],
+			members_gatherings: vec![
+				(alice.clone(), vec![6u64]),
+				(bob.clone(), vec![7u64, 8u64])
+			],
+			memberships: vec![
+				// communities
+				((alice.clone(), 1), Membership::admin(None)),
+				((alice.clone(), 2), Membership::default()),
+				((bob.clone(), 1), Membership::admin(None)),
+				((bob.clone(), 2), Membership::default()),
+				// groups
+				((alice.clone(), 3), Membership::admin(None)),
+				((alice.clone(), 4), Membership::default()),
+				((bob.clone(), 3), Membership::admin(None)),
+				((bob.clone(), 4), Membership::default()),
+			],
+			rsvps: vec![
+				((alice.clone(), 6u64), RSVP::yes(None)),
+				((bob.clone(), 6u64), RSVP::default()),
+				((bob.clone(), 7u64), RSVP::default()),
+			],
+			nonce: 10u64,
 		
 		})
 	}

@@ -163,12 +163,32 @@ pub struct Membership {
     pub updated_at: Timestamp,
 }
 
+impl Membership {
+    pub fn admin(now: Option<Timestamp>) -> Membership {
+        Membership {
+            role: Role::Admin,
+            created_at: now.unwrap_or_default(),
+            updated_at: now.unwrap_or_default(),
+        }
+    }
+}
+
 #[derive(Encode, Decode, Default, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 pub struct RSVP {
     pub state: RSVPStates,
     pub created_at: Timestamp,
     pub updated_at: Timestamp,
+}
+
+impl RSVP {
+    pub fn yes(now: Option<Timestamp>) -> RSVP {
+        RSVP {
+            state: RSVPStates::Yes,
+            created_at: now.unwrap_or_default(),
+            updated_at: now.unwrap_or_default(),
+        }
+    }
 }
 
 
