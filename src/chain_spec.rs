@@ -141,8 +141,8 @@ fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 			gatherings: Default::default(),
 			gatherings_members: Default::default(),
 			members_gatherings: Default::default(),
-			// memberships: Default::default(),
-			// rsvps: ,
+			memberships: Default::default(),
+			rsvps: Default::default(),
 			nonce: Default::default(),
 		
 		})
