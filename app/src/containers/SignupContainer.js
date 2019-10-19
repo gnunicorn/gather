@@ -4,6 +4,8 @@ import React from 'react';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import AccessForm from '../components/forms/AccessForm';
+import * as userService from '../services/userService';
+
 
 const LoginSchema = Yup.object().shape({
     email: Yup.string()
@@ -26,7 +28,8 @@ export default function SignupContainer (props) {
             validationSchema={LoginSchema}
 
             onSubmit={(values, { setSubmitting }) => {
-                console.log("Signup success", values)
+                console.log("Signup success")
+                userService.signup(...values);
             }}
         >
              {(props) => (

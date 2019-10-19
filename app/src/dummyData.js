@@ -24,7 +24,7 @@ export const GroupCardDummyData = [
     {
         id: "1234567i234234",
         title: "Department of Decentralisation",
-        subTitle: "Additional meta",
+        subtitle: "Additional meta",
         type: "Group",
         link: "/groups/department-of-decentralisation",
         image: null
