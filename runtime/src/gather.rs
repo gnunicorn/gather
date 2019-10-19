@@ -133,7 +133,7 @@ pub struct RSVP {
 
 
 /// The module's configuration trait.
-pub trait Trait: system::Trait + timestamp::Trait + balances::Trait {
+pub trait Trait: system::Trait + timestamp::Trait {
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 }
@@ -184,11 +184,11 @@ decl_module! {
                     updated_at: now
             });
 
-            // Memberships::insert( (who, id), Membership {
-            //     role: Role::Admin,
-            //     created_at: now,
-            //     updated_at: now
-            // });
+            Memberships::<T>::insert( (who, id), Membership {
+                role: Role::Admin,
+                created_at: now,
+                updated_at: now
+            });
 
             // CommunitiesMembers::<Self>::insert(id, vec![id]);
             // MembersCommunities::insert_or()
@@ -367,6 +367,14 @@ mod tests {
 	impl Trait for Test {
 		type Event = ();
 	}
+
+    impl timestamp::Trait for Test {
+        /// A timestamp: milliseconds since the unix epoch.
+        type Moment = u64;
+        type OnTimestampSet = ();
+        type MinimumPeriod = ();
+    }
+
 	type Gather = Module<Test>;
 
 	// This function basically just builds a genesis storage key/value store according to
