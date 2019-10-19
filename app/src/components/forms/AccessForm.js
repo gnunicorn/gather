@@ -37,8 +37,6 @@ const useStyles = makeStyles(theme => ({
 
 export default function AccessForm(props) {
   const {
-    errors,
-    touched,
     newUser
   } = props;
   const classes = useStyles();
@@ -51,11 +49,9 @@ export default function AccessForm(props) {
       <Form className={classes.root}>
         <FormControl className={classes.inputWrapper} fullWidth>
           <Field label="Email" name="email" type="email" component={TextField} fullWidth />
-          {errors.email && touched.email ? <div>{errors.email}</div> : null}
         </FormControl>
         <FormControl className={classes.inputWrapper} fullWidth>
           <Field label="Password" name="password" type="password" component={TextField} fullWidth />
-          {errors.password && touched.password ? <div>{errors.password}</div> : null}
         </FormControl>
         <Button variant="contained" color="primary" className={classes.button} type="submit">
           { newUser ? "Register" : "Login" }

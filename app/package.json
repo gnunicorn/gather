@@ -28,6 +28,7 @@
     "react-router-transition": "^1.4.0",
     "react-scripts": "latest",
     "react-svg": "^10.0.23",
+    "use-react-router": "^1.0.7",
     "yup": "^0.27.0"
   },
   "scripts": {
