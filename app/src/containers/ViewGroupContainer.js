@@ -13,12 +13,12 @@ export default function ViewGroupContainer (props) {
         } 
     } = props;
 
-    useEffect(() => {
-        let unsubscribeAll = null;
-        gatherService.getGroupDetails(groupId)
-        .then((data) => console.log(data.toString()));
-        return () => unsubscribeAll && unsubscribeAll();
-      },[groupId]);
+    // useEffect(() => {
+    //     let unsubscribeAll = null;
+    //     gatherService.getGroupDetails(groupId)
+    //     .then((data) => console.log(data.toString()));
+    //     return () => unsubscribeAll && unsubscribeAll();
+    //   },[groupId]);
 
     // TODO Resolve group Data via group ID
     let data = {
@@ -32,6 +32,11 @@ export default function ViewGroupContainer (props) {
     }
 
     return (
-        <ViewGroup {...data}></ViewGroup>
+        <ViewGroup 
+            joinGroup={async () => {
+                console.log("Join group Action triggered");
+                await gatherService.joinGroup(groupId);
+            }} 
+            {...data}></ViewGroup>
     )
 }

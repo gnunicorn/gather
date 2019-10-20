@@ -37,7 +37,8 @@ export default function ViewEvent(props) {
     const classes = useStyles();
     const {
         meta,
-        members
+        members,
+        rsvp
     } = props;
 
 
@@ -54,9 +55,7 @@ export default function ViewEvent(props) {
         </div>
        <section className={classes.memberSection}>
             <div className={classes.buttonArea}>
-                <Button variant="contained" color="primary" onClick={() => {
-                    console.log("RSVP Action triggered")
-                }}>RSVP</Button>
+                <Button variant="contained" color="primary" onClick={rsvp}>RSVP</Button>
             </div>
             <Typography variant="h2" component="h2">
                 Attendees    

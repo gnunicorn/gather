@@ -2,19 +2,35 @@ import { USER_TYPE } from "./Constants"
 
 export const EventCardDummyData = [
     {
-        id: "1234567io",
+        id: "6",
         title: "Diffusion 2019",
         subtitle: "19 Oct 2019 - 20 Oct 2019",
         type: "Event",
-        link: "/events/diffusion-2019",
+        link: "/events/6",
         bannerImage: null
     },
     {
-        id: "1234567ip",
+        id: "7",
         title: "Devcon 2020",
-        subtitle: "?? ?? 2019 - ? ? 2020",
+        subtitle: "Some cool text.",
         type: "Event",
-        link: "/events/devcon-2020",
+        link: "/events/7",
+        bannerImage: null
+    },
+    {
+        id: "8",
+        title: "Substrate Hack 'n Chill.",
+        subtitle: "Some cool text.",
+        type: "Event",
+        link: "/events/8",
+        bannerImage: null
+    },
+    {
+        id: "9",
+        title: "Blockchain Summit Latam",
+        subtitle: "Some cool text.",
+        type: "Event",
+        link: "/events/9",
         bannerImage: null
     }
 ]
@@ -22,11 +38,27 @@ export const EventCardDummyData = [
 
 export const GroupCardDummyData = [
     {
-        id: "1234567i234234",
+        id: "3",
         title: "Department of Decentralisation",
         subtitle: "Additional meta",
         type: "Group",
-        link: "/groups/department-of-decentralisation",
+        link: "/groups/3",
+        image: null
+    },
+    {
+        id: "4",
+        title: "Factory",
+        subtitle: "Additional meta",
+        type: "Group",
+        link: "/groups/4",
+        image: null
+    },
+    {
+        id: "5",
+        title: "Substrate Rocks",
+        subtitle: "Additional meta",
+        type: "Group",
+        link: "/groups/5",
         image: null
     },
 ]

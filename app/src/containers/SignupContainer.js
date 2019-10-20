@@ -31,7 +31,7 @@ export default function SignupContainer (props) {
             onSubmit={(values, { setSubmitting }) => {
                 console.log("Signup success");
                 userService.signup(values.email, values.password).then((res) => {
-                    if(res) {
+                    if(res.funding) {
                         history.push("/login/");
                     }
                 });
