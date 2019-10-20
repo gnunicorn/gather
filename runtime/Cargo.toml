@@ -54,6 +54,12 @@ git = 'https://github.com/paritytech/substrate.git'
 package = 'srml-grandpa'
 rev = '5fde6d0882bd9943da28df6d40dc78714672dcca'
 
+[dependencies.system-rpc-runtime-api]
+default_features = false
+git = 'https://github.com/paritytech/substrate.git'
+package = 'srml-system-rpc-runtime-api'
+rev = '5fde6d0882bd9943da28df6d40dc78714672dcca'
+
 [dependencies.indices]
 default_features = false
 git = 'https://github.com/paritytech/substrate.git'
@@ -172,4 +178,5 @@ std = [
     'safe-mix/std',
     'offchain-primitives/std',
     'substrate-session/std',
+    'system-rpc-runtime-api/std',
 ]
