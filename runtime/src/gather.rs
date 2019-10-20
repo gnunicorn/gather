@@ -8,6 +8,9 @@ use codec::{Encode, Decode};
 #[cfg(feature = "std")]
 use serde::{Serialize, Deserialize};
 
+#[cfg(feature = "std")]
+use reqwest;
+
 // TYPES
 pub type Reference = u64;
 pub type CommunityId = Reference;
@@ -574,7 +577,14 @@ decl_module! {
 
 		// We want to inform users about new events
 		fn offchain_worker(_now: T::BlockNumber) {
-            let _ = Self::who_to_notify();
+            // let kind = primitives::offchain::StorageKind::PERSISTENT;
+            for (_u_id, g) in Self::who_to_notify()
+                    // FIXME: Check against email addresses we have locally
+                    // .iter().filter_map(|(u_id, g)|
+                    //     runtime_io::local_storage_get(kind, u_id.into()).map(|e| (e, g)))
+            {
+                Self::email("ben@gnunicorn.org".as_bytes().to_vec(), &g);
+            }
 		}
 
 	}
@@ -618,6 +628,31 @@ impl<T: Trait> Module<T> {
             }
         }
         target
+    }
+
+
+    #[cfg(not(feature = "std"))]
+    fn email(_addr: Vec<u8>, _gathering: &Gathering) {
+        // stub for WASM for now
+    }
+
+    #[cfg(feature = "std")]
+    fn email(addr: Vec<u8>, _gathering: &Gathering) {
+        // FIXME: move this to offchain HTTP API
+        let params = [("from", "Gather <mailgun@sandbox7dd237c7e17e495396625732518feb9b.mailgun.org>"),
+                      ("to", &String::from_utf8(addr).unwrap()),
+                      ("subject", "New Gathering happening"),
+                      ("html", include_str!("../../assets/email-notification-template.html"))
+                      ];
+        let client = reqwest::Client::new();
+        let mut resp = client.post("https://api.mailgun.net/v3/sandbox7dd237c7e17e495396625732518feb9b.mailgun.org/messages")
+            .basic_auth("api", Some("key-730319fd97aed60ab09bc0e3e20a0ec4"))
+            .form(&params)
+            .send()
+            .expect("Should Work");
+
+        println!("{}", resp.status());
+        println!("{}", resp.text().unwrap_or("".to_owned()));
     }
 }
 
@@ -666,7 +701,7 @@ mod tests {
 	// first constructing a configuration type (`Test`) which `impl`s each of the
 	// configuration traits of modules we want to use.
 	#[derive(Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+    #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 	pub struct Test;
 	parameter_types! {
 		pub const BlockHashCount: u64 = 250;
@@ -713,7 +748,6 @@ mod tests {
     fn basic_group_setup() -> GroupId{
         let alice = 1u64;
         let bob = 2u64;
-        let soon = Gather::now() + 10000;
 
         let commuity_id = Nonce::get();
 		assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
@@ -725,6 +759,11 @@ mod tests {
 
         group_id
     }
+
+	// #[test]
+	// fn test_email() {
+    //     Gather::email("ben@gnunicorn.org".as_bytes().to_vec(), &Gathering::default());
+    // }
 
 	#[test]
 	fn full_regular_flow() {
