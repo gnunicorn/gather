@@ -2,11 +2,14 @@ import { Keyring } from '@polkadot/keyring';
 import { createHash } from 'crypto-browserify';
 import Buffer from 'buffer/';
 import * as substrateService from './substrateService';
+import * as gatherService from './gatherService';
 
 export async function signup(email, password) {
     var hex = getHexFromEmailPassword(email, password);
     var keypair = getKeyPairFromHex(hex);
-    return await substrateService.fundAccount(keypair.address);
+    const funding = await substrateService.fundAccount(keypair.address);
+    const joinComm = await gatherService.joinCommunity(1, hex);
+    return { funding, joinComm };
 }
 
 export function login(email, password) {
