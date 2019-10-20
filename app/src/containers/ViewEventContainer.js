@@ -2,6 +2,7 @@
 import React from 'react';
 import { EventCardDummyData, MembersDummyData } from '../dummyData';
 import ViewEvent from '../components/pages/ViewEvent';
+import { state } from '../services/SingletonStore';
 
 export default function ViewEventContainer (props) {
     const {  
@@ -27,6 +28,7 @@ export default function ViewEventContainer (props) {
             rsvp={() => {
                 console.log("RSVP Action triggered")
             }} 
+            loading={state.txLoading}
             {...data}
         ></ViewEvent>
 

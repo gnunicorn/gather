@@ -3,8 +3,10 @@ import React, {useEffect} from 'react';
 import ViewGroup from '../components/pages/ViewGroup';
 import { GroupCardDummyData, EventCardDummyData, MembersDummyData } from '../dummyData';
 import * as gatherService from '../services/gatherService';
+import { state } from '../services/SingletonStore';
 
 export default function ViewGroupContainer (props) {
+    
     const {
         match:{
             params:{
@@ -36,6 +38,7 @@ export default function ViewGroupContainer (props) {
             joinGroup={() => {
                 console.log("Join group Action triggered")
             }} 
+            loading={state.txLoading}
             {...data}></ViewGroup>
     )
 }

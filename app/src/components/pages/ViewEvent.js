@@ -7,6 +7,7 @@ import MemberStub from '../general/MemberStub';
 import { mixins } from '../../theme';
 import { Link } from "react-router-dom";
 import EditIcon from '@material-ui/icons/Edit';
+import LoadingModal from '../general/LoadingModal';
 
 const useStyles = makeStyles(theme => ({
     root:{
@@ -38,12 +39,14 @@ export default function ViewEvent(props) {
     const {
         meta,
         members,
-        rsvp
+        rsvp,
+        loading
     } = props;
 
 
     return (
     <article className={classes.root}>
+        <LoadingModal active={loading}></LoadingModal>
         <TopBanner {...meta}></TopBanner>
         <div className={classes.headings}>
             <Typography variant="h1" component="h1">
