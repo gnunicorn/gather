@@ -8,6 +8,8 @@ import { mixins } from '../../theme';
 import { Link } from "react-router-dom";
 import EditIcon from '@material-ui/icons/Edit';
 
+import * as gatherService from '../../services/gatherService';
+
 const useStyles = makeStyles(theme => ({
     root:{
         paddingBottom: "20px"
@@ -54,8 +56,10 @@ export default function ViewEvent(props) {
         </div>
        <section className={classes.memberSection}>
             <div className={classes.buttonArea}>
-                <Button variant="contained" color="primary" onClick={() => {
-                    console.log("RSVP Action triggered")
+                <Button variant="contained" color="primary" onClick={async () => {
+                    console.log("RSVP Action triggered");
+                    console.log(JSON.stringify(meta));
+                    await gatherService.rsvp(meta.id);
                 }}>RSVP</Button>
             </div>
             <Typography variant="h2" component="h2">

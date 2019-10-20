@@ -2,6 +2,7 @@ import * as ipfsService from './ipfsService';
 import * as substrateService from './substrateService';
 import { Keyring } from '@polkadot/keyring';
 import { hexToString } from '@polkadot/util';
+import { customTypes } from './types';
 
 export async function createGroup(group) {
     return new Promise(async (resolve, reject) => {
@@ -47,5 +48,71 @@ export async function getGroupDetails(id) {
         console.log(ipfsId);
         const obj = await ipfsService.get(hexToString(ipfsId));
         resolve(JSON.parse(obj));
+    });
+}
+
+export async function joinGroup(groupId) {
+    return new Promise(async (resolve, reject) => {
+        const api = await substrateService.createApi();
+        const keyring = new Keyring({ type: 'sr25519' });
+        const userHex = localStorage.getItem('user');
+        const keys = keyring.addFromUri('0x' + userHex);
+        const nonce = await api.query.system.accountNonce(keys.address);
+        api.tx.gather
+            .joinGroup(groupId)
+            .signAndSend(keys, { nonce }, ({ events = [], status }) => {
+                if (status.isFinalized) {
+                    console.log(`Transaction included at blockHash ${status.asFinalized}`);
+                }
+
+                events.forEach(({ phase, event: { data, method, section } }) => {
+                    console.log('\t', phase.toString(), `: ${section}.${method}`, data.toString());
+                    resolve(data[1]);
+                });
+            });
+    });
+}
+
+export async function rsvp(eventId) {
+    console.log(eventId);
+    return new Promise(async (resolve, reject) => {
+        const api = await substrateService.createApi();
+        const keyring = new Keyring({ type: 'sr25519' });
+        const userHex = localStorage.getItem('user');
+        const keys = keyring.addFromUri('0x' + userHex);
+        const nonce = await api.query.system.accountNonce(keys.address);
+        api.tx.gather
+            .rsvpGathering(eventId, customTypes.RSVPStates._enum[0])
+            .signAndSend(keys, { nonce }, ({ events = [], status }) => {
+                if (status.isFinalized) {
+                    console.log(`Transaction included at blockHash ${status.asFinalized}`);
+                }
+
+                events.forEach(({ phase, event: { data, method, section } }) => {
+                    console.log('\t', phase.toString(), `: ${section}.${method}`, data.toString());
+                    resolve(data[1]);
+                });
+            });
+    });
+}
+
+export async function joinCommunity(communityId, userHex) {
+    return new Promise(async (resolve, reject) => {
+        const api = await substrateService.createApi();
+        const keyring = new Keyring({ type: 'sr25519' });
+        const keys = keyring.addFromUri('0x' + userHex);
+        const nonce = await api.query.system.accountNonce(keys.address);
+        api.tx.gather
+            .joinCommunity(communityId)
+            .signAndSend(keys, { nonce }, ({ events = [], status }) => {
+                if (status.isFinalized) {
+                    console.log(`Transaction included at blockHash ${status.asFinalized}`);
+                }
+
+                events.forEach(({ phase, event: { data, method, section } }) => {
+                    console.log('\t', phase.toString(), `: ${section}.${method}`, data.toString());
+                    resolve(data[1]);
+                });
+            });
     });
 }
