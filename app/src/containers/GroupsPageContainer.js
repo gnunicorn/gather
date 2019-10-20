@@ -8,8 +8,6 @@ import { GroupCardDummyData } from '../dummyData';
 import { Link } from "react-router-dom";
 
 import AddIcon from '@material-ui/icons/Add';
-import { getGroups } from '../services/gatherService';
-
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -26,14 +24,14 @@ export default function GroupsPageContainer (props) {
     // TODO find way to get all ID's 
     const [groups, setGroups] = useState([]);
 
-    useEffect(() => {
-        const fetchGroups = async () => {
-            const data = await getGroups()
-            setGroups(data);
-            console.log(data)
-        };
-        fetchGroups();
-      }, []);
+    // useEffect(() => {
+    //     const fetchGroups = async () => {
+    //         const data = await getGroups()
+    //         setGroups(data);
+    //         console.log(data)
+    //     };
+    //     fetchGroups();
+    //   }, []);
 
     return (
         <section className={classes.root}> 

@@ -42,7 +42,7 @@ export const GroupCardDummyData = [
         title: "Department of Decentralisation",
         subtitle: "Additional meta",
         type: "Group",
-        link: "/groups/department-of-decentralisation",
+        link: "/groups/3",
         image: null
     },
     {
@@ -50,7 +50,7 @@ export const GroupCardDummyData = [
         title: "Factory",
         subtitle: "Additional meta",
         type: "Group",
-        link: "/groups/factory",
+        link: "/groups/4",
         image: null
     },
     {
@@ -58,7 +58,7 @@ export const GroupCardDummyData = [
         title: "Substrate Rocks",
         subtitle: "Additional meta",
         type: "Group",
-        link: "/groups/substrate-rocks",
+        link: "/groups/5",
         image: null
     },
 ]

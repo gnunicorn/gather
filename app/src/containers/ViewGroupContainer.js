@@ -33,8 +33,9 @@ export default function ViewGroupContainer (props) {
 
     return (
         <ViewGroup 
-            joinGroup={() => {
-                console.log("Join group Action triggered")
+            joinGroup={async () => {
+                console.log("Join group Action triggered");
+                await gatherService.joinGroup(groupId);
             }} 
             {...data}></ViewGroup>
     )
