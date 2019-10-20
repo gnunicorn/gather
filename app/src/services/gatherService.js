@@ -26,10 +26,20 @@ export async function createGroup(group) {
     });
 }
 
-export async function getGroups(group) {
+export async function getGroups() {
+    const hardcodedIdPatch = [1,2];
     return new Promise(async (resolve, reject) => {
         const api = await substrateService.createApi();
-        const groups = await api.query.gather.notifications()
+        const communitiesGroups = await Promise.all(hardcodedIdPatch.map(async id => {
+            return await api.query.gather.communitiesGroups(id);
+        }));
+        let groups = []
+        await Promise.all(communitiesGroups.map(async community => {
+            await Promise.all(community.map(async group => {
+                groups.push(await api.query.gather.groups(group));
+            }))
+        }))
+
         const resolvedGroups = await Promise.all(groups.map(async group => {
             const ipfsId = JSON.parse(group.toString()).metadata;
             console.log(ipfsId);
