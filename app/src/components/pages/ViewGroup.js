@@ -121,10 +121,10 @@ export default function ViewGroup(props) {
            </Fab>
         </Link>
        } */}
-       <Link className={classes.floatingCta} to={`/groups/${meta.id}/edit`}>
+       {/* <Link className={classes.floatingCta} to={`/groups/${meta.id}/edit`}>
            <Fab color="primary">
                <EditIcon />
            </Fab>
-        </Link>
+        </Link> */}
     </article>)
 }

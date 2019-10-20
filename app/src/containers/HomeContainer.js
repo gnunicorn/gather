@@ -1,17 +1,20 @@
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { constants } from '../theme';
+import { GroupCardDummyData, EventCardDummyData } from '../dummyData';
+import CardBase from '../components/cards/CardBase';
+import StandardGrid from '../components/general/StandardGrid';
 
 
 const useStyles = makeStyles(theme => ({
-    root: {
+    videoRoot: {
         position: "relative",
-        height: `calc(100vh - (${constants.footerArea}px + ${constants.headerArea}px))`,
+        height: `40vh`,
         width: "100%"
     },
     video: {
@@ -32,42 +35,70 @@ const useStyles = makeStyles(theme => ({
     hl: {
         "margin": theme.spacing(2),
         "color": "white",
-        fontSize: "60px"
+        fontSize: "36px"
     },
     sub: {
         "margin": theme.spacing(1),
         "color": "white",
-        fontSize: "34px"
+        fontSize: "24px"
     },
     button: {
         "margin": theme.spacing(2),
     },
+    contentArea:{
+        padding: "15px 20px"
+    }
   }));
 
 export default function HomeContainer () {
     const classes = useStyles();
 
     return (
-        <div className={classes.root}>
-            <video
-                className={classes.video}
-                src="http://unterbau.tech:8080/ipfs/QmSKx4LDZHFLTgWWw3g9AH2MzVbpKUFjLYBvQ2LugLC5Ac"
-                autoPlay="1"
-                loop="1"
-                muted="1"
-            />
-            <Container className={classes.box}>
-                <Box>
-                    <Typography className={classes.hl} variant="h2">
-                        Let's gather
-                    </Typography>
+        <Fragment>
+            <div className={classes.videoRoot}>
+                <video
+                    className={classes.video}
+                    src="http://unterbau.tech:8080/ipfs/QmSKx4LDZHFLTgWWw3g9AH2MzVbpKUFjLYBvQ2LugLC5Ac"
+                    autoPlay="1"
+                    loop="1"
+                    muted="1"
+                />
+                <Container className={classes.box}>
+                    <Box>
+                        <Typography className={classes.hl} variant="h2">
+                            Let's gather
+                        </Typography>
 
-                    <Typography className={classes.sub} variant="h4">
-                        organise communities and events with real people
-                    </Typography>
-                    <Button color="primary" size="large" className={classes.button} variant="contained">Discover</Button>
-                </Box>
-            </Container>
-        </div>
+                        <Typography className={classes.sub} variant="h4">
+                            organise communities and events with real people
+                        </Typography>
+                        <Button color="primary" size="large" className={classes.button} variant="contained">Discover</Button>
+                    </Box>
+                </Container>
+            </div>
+            <div className={classes.contentArea}>
+                <Typography variant="h1" component="h2">
+                    Groups
+                </Typography>
+                <StandardGrid>
+                    {
+                        GroupCardDummyData.map(card => 
+                            (<CardBase key={card.id} {...card}></CardBase>)
+                        )
+                    }
+                </StandardGrid>
+                <Typography variant="h1" component="h2">
+                    Events
+                </Typography>
+                <StandardGrid>
+                    {
+                        EventCardDummyData.map(card => 
+                            (<CardBase key={card.id} {...card}></CardBase>)
+                        )
+                    }
+                </StandardGrid>
+            </div>
+            
+        </Fragment>
     )
 }
