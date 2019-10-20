@@ -881,7 +881,7 @@ mod tests {
             let group_id = basic_group_setup();
             let gathering_id = Nonce::get();
 
-            Notifications::kill(); // clean up all existing events
+            Notifications::<Test>::kill(); // clean up all existing events
             
             assert_ok!(Gather::create_gathering(Origin::signed(alice), group_id, GatheringInput::then(soon)));
             let gathering = Gatherings::get(gathering_id).unwrap();
