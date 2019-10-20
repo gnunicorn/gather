@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Typography, Fab } from '@material-ui/core';
 import StandardGrid from '../components/general/StandardGrid';
 import CardBase from '../components/cards/CardBase';
@@ -8,6 +8,9 @@ import { GroupCardDummyData } from '../dummyData';
 import { Link } from "react-router-dom";
 
 import AddIcon from '@material-ui/icons/Add';
+import { getGroups } from '../services/gatherService';
+
+
 const useStyles = makeStyles(theme => ({
     root: {
         ...mixins.standardContentWrapper
@@ -19,6 +22,17 @@ const useStyles = makeStyles(theme => ({
 
 export default function GroupsPageContainer (props) {
     const classes = useStyles();
+
+    // TODO find way to get all ID's 
+    // const [groups, setGroups] = useState([]);
+
+    // useEffect(() => {
+    //     const fetchGroups = async () => {
+    //         const data = await getGroups()
+    //         setGroups(data);
+    //     };
+    //     fetchGroups();
+    //   }, []);
 
     return (
         <section className={classes.root}> 

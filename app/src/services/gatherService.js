@@ -26,6 +26,19 @@ export async function createGroup(group) {
     });
 }
 
+export async function getGroups(group) {
+    return new Promise(async (resolve, reject) => {
+        const api = await substrateService.createApi();
+        const groups = await api.query.gather.notifications()
+        const resolvedGroups = await Promise.all(groups.map(async group => {
+            const ipfsId = JSON.parse(group.toString()).metadata;
+            console.log(ipfsId);
+            return JSON.parse( await ipfsService.get(hexToString(ipfsId)));
+        }))
+        resolve(resolvedGroups);
+    });
+}
+
 export async function getGroupDetails(id) {
     return new Promise(async (resolve, reject) => {
         const api = await substrateService.createApi();
