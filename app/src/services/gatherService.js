@@ -27,6 +27,19 @@ export async function createGroup(group) {
     });
 }
 
+
+
+export async function getGroupDetails(id) {
+    return new Promise(async (resolve, reject) => {
+        const api = await substrateService.createApi();
+        const group = await api.query.gather.groups(id);
+        const ipfsId = JSON.parse(group.toString()).metadata;
+        console.log(ipfsId);
+        const obj = await ipfsService.get(hexToString(ipfsId));
+        resolve(JSON.parse(obj));
+    });
+}
+
 export async function getGroups() {
     const hardcodedIdPatch = [1,2];
     return new Promise(async (resolve, reject) => {
@@ -38,6 +51,7 @@ export async function getGroups() {
         await Promise.all(communitiesGroups.map(async community => {
             await Promise.all(community.map(async group => {
                 groups.push(await api.query.gather.groups(group));
+                // groups.push(await getGroupDetails(group));
             }))
         }))
 
@@ -48,17 +62,6 @@ export async function getGroups() {
         // }))
         const resolvedGroups = groups.map(group => JSON.parse(group.toString()));
         resolve(resolvedGroups);
-    });
-}
-
-export async function getGroupDetails(id) {
-    return new Promise(async (resolve, reject) => {
-        const api = await substrateService.createApi();
-        const group = await api.query.gather.groups(id);
-        const ipfsId = JSON.parse(group.toString()).metadata;
-        console.log(ipfsId);
-        const obj = await ipfsService.get(hexToString(ipfsId));
-        resolve(JSON.parse(obj));
     });
 }
 

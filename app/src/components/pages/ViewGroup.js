@@ -9,6 +9,7 @@ import MemberStub from '../general/MemberStub';
 import { Link } from "react-router-dom";
 import EditIcon from '@material-ui/icons/Edit';
 import { mixins } from '../../theme';
+import LoadingModal from '../general/LoadingModal';
 
 const useStyles = makeStyles(theme => ({
     root:{
@@ -45,13 +46,15 @@ export default function ViewGroup(props) {
         meta,
         events,
         members,
-        joinGroup
+        joinGroup,
+        loading
     } = props;
 
     const [slideIndex, handleSlideChange] = useState(0);
 
     return (
     <article className={classes.root}>
+        <LoadingModal loading={loading}></LoadingModal>
         <TopBanner {...meta}></TopBanner>
         <div className={classes.headings}>
             <Typography variant="h1" component="h1">

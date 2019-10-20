@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EventCardDummyData, MembersDummyData } from '../dummyData';
 import ViewEvent from '../components/pages/ViewEvent';
 import * as gatherService from '../services/gatherService';
@@ -22,12 +22,16 @@ export default function ViewEventContainer (props) {
         },
         members: MembersDummyData,
     }
+    const [loading, setLoading] = useState(false);
 
     return (
         <ViewEvent 
+            loading={loading}
             rsvp={async () => {
                 console.log("RSVP Action triggered");
+                setLoading(true);
                 await gatherService.rsvp(eventId);
+                setLoading(true);
             }} 
             {...data}
         ></ViewEvent>
