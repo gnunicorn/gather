@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { EventCardDummyData, MembersDummyData } from '../dummyData';
 import ViewEvent from '../components/pages/ViewEvent';
 import * as gatherService from '../services/gatherService';
+import { USER_TYPE } from "../Constants"
 
 export default function ViewEventContainer (props) {
     const {  
