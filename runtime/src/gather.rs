@@ -135,7 +135,7 @@ pub struct GatheringInput {
 }
 
 impl GatheringInput {
-    fn as_new(self, id: GroupId, now: Timestamp) -> Gathering {
+    pub fn as_new(self, id: GroupId, now: Timestamp) -> Gathering {
         Gathering {
             belongs_to: vec![id],
             created_at: now,
@@ -164,8 +164,7 @@ impl GatheringInput {
         }
     }
 
-    #[cfg(test)]
-    fn then(then: Timestamp) -> GatheringInput {
+    pub fn then(then: Timestamp) -> GatheringInput {
         let mut g = GatheringInput::default();
         g.starts_at = Some(then);
         g

@@ -3,7 +3,7 @@ use gather_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, GatherConfig,
 	SudoConfig, IndicesConfig, SystemConfig, WASM_BINARY,
 	gather::{
-		Community, Group, Gathering, Membership, RSVP
+		Community, Group, GatheringInput, Membership, RSVP
 	}
 };
 use aura_primitives::sr25519::{AuthorityId as AuraId};
@@ -115,6 +115,7 @@ fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 
 	let alice = get_from_seed::<AccountId>("Alice");
 	let bob = get_from_seed::<AccountId>("Bob");
+	let soon = 1000;
 
 	GenesisConfig {
 		system: Some(SystemConfig {
@@ -174,10 +175,10 @@ fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 				(5u64, vec![8, 9]),
 			],
 			gatherings: vec![
-				(6u64, Gathering::default()),
-				(7u64, Gathering::default()),
-				(8u64, Gathering::default()),
-				(9u64, Gathering::default()),
+				(6u64, GatheringInput::then(soon).as_new(6,0)),
+				(7u64, GatheringInput::then(soon).as_new(7,0)),
+				(8u64, GatheringInput::then(soon).as_new(8,0)),
+				(9u64, GatheringInput::then(soon).as_new(9,0)),
 			],
 			gatherings_members: vec![
 				(6u64, vec![alice.clone(), bob.clone()]),
