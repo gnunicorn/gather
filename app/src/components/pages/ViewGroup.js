@@ -54,7 +54,7 @@ export default function ViewGroup(props) {
 
     return (
     <article className={classes.root}>
-        <LoadingModal active={loading}></LoadingModal>
+        <LoadingModal loading={loading}></LoadingModal>
         <TopBanner {...meta}></TopBanner>
         <div className={classes.headings}>
             <Typography variant="h1" component="h1">

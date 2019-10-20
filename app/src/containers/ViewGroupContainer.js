@@ -1,9 +1,8 @@
 
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import ViewGroup from '../components/pages/ViewGroup';
 import { GroupCardDummyData, EventCardDummyData, MembersDummyData } from '../dummyData';
 import * as gatherService from '../services/gatherService';
-import { state } from '../services/SingletonStore';
 
 export default function ViewGroupContainer (props) {
     
@@ -32,14 +31,16 @@ export default function ViewGroupContainer (props) {
         members: MembersDummyData,
         events: EventCardDummyData
     }
-
+    const [loading, setLoading] = useState(false);
     return (
         <ViewGroup 
+            loading={loading}
             joinGroup={async () => {
                 console.log("Join group Action triggered");
+                setLoading(true);
                 await gatherService.joinGroup(groupId);
+                setLoading(true);
             }} 
-            loading={state.txLoading}
             {...data}></ViewGroup>
     )
 }

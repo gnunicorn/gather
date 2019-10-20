@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import { constants } from '../../theme';
@@ -46,12 +46,11 @@ const useStyles = makeStyles(theme => ({
 
 export default function LoadingModal(props) {
     const {
-        active
+        loading
     } = props;
     const classes = useStyles();
-
     return (
-        <section className={classNames(classes.root, active ? "active" : "")}>
+        <section className={classNames(classes.root, loading ? "active" : "")}>
             <div>
                 <CircularProgress size={size} color="secondary" />
             </div>
