@@ -33,7 +33,7 @@ export default function LoginContainer (props) {
                 console.log("Login success", values);
                 const login = userService.login(values.email, values.password);
                 if(login) {
-                    history.push("/events/")
+                    history.push("/")
                 }
             }}
         >

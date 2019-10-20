@@ -73,14 +73,14 @@ export const MembersDummyData = [
     },
     {
         id: "a2127293389247",
-        accountAddress: "oStrithcesARentliKeleMONSlikeGRapES",
+        accountAddress: "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
         name: "Greg",
         email: "meh@eish.com",
         role: USER_TYPE.ORGANIZER,
     },
     {
         id: "a2127293389248",
-        accountAddress: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        accountAddress: "5FA9nQDVg267DEd8m1ZypXLBnvN7SFxYwV7ndqSYGiN9TTpu",
         name: "Not Greg",
         email: "hmm@bah.com",
         role: USER_TYPE.ADMIN,

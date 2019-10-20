@@ -218,8 +218,9 @@ pub trait Trait: system::Trait + timestamp::Trait {
 #[derive(Encode, Decode, Clone, PartialEq)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 /// internal offchain worker notifications
-enum Notification {
+enum Notification<T: Trait> {
     GatheringCreated(GroupId, GatheringId),
+    RSVPUpdated(GatheringId, T::AccountId),
 }
 
 // This module's storage items.
@@ -246,7 +247,7 @@ decl_storage! {
         // nonces
         Nonce get(nonce) config(): Reference;
         /// Notifications going to the offchain worker, cleared on every insteance:
-        Notifications: Vec<Notification>;
+        Notifications: Vec<Notification<T>>;
     }
 }
 
@@ -257,7 +258,7 @@ decl_module! {
 		fn deposit_event() = default;
 
         fn on_initialize(_now: T::BlockNumber) {
-            Notifications::kill();
+            Notifications::<T>::kill();
         }
 
         // ---- Community
@@ -600,9 +601,15 @@ impl<T: Trait> Module<T> {
         match ev {
             // we do something special on some events
             RawEvent::GatheringCreated(group_id, gathering_id) => {
-                Notifications::append(
+                Notifications::<T>::append(
                     &[Notification::GatheringCreated(group_id, gathering_id)][..]);
             },
+            RawEvent::RSVPUpdated(ref gather_id, ref user_id) => {
+                if RSVPs::<T>::get( (user_id, gather_id)).expect("Always exists").state == RSVPStates::Yes {
+                    Notifications::<T>::append(
+                        &[Notification::RSVPUpdated(*gather_id, user_id.clone())][..]);
+                }
+            }
             _ => {}
         }
         Self::deposit_event(ev);
@@ -617,14 +624,21 @@ impl<T: Trait> Module<T> {
 
     fn who_to_notify() -> Vec<(T::AccountId, Gathering)> { // FIXME: should be Iterator
         let mut target = Vec::default();
-        for n in Notifications::get() {
-            if let Notification::GatheringCreated(group_id, g) = n {
-                let gathering = Gatherings::get(&g).expect("Gathering always exists. qed");
-                for u_id in GroupsMembers::<T>::get(group_id)
-                        .iter().filter(|u| !RSVPs::<T>::exists( (u, &g)))
-                {
-                    target.push( (u_id.clone(), gathering.clone()))
+        for n in Notifications::<T>::get() {
+            match n {
+                // Notification::GatheringCreated(group_id, g) => {
+                //     let gathering = Gatherings::get(&g).expect("Gathering always exists. qed");
+                //     for u_id in GroupsMembers::<T>::get(group_id)
+                //             .iter()
+                //             .filter(|u| !RSVPs::<T>::exists( (u, &g))) {
+                //         target.push( (u_id.clone(), gathering.clone()))
+                //     }
+                // }
+                Notification::RSVPUpdated(gathering_id, u_id ) => {
+                    let gathering = Gatherings::get(gathering_id).expect("Gathering always exists. qed");
+                    target.push( (u_id, gathering.clone()))
                 }
+                _ => { }
             }
         }
         target
@@ -641,8 +655,8 @@ impl<T: Trait> Module<T> {
         // FIXME: move this to offchain HTTP API
         let params = [("from", "Gather <mailgun@sandbox7dd237c7e17e495396625732518feb9b.mailgun.org>"),
                       ("to", &String::from_utf8(addr).unwrap()),
-                      ("subject", "New Gathering happening"),
-                      ("html", include_str!("../../assets/email-notification-template.html"))
+                      ("subject", "You are coming to a gathering 🎉"),
+                      ("html", include_str!("../../assets/email-rsvp-template.html"))
                       ];
         let client = reqwest::Client::new();
         let mut resp = client.post("https://api.mailgun.net/v3/sandbox7dd237c7e17e495396625732518feb9b.mailgun.org/messages")

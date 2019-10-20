@@ -40,7 +40,7 @@ export default function ViewGroupContainer (props) {
                 console.log("Join group Action triggered");
                 setLoading(true);
                 await gatherService.joinGroup(groupId);
-                setLoading(true);
+                setLoading(false);
             }} 
             {...data}></ViewGroup>
     )
