@@ -14,10 +14,11 @@ export default function ViewEventContainer (props) {
     } = props;
 
     // TODO Resolve event Data via event ID
+    const event = EventCardDummyData ? EventCardDummyData.filter(item => item.id === parseInt(eventId))[0] : null;
     let data = {
         meta: {
-            title: EventCardDummyData[0].title,
-            subtitle: EventCardDummyData[0].subtitle,
+            title: event ? event.title : "",
+            subtitle: event ? event.subtitle : "",
             id: eventId
         },
         members: MembersDummyData,
@@ -29,9 +30,19 @@ export default function ViewEventContainer (props) {
             loading={loading}
             rsvp={async () => {
                 console.log("RSVP Action triggered");
+                const newMember = {
+                    id: "asdasd123123",
+                    accountAddress: "5HmWeDzF7ito4GLmfSioS6DX9dgQvx2YUki2ZprzsUwe2YuS",
+                    name: "Ben",
+                    email: "ben@gnunicorn.org",
+                    role: USER_TYPE.MEMBER,
+                };
                 setLoading(true);
-                await gatherService.rsvp(eventId);
-                setLoading(true);
+                const result = await gatherService.rsvp(eventId);
+                if(result) {
+                    data.members.push(newMember);
+                }
+                setLoading(false);
             }} 
             {...data}
         ></ViewEvent>
