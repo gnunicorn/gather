@@ -66,6 +66,7 @@ export async function getGroups() {
 }
 
 export async function joinGroup(groupId) {
+    console.log(groupId);
     return new Promise(async (resolve, reject) => {
         const api = await substrateService.createApi();
         const keyring = new Keyring({ type: 'sr25519' });

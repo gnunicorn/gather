@@ -3,6 +3,7 @@ import React from 'react';
 import { EventCardDummyData, MembersDummyData } from '../dummyData';
 import ViewEvent from '../components/pages/ViewEvent';
 import { state } from '../services/SingletonStore';
+import * as gatherService from '../services/gatherService';
 
 export default function ViewEventContainer (props) {
     const {  
@@ -25,8 +26,9 @@ export default function ViewEventContainer (props) {
 
     return (
         <ViewEvent 
-            rsvp={() => {
-                console.log("RSVP Action triggered")
+            rsvp={async () => {
+                console.log("RSVP Action triggered");
+                await gatherService.rsvp(eventId);
             }} 
             loading={state.txLoading}
             {...data}
