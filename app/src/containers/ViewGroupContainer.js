@@ -30,7 +30,7 @@ export default function ViewGroupContainer (props) {
             id: groupId
         },
         members: MembersDummyData,
-        events: EventCardDummyData
+        events: EventCardDummyData.filter(t => t.groupId == groupId)
     }
     const [loading, setLoading] = useState(false);
     return (

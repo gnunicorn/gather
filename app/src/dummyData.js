@@ -7,6 +7,7 @@ export const EventCardDummyData = [
         subtitle: "19 Oct 2019 - 20 Oct 2019",
         type: "Event",
         link: "/events/6",
+        groupId: 3,
         bannerImage: null
     },
     {
@@ -15,6 +16,7 @@ export const EventCardDummyData = [
         subtitle: "Some cool text.",
         type: "Event",
         link: "/events/7",
+        groupId: 3,
         bannerImage: null
     },
     {
@@ -23,6 +25,7 @@ export const EventCardDummyData = [
         subtitle: "Some cool text.",
         type: "Event",
         link: "/events/8",
+        groupId: 5,
         bannerImage: null
     },
     {
@@ -31,6 +34,7 @@ export const EventCardDummyData = [
         subtitle: "Some cool text.",
         type: "Event",
         link: "/events/9",
+        groupId: 5,
         bannerImage: null
     }
 ]
@@ -46,21 +50,13 @@ export const GroupCardDummyData = [
         image: null
     },
     {
-        id: 4,
-        title: "Factory",
-        subtitle: "Additional meta",
-        type: "Group",
-        link: "/groups/4",
-        image: null
-    },
-    {
         id: 5,
         title: "Substrate Rocks",
         subtitle: "Additional meta",
         type: "Group",
         link: "/groups/5",
         image: null
-    },
+    }
 ]
 
 export const MembersDummyData = [
