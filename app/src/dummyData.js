@@ -2,7 +2,7 @@ import { USER_TYPE } from "./Constants"
 
 export const EventCardDummyData = [
     {
-        id: "6",
+        id: 6,
         title: "Diffusion 2019",
         subtitle: "19 Oct 2019 - 20 Oct 2019",
         type: "Event",
@@ -10,7 +10,7 @@ export const EventCardDummyData = [
         bannerImage: null
     },
     {
-        id: "7",
+        id: 7,
         title: "Devcon 2020",
         subtitle: "Some cool text.",
         type: "Event",
@@ -18,7 +18,7 @@ export const EventCardDummyData = [
         bannerImage: null
     },
     {
-        id: "8",
+        id: 8,
         title: "Substrate Hack 'n Chill.",
         subtitle: "Some cool text.",
         type: "Event",
@@ -26,7 +26,7 @@ export const EventCardDummyData = [
         bannerImage: null
     },
     {
-        id: "9",
+        id: 9,
         title: "Blockchain Summit Latam",
         subtitle: "Some cool text.",
         type: "Event",
@@ -38,7 +38,7 @@ export const EventCardDummyData = [
 
 export const GroupCardDummyData = [
     {
-        id: "3",
+        id: 3,
         title: "Department of Decentralisation",
         subtitle: "Additional meta",
         type: "Group",
@@ -46,7 +46,7 @@ export const GroupCardDummyData = [
         image: null
     },
     {
-        id: "4",
+        id: 4,
         title: "Factory",
         subtitle: "Additional meta",
         type: "Group",
@@ -54,7 +54,7 @@ export const GroupCardDummyData = [
         image: null
     },
     {
-        id: "5",
+        id: 5,
         title: "Substrate Rocks",
         subtitle: "Additional meta",
         type: "Group",
