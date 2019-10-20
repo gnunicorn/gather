@@ -32,7 +32,9 @@ construct_simple_protocol! {
 /// be able to perform chain operations.
 macro_rules! new_full_start {
 	($config:expr) => {{
+		type RpcExtension = jsonrpc_core::IoHandler<substrate_rpc::Metadata>;
 		let mut import_setup = None;
+		
 		let inherent_data_providers = inherents::InherentDataProviders::new();
 
 		let builder = substrate_service::ServiceBuilder::new_full::<
@@ -66,6 +68,18 @@ macro_rules! new_full_start {
 				import_setup = Some((grandpa_block_import, grandpa_link));
 
 				Ok(import_queue)
+			})?
+			.with_rpc_extensions(|client, pool| -> RpcExtension {
+				use srml_system_rpc::{System, SystemApi};
+
+				let mut io = jsonrpc_core::IoHandler::default();
+				io.extend_with(
+					SystemApi::to_delegate(System::new(client.clone(), pool))
+				);
+				// io.extend_with(
+				// FIXME: HERE WE ADD OUR OWN DELEGATE
+				// );
+				io
 			})?;
 
 		(builder, import_setup, inherent_data_providers)

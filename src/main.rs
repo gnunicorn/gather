@@ -16,7 +16,7 @@ fn main() {
 		commit: env!("VERGEN_SHA_SHORT"),
 		version: env!("CARGO_PKG_VERSION"),
 		executable_name: "gather",
-		author: "Anonymous",
+		author: "Gatherers",
 		description: "Community Gatherings plattform",
 		support_url: "https://github.com/gnunicorn/gather",
 	};
