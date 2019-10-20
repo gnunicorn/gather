@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -20,6 +20,7 @@ const LoginSchema = Yup.object().shape({
 
 export default function LoginContainer (props) {
     const { history } = useReactRouter();
+    const [loading, setLoading] = useState(false);
     return (
         <Formik
             initialValues={{ 
@@ -31,14 +32,18 @@ export default function LoginContainer (props) {
 
             onSubmit={(values, { setSubmitting }) => {
                 console.log("Login success", values);
+                setLoading(true)
                 const login = userService.login(values.email, values.password);
                 if(login) {
+                    setLoading(false)
                     history.push("/")
                 }
             }}
         >
              {(props) => (
-                <AccessForm newUser={false} {...props}></AccessForm>
+                <AccessForm
+                    loading={loading}
+                    newUser={false} {...props}></AccessForm>
             )}
         </Formik>
     )

@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Form, Field } from 'formik';
 import { Button, Paper, FormControl, Typography } from '@material-ui/core';
 import { TextField } from 'formik-material-ui';
+import LoadingModal from '../general/LoadingModal';
 
 
 const useStyles = makeStyles(theme => ({
@@ -37,12 +38,14 @@ const useStyles = makeStyles(theme => ({
 
 export default function AccessForm(props) {
   const {
-    newUser
+    newUser,
+    loading
   } = props;
   const classes = useStyles();
 
   return (
     <Paper square={true} className={classes.paperRoot} elevation={0}>
+      <LoadingModal loading={loading}></LoadingModal>
       <Typography variant="h1" component="h1">
         { newUser ? "Please register to continue" : "Login" }
       </Typography>

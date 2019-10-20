@@ -7,7 +7,7 @@ import MemberStub from '../general/MemberStub';
 import { mixins, constants } from '../../theme';
 import LoadingModal from '../general/LoadingModal';
 import CheckIcon from '@material-ui/icons/Check';
-
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 const useStyles = makeStyles(theme => ({
     root:{
         paddingBottom: "20px"
@@ -77,9 +77,8 @@ export default function ViewEvent(props) {
                 </Fab>
                 </Link>
             } */}
-            <Fab className={classes.floatingCta} color="primary" aria-label="RSVP"  variant="extended" onClick={rsvp}>
-                <CheckIcon />
-                RSVP
+            <Fab className={classes.floatingCta} color="primary" aria-label="Attend"  variant="extended" onClick={rsvp}>
+                Attend?
             </Fab>
        </section>
     </article>)
