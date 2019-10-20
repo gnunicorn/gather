@@ -24,15 +24,16 @@ export default function GroupsPageContainer (props) {
     const classes = useStyles();
 
     // TODO find way to get all ID's 
-    // const [groups, setGroups] = useState([]);
+    const [groups, setGroups] = useState([]);
 
-    // useEffect(() => {
-    //     const fetchGroups = async () => {
-    //         const data = await getGroups()
-    //         setGroups(data);
-    //     };
-    //     fetchGroups();
-    //   }, []);
+    useEffect(() => {
+        const fetchGroups = async () => {
+            const data = await getGroups()
+            setGroups(data);
+            console.log(data)
+        };
+        fetchGroups();
+      }, []);
 
     return (
         <section className={classes.root}> 

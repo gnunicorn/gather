@@ -23,7 +23,12 @@ export default function ViewEventContainer (props) {
     }
 
     return (
-        <ViewEvent {...data}></ViewEvent>
+        <ViewEvent 
+            rsvp={() => {
+                console.log("RSVP Action triggered")
+            }} 
+            {...data}
+        ></ViewEvent>
 
     )
 }

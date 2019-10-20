@@ -32,6 +32,10 @@ export default function ViewGroupContainer (props) {
     }
 
     return (
-        <ViewGroup {...data}></ViewGroup>
+        <ViewGroup 
+            joinGroup={() => {
+                console.log("Join group Action triggered")
+            }} 
+            {...data}></ViewGroup>
     )
 }

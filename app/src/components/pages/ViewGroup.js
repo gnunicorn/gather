@@ -43,7 +43,8 @@ export default function ViewGroup(props) {
     const {
         meta,
         events,
-        members
+        members,
+        joinGroup
     } = props;
 
     const [slideIndex, handleSlideChange] = useState(0);
@@ -60,10 +61,13 @@ export default function ViewGroup(props) {
             </Typography>
         </div>
         <div className={classes.buttonArea}>
-            <Button variant="contained" color="primary" onClick={() => {
-                console.log("RSVP Action triggered")
-            }}>
-                Create Event
+           <Link to={`/events/${meta.id}/new`}>
+                <Button variant="contained" color="primary" >
+                    Create Event
+                </Button>
+            </Link>
+            <Button variant="contained" color="primary" onClick={joinGroup}>
+                Join Group
             </Button>
         </div>
         <AppBar position="static" className={classes.tabs}>
