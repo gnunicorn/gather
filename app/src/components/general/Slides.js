@@ -13,10 +13,12 @@ const useStyles = makeStyles(theme => ({
   slide:{
     overflow: "hidden",
     width: 0,
+    height: "0",
+    transitionProperty: "width",
     transitionDuration: "400ms",
     "&.active":{
         width: "100%",
-       
+        height: "100%"
     },
     "& > *":{
         width: "100vw"
