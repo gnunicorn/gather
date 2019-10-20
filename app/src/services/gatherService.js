@@ -40,11 +40,12 @@ export async function getGroups() {
             }))
         }))
 
-        const resolvedGroups = await Promise.all(groups.map(async group => {
-            const ipfsId = JSON.parse(group.toString()).metadata;
-            console.log(ipfsId);
-            return JSON.parse( await ipfsService.get(hexToString(ipfsId)));
-        }))
+        // const resolvedGroups = await Promise.all(groups.map(async group => {
+        //     const ipfsId = JSON.parse(group.toString()).metadata;
+        //     console.log(ipfsId);
+        //     return ipfsId !== "0x" ? JSON.parse( await ipfsService.get(hexToString(ipfsId))) : "";
+        // }))
+        const resolvedGroups = groups.map(group => JSON.parse(group.toString()));
         resolve(resolvedGroups);
     });
 }
