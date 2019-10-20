@@ -207,11 +207,17 @@ impl RSVP {
     }
 }
 
-
 /// The module's configuration trait.
 pub trait Trait: system::Trait + timestamp::Trait {
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+}
+
+#[derive(Encode, Decode, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+/// internal offchain worker notifications
+enum Notification {
+    GatheringCreated(GroupId, GatheringId),
 }
 
 // This module's storage items.
@@ -237,6 +243,8 @@ decl_storage! {
 
         // nonces
         Nonce get(nonce) config(): Reference;
+        /// Notifications going to the offchain worker, cleared on every insteance:
+        Notifications: Vec<Notification>;
     }
 }
 
@@ -245,6 +253,10 @@ decl_module! {
 	/// The module declaration.
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
 		fn deposit_event() = default;
+
+        fn on_initialize(_now: T::BlockNumber) {
+            Notifications::kill();
+        }
 
         // ---- Community
 
@@ -268,7 +280,7 @@ decl_module! {
             CommunitiesMembers::<T>::insert(id, vec![&who]);
             MembersCommunities::<T>::append_or_insert(who, &[id][..]);
 
-            Self::deposit_event(RawEvent::CommunityCreated(id));
+            Self::notify(RawEvent::CommunityCreated(id));
 
             Ok(())
         }
@@ -286,7 +298,7 @@ decl_module! {
             community.metadata = metadata;
             Communities::insert(id, community);
 
-            Self::deposit_event(RawEvent::CommunityUpdated(id));
+            Self::notify(RawEvent::CommunityUpdated(id));
             Ok(())
         }
 
@@ -318,7 +330,7 @@ decl_module! {
             CommunitiesMembers::<T>::append(id, &[&who][..]);
             MembersCommunities::<T>::append_or_insert(&who, &[id][..]);
 
-            Self::deposit_event(RawEvent::CommunityMembershipChanged(id, who));
+            Self::notify(RawEvent::CommunityMembershipChanged(id, who));
 
             Ok(())
         }
@@ -344,7 +356,7 @@ decl_module! {
 
             Memberships::<T>::insert((&who, community), membership);
 
-            Self::deposit_event(RawEvent::CommunityMembershipChanged(community, who));
+            Self::notify(RawEvent::CommunityMembershipChanged(community, who));
             Ok(())
         }
 
@@ -383,7 +395,7 @@ decl_module! {
             MembersGroups::<T>::append_or_insert(who, &[id][..]);
             CommunitiesGroups::append_or_insert(community, &[id][..]);
 
-            Self::deposit_event(RawEvent::GroupCreated(community, id));
+            Self::notify(RawEvent::GroupCreated(community, id));
 
             Ok(())
         }
@@ -408,7 +420,7 @@ decl_module! {
 
             Groups::insert(id, group);
 
-            Self::deposit_event(RawEvent::GroupUpdated(id));
+            Self::notify(RawEvent::GroupUpdated(id));
 
             Ok(())
         }
@@ -438,7 +450,7 @@ decl_module! {
             GroupsMembers::<T>::append(&id, &[&who][..]);
             MembersGroups::<T>::append_or_insert(&who, &[&id][..]);
 
-            Self::deposit_event(RawEvent::MemberJoinedGroup(id, who));
+            Self::notify(RawEvent::MemberJoinedGroup(id, who));
 
             Ok(())
         }
@@ -464,7 +476,7 @@ decl_module! {
             membership.updated_at = Self::now();
             Memberships::<T>::insert( (&whom, id), membership);
 
-            Self::deposit_event(RawEvent::GroupMembershipChanged(id, whom));
+            Self::notify(RawEvent::GroupMembershipChanged(id, whom));
 
             Ok(())
         }
@@ -499,7 +511,7 @@ decl_module! {
             MembersGatherings::<T>::append_or_insert(&who, &[id][..]);
             GroupsGatherings::append_or_insert(group_id, &[id][..]);
 
-            Self::deposit_event(RawEvent::GatheringCreated(group_id, id));
+            Self::notify(RawEvent::GatheringCreated(group_id, id));
 
             Ok(())
         }
@@ -555,10 +567,15 @@ decl_module! {
             // Update an existing gathering
             RSVPs::<T>::insert( (&who, id), rsvp);
 
-            Self::deposit_event(RawEvent::RSVPUpdated(id, who));
+            Self::notify(RawEvent::RSVPUpdated(id, who));
 
             Ok(())
         }
+
+		// We want to inform users about new events
+		fn offchain_worker(_now: T::BlockNumber) {
+            let _ = Self::who_to_notify();
+		}
 
 	}
 }
@@ -569,10 +586,38 @@ impl<T: Trait> Module<T> {
         // FIXME: <timestamp::Module<T>>::now();
         0
     }
+
+    fn notify(ev: RawEvent<T::AccountId>) {
+        match ev {
+            // we do something special on some events
+            RawEvent::GatheringCreated(group_id, gathering_id) => {
+                Notifications::append(
+                    &[Notification::GatheringCreated(group_id, gathering_id)][..]);
+            },
+            _ => {}
+        }
+        Self::deposit_event(ev);
+    }
+
     fn next_id() -> Reference {
         let id = Nonce::get();
         Nonce::put(id + 1); //FIXME: COULD OVERFLOW
         id
+    }
+
+    fn who_to_notify() -> Vec<(T::AccountId, Gathering)> { // FIXME: should be Iterator
+        let mut target = Vec::default();
+        for n in Notifications::get() {
+            if let Notification::GatheringCreated(group_id, g) = n {
+                let gathering = Gatherings::get(&g).expect("Gathering always exists. qed");
+                for u_id in GroupsMembers::<T>::get(group_id)
+                        .iter().filter(|u| !RSVPs::<T>::exists( (u, &g)))
+                {
+                    target.push( (u_id.clone(), gathering.clone()))
+                }
+            }
+        }
+        target
     }
 }
 
@@ -665,6 +710,22 @@ mod tests {
 		system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
 	}
 
+    fn basic_group_setup() -> GroupId{
+        let alice = 1u64;
+        let bob = 2u64;
+        let soon = Gather::now() + 10000;
+
+        let commuity_id = Nonce::get();
+		assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
+		assert_ok!(Gather::join_community(Origin::signed(bob), commuity_id));
+
+        let group_id = Nonce::get();
+        assert_ok!(Gather::create_group(Origin::signed(alice), commuity_id, b"NEWLINK".to_vec(), None));
+        assert_ok!(Gather::join_group(Origin::signed(bob), group_id));
+
+        group_id
+    }
+
 	#[test]
 	fn full_regular_flow() {
 		new_test_ext().execute_with(|| {
@@ -755,6 +816,26 @@ mod tests {
 			
 		});
 	}
+
+
+	#[test]
+	fn new_gatherings_creates_offchain_notifications() {
+		new_test_ext().execute_with(|| {
+
+            let alice = 1u64;
+            let bob = 2u64;
+            let soon = Gather::now() + 10000;
+            let group_id = basic_group_setup();
+            let gathering_id = Nonce::get();
+
+            Notifications::kill(); // clean up all existing events
+            
+            assert_ok!(Gather::create_gathering(Origin::signed(alice), group_id, GatheringInput::then(soon)));
+            let gathering = Gatherings::get(gathering_id).unwrap();
+
+            assert_eq!(Gather::who_to_notify(), vec![(bob, gathering)]);
+        });
+    }
 
 	#[test]
 	fn permissions() {
