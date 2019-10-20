@@ -30,9 +30,19 @@ export default function ViewEventContainer (props) {
             loading={loading}
             rsvp={async () => {
                 console.log("RSVP Action triggered");
+                const newMember = {
+                    id: "asdasd123123",
+                    accountAddress: "5HmWeDzF7ito4GLmfSioS6DX9dgQvx2YUki2ZprzsUwe2YuS",
+                    name: "Ben",
+                    email: "ben@gnunicorn.org",
+                    role: USER_TYPE.MEMBER,
+                };
                 setLoading(true);
-                await gatherService.rsvp(eventId);
-                setLoading(true);
+                const result = await gatherService.rsvp(eventId);
+                if(result) {
+                    data.members.push(newMember);
+                }
+                setLoading(false);
             }} 
             {...data}
         ></ViewEvent>
