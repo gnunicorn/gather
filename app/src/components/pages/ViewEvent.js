@@ -1,13 +1,12 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TopBanner from '../general/TopBanner';
-import { Typography, Fab, Button } from '@material-ui/core';
+import { Typography, Fab } from '@material-ui/core';
 import StandardGrid from '../general/StandardGrid';
 import MemberStub from '../general/MemberStub';
-import { mixins } from '../../theme';
-import { Link } from "react-router-dom";
-import EditIcon from '@material-ui/icons/Edit';
+import { mixins, constants } from '../../theme';
 import LoadingModal from '../general/LoadingModal';
+import CheckIcon from '@material-ui/icons/Check';
 
 const useStyles = makeStyles(theme => ({
     root:{
@@ -21,7 +20,8 @@ const useStyles = makeStyles(theme => ({
         padding: "10px 15px",
     },
     floatingCta:{
-        ...mixins.floatingCta
+        ...mixins.floatingCta,
+        bottom: constants.footerArea + 35
     },
     buttonArea:{
         display:"flex",
@@ -57,9 +57,9 @@ export default function ViewEvent(props) {
             </Typography>
         </div>
        <section className={classes.memberSection}>
-            <div className={classes.buttonArea}>
+            {/* <div className={classes.buttonArea}>
                 <Button variant="contained" color="primary" onClick={rsvp}>RSVP</Button>
-            </div>
+            </div> */}
             <Typography variant="h2" component="h2">
                 Attendees    
             </Typography>
@@ -77,11 +77,10 @@ export default function ViewEvent(props) {
                 </Fab>
                 </Link>
             } */}
-            <Link className={classes.floatingCta} to={`/events/${meta.id}/edit`}>
-                <Fab color="primary">
-                    <EditIcon />
-                </Fab>
-            </Link>
+            <Fab className={classes.floatingCta} color="primary" aria-label="RSVP"  variant="extended" onClick={rsvp}>
+                <CheckIcon />
+                RSVP
+            </Fab>
        </section>
     </article>)
 }
