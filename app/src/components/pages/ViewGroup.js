@@ -33,7 +33,8 @@ const useStyles = makeStyles(theme => ({
         flexWrap: "wrap",
         flexDirection: "row",
         "& > *":{
-            margin: "10px 5px"
+            margin: "10px 5px",
+            textDecoration: "none"
         }
     }
   }));

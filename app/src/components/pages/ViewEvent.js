@@ -8,8 +8,6 @@ import { mixins } from '../../theme';
 import { Link } from "react-router-dom";
 import EditIcon from '@material-ui/icons/Edit';
 
-import * as gatherService from '../../services/gatherService';
-
 const useStyles = makeStyles(theme => ({
     root:{
         paddingBottom: "20px"
