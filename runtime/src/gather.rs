@@ -265,7 +265,7 @@ decl_module! {
 
         pub fn create_community(origin, metadata: ExternalData) -> Result {
             let who = ensure_signed(origin)?;
-            let id = Self::next_id();
+            let id = Self::next_id().ok_or("Next id overflow")?;
             let now = Self::now();
 
             Communities::insert(id, Community {
@@ -377,7 +377,7 @@ decl_module! {
                 return Err("Only the community admins and organisers can create groups")
             }
 
-            let id = Self::next_id();
+            let id = Self::next_id().ok_or("Next id overflow")?;
             let now = Self::now();
 
             Groups::insert(id, Group {
@@ -501,7 +501,7 @@ decl_module! {
                     .and_then(filter)
                 ).ok_or("You are neither an Admin nor Organiser of the Group or Community")?;
 
-            let id = Self::next_id();
+            let id = Self::next_id().ok_or("Next id overflow")?;
             let now = Self::now();
             Gatherings::insert(id, details.as_new(group_id, now));
             RSVPs::<T>::insert((&who, id), RSVP {
@@ -519,8 +519,8 @@ decl_module! {
             Ok(())
         }
 
-        pub fn update_gathering(origin, gathering: GatheringId, metadata: ExternalData) -> Result {
-            let who = ensure_signed(origin)?;
+        pub fn _update_gathering(origin, _gathering: GatheringId, _metadata: ExternalData) -> Result {
+            let _who = ensure_signed(origin)?;
             // + ensure has role admin for gathering or community
             Err("not yet implemented")
         }
@@ -609,10 +609,11 @@ impl<T: Trait> Module<T> {
         Self::deposit_event(ev);
     }
 
-    fn next_id() -> Reference {
+    fn next_id() -> Option<Reference> {
         let id = Nonce::get();
-        Nonce::put(id + 1); //FIXME: COULD OVERFLOW
-        id
+        let id_inc = id.checked_add(1)?;
+        Nonce::put(id_inc);
+        Some(id)
     }
 
     fn who_to_notify() -> Vec<(T::AccountId, Gathering)> { // FIXME: should be Iterator
