@@ -13,6 +13,7 @@ use substrate_executor::native_executor_instance;
 pub use substrate_executor::NativeExecutor;
 use aura_primitives::sr25519::{AuthorityPair as AuraPair};
 use grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
+
 // Our native executor instance.
 native_executor_instance!(
 	pub Executor,
@@ -68,17 +69,20 @@ macro_rules! new_full_start {
 
 				Ok(import_queue)
 			})?
-			.with_rpc_extensions(|client, pool| -> RpcExtension {
+			.with_rpc_extensions(|client, pool, backend| -> RpcExtension {
 				use srml_system_rpc::{System, SystemApi};
 				use crate::rpc::{GatherApi, Gather};
+				use substrate_client::backend::Backend;
 
 				let mut io = jsonrpc_core::IoHandler::default();
 				io.extend_with(
 					SystemApi::to_delegate(System::new(client.clone(), pool))
 				);
-				io.extend_with(
-					GatherApi::<gather_runtime::AccountId>::to_delegate(Gather::new(client.clone()))
-				);
+				if let Some(storage) = backend.offchain_storage() {
+					io.extend_with(
+						GatherApi::<gather_runtime::AccountId>::to_delegate(Gather::new(storage.clone()))
+					);
+				}
 				io
 			})?;
 

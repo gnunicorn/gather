@@ -2,7 +2,7 @@
 use jsonrpc_derive::rpc;
 use jsonrpc_core::Result;
 use codec::Codec;
-use std::sync::Arc;
+use substrate_client::backend::OffchainStorage;
 
 /// Substrate system RPC API
 #[rpc]
@@ -15,26 +15,28 @@ pub trait GatherApi<AccountId> {
 
 
 /// An implementation of System-specific RPC methods.
-pub struct Gather<C> {
-	client: Arc<C>,
+pub struct Gather<B> {
+	backend: B,
 }
 
-impl<C> Gather< C> {
-	/// Create new `System` given client and transaction pool.
-	pub fn new(client: Arc<C>) -> Self {
+impl<B> Gather<B> {
+	/// Create new `Gather` interface given backend.
+	pub fn new(backend: B) -> Self {
 		Gather {
-			client,
+			backend,
 		}
 	}
 }
 
-impl<C, AccountId> GatherApi<AccountId> for Gather<C>
+impl<B, AccountId> GatherApi<AccountId> for Gather<B>
 where
-	C: Send + Sync + 'static,
+	B: OffchainStorage + 'static,
 	AccountId: Clone + std::fmt::Display + Codec,
 {
-    fn register_notify(&self, _account: AccountId, email: String) -> Result<String> {
-        println!("Pinged with: {}", email);
+    fn register_notify(&self, account: AccountId, email: String) -> Result<String> {
+        println!("storing {} for {}", email, account);
+        // FIXME: this should do an actual auth flow.
+        self.backend.clone().set(b"gather", &account.encode(), email.as_bytes());
         Ok(email)
     }
 }
