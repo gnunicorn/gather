@@ -8,6 +8,9 @@ use codec::{Encode, Decode};
 #[cfg(feature = "std")]
 use serde::{Serialize, Deserialize};
 
+#[cfg(feature = "std")]
+use reqwest;
+
 // TYPES
 pub type Reference = u64;
 pub type CommunityId = Reference;
@@ -207,11 +210,17 @@ impl RSVP {
     }
 }
 
-
 /// The module's configuration trait.
 pub trait Trait: system::Trait + timestamp::Trait {
 	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+}
+
+#[derive(Encode, Decode, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+/// internal offchain worker notifications
+enum Notification {
+    GatheringCreated(GroupId, GatheringId),
 }
 
 // This module's storage items.
@@ -237,6 +246,8 @@ decl_storage! {
 
         // nonces
         Nonce get(nonce) config(): Reference;
+        /// Notifications going to the offchain worker, cleared on every insteance:
+        Notifications: Vec<Notification>;
     }
 }
 
@@ -246,11 +257,15 @@ decl_module! {
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
 		fn deposit_event() = default;
 
+        fn on_initialize(_now: T::BlockNumber) {
+            Notifications::kill();
+        }
+
         // ---- Community
 
         pub fn create_community(origin, metadata: ExternalData) -> Result {
             let who = ensure_signed(origin)?;
-            let id = Self::next_id();
+            let id = Self::next_id().ok_or("Next id overflow")?;
             let now = Self::now();
 
             Communities::insert(id, Community {
@@ -268,7 +283,7 @@ decl_module! {
             CommunitiesMembers::<T>::insert(id, vec![&who]);
             MembersCommunities::<T>::append_or_insert(who, &[id][..]);
 
-            Self::deposit_event(RawEvent::CommunityCreated(id));
+            Self::notify(RawEvent::CommunityCreated(id));
 
             Ok(())
         }
@@ -286,7 +301,7 @@ decl_module! {
             community.metadata = metadata;
             Communities::insert(id, community);
 
-            Self::deposit_event(RawEvent::CommunityUpdated(id));
+            Self::notify(RawEvent::CommunityUpdated(id));
             Ok(())
         }
 
@@ -318,7 +333,7 @@ decl_module! {
             CommunitiesMembers::<T>::append(id, &[&who][..]);
             MembersCommunities::<T>::append_or_insert(&who, &[id][..]);
 
-            Self::deposit_event(RawEvent::CommunityMembershipChanged(id, who));
+            Self::notify(RawEvent::CommunityMembershipChanged(id, who));
 
             Ok(())
         }
@@ -344,7 +359,7 @@ decl_module! {
 
             Memberships::<T>::insert((&who, community), membership);
 
-            Self::deposit_event(RawEvent::CommunityMembershipChanged(community, who));
+            Self::notify(RawEvent::CommunityMembershipChanged(community, who));
             Ok(())
         }
 
@@ -362,7 +377,7 @@ decl_module! {
                 return Err("Only the community admins and organisers can create groups")
             }
 
-            let id = Self::next_id();
+            let id = Self::next_id().ok_or("Next id overflow")?;
             let now = Self::now();
 
             Groups::insert(id, Group {
@@ -383,7 +398,7 @@ decl_module! {
             MembersGroups::<T>::append_or_insert(who, &[id][..]);
             CommunitiesGroups::append_or_insert(community, &[id][..]);
 
-            Self::deposit_event(RawEvent::GroupCreated(community, id));
+            Self::notify(RawEvent::GroupCreated(community, id));
 
             Ok(())
         }
@@ -408,7 +423,7 @@ decl_module! {
 
             Groups::insert(id, group);
 
-            Self::deposit_event(RawEvent::GroupUpdated(id));
+            Self::notify(RawEvent::GroupUpdated(id));
 
             Ok(())
         }
@@ -438,7 +453,7 @@ decl_module! {
             GroupsMembers::<T>::append(&id, &[&who][..]);
             MembersGroups::<T>::append_or_insert(&who, &[&id][..]);
 
-            Self::deposit_event(RawEvent::MemberJoinedGroup(id, who));
+            Self::notify(RawEvent::MemberJoinedGroup(id, who));
 
             Ok(())
         }
@@ -464,7 +479,7 @@ decl_module! {
             membership.updated_at = Self::now();
             Memberships::<T>::insert( (&whom, id), membership);
 
-            Self::deposit_event(RawEvent::GroupMembershipChanged(id, whom));
+            Self::notify(RawEvent::GroupMembershipChanged(id, whom));
 
             Ok(())
         }
@@ -486,7 +501,7 @@ decl_module! {
                     .and_then(filter)
                 ).ok_or("You are neither an Admin nor Organiser of the Group or Community")?;
 
-            let id = Self::next_id();
+            let id = Self::next_id().ok_or("Next id overflow")?;
             let now = Self::now();
             Gatherings::insert(id, details.as_new(group_id, now));
             RSVPs::<T>::insert((&who, id), RSVP {
@@ -499,13 +514,13 @@ decl_module! {
             MembersGatherings::<T>::append_or_insert(&who, &[id][..]);
             GroupsGatherings::append_or_insert(group_id, &[id][..]);
 
-            Self::deposit_event(RawEvent::GatheringCreated(group_id, id));
+            Self::notify(RawEvent::GatheringCreated(group_id, id));
 
             Ok(())
         }
 
-        pub fn update_gathering(origin, gathering: GatheringId, metadata: ExternalData) -> Result {
-            let who = ensure_signed(origin)?;
+        pub fn _update_gathering(origin, _gathering: GatheringId, _metadata: ExternalData) -> Result {
+            let _who = ensure_signed(origin)?;
             // + ensure has role admin for gathering or community
             Err("not yet implemented")
         }
@@ -555,10 +570,22 @@ decl_module! {
             // Update an existing gathering
             RSVPs::<T>::insert( (&who, id), rsvp);
 
-            Self::deposit_event(RawEvent::RSVPUpdated(id, who));
+            Self::notify(RawEvent::RSVPUpdated(id, who));
 
             Ok(())
         }
+
+		// We want to inform users about new events
+		fn offchain_worker(_now: T::BlockNumber) {
+            // let kind = primitives::offchain::StorageKind::PERSISTENT;
+            for (_u_id, g) in Self::who_to_notify()
+                    // FIXME: Check against email addresses we have locally
+                    // .iter().filter_map(|(u_id, g)|
+                    //     runtime_io::local_storage_get(kind, u_id.into()).map(|e| (e, g)))
+            {
+                Self::email("ben@gnunicorn.org".as_bytes().to_vec(), &g);
+            }
+		}
 
 	}
 }
@@ -569,10 +596,64 @@ impl<T: Trait> Module<T> {
         // FIXME: <timestamp::Module<T>>::now();
         0
     }
-    fn next_id() -> Reference {
+
+    fn notify(ev: RawEvent<T::AccountId>) {
+        match ev {
+            // we do something special on some events
+            RawEvent::GatheringCreated(group_id, gathering_id) => {
+                Notifications::append(
+                    &[Notification::GatheringCreated(group_id, gathering_id)][..]);
+            },
+            _ => {}
+        }
+        Self::deposit_event(ev);
+    }
+
+    fn next_id() -> Option<Reference> {
         let id = Nonce::get();
-        Nonce::put(id + 1); //FIXME: COULD OVERFLOW
-        id
+        let id_inc = id.checked_add(1)?;
+        Nonce::put(id_inc);
+        Some(id)
+    }
+
+    fn who_to_notify() -> Vec<(T::AccountId, Gathering)> { // FIXME: should be Iterator
+        let mut target = Vec::default();
+        for n in Notifications::get() {
+            if let Notification::GatheringCreated(group_id, g) = n {
+                let gathering = Gatherings::get(&g).expect("Gathering always exists. qed");
+                for u_id in GroupsMembers::<T>::get(group_id)
+                        .iter().filter(|u| !RSVPs::<T>::exists( (u, &g)))
+                {
+                    target.push( (u_id.clone(), gathering.clone()))
+                }
+            }
+        }
+        target
+    }
+
+
+    #[cfg(not(feature = "std"))]
+    fn email(_addr: Vec<u8>, _gathering: &Gathering) {
+        // stub for WASM for now
+    }
+
+    #[cfg(feature = "std")]
+    fn email(addr: Vec<u8>, _gathering: &Gathering) {
+        // FIXME: move this to offchain HTTP API
+        let params = [("from", "Gather <mailgun@sandbox7dd237c7e17e495396625732518feb9b.mailgun.org>"),
+                      ("to", &String::from_utf8(addr).unwrap()),
+                      ("subject", "New Gathering happening"),
+                      ("html", include_str!("../../assets/email-notification-template.html"))
+                      ];
+        let client = reqwest::Client::new();
+        let mut resp = client.post("https://api.mailgun.net/v3/sandbox7dd237c7e17e495396625732518feb9b.mailgun.org/messages")
+            .basic_auth("api", Some("key-730319fd97aed60ab09bc0e3e20a0ec4"))
+            .form(&params)
+            .send()
+            .expect("Should Work");
+
+        println!("{}", resp.status());
+        println!("{}", resp.text().unwrap_or("".to_owned()));
     }
 }
 
@@ -621,7 +702,7 @@ mod tests {
 	// first constructing a configuration type (`Test`) which `impl`s each of the
 	// configuration traits of modules we want to use.
 	#[derive(Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+    #[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
 	pub struct Test;
 	parameter_types! {
 		pub const BlockHashCount: u64 = 250;
@@ -664,6 +745,26 @@ mod tests {
 	fn new_test_ext() -> runtime_io::TestExternalities {
 		system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
 	}
+
+    fn basic_group_setup() -> GroupId{
+        let alice = 1u64;
+        let bob = 2u64;
+
+        let commuity_id = Nonce::get();
+		assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
+		assert_ok!(Gather::join_community(Origin::signed(bob), commuity_id));
+
+        let group_id = Nonce::get();
+        assert_ok!(Gather::create_group(Origin::signed(alice), commuity_id, b"NEWLINK".to_vec(), None));
+        assert_ok!(Gather::join_group(Origin::signed(bob), group_id));
+
+        group_id
+    }
+
+	// #[test]
+	// fn test_email() {
+    //     Gather::email("ben@gnunicorn.org".as_bytes().to_vec(), &Gathering::default());
+    // }
 
 	#[test]
 	fn full_regular_flow() {
@@ -755,6 +856,26 @@ mod tests {
 			
 		});
 	}
+
+
+	#[test]
+	fn new_gatherings_creates_offchain_notifications() {
+		new_test_ext().execute_with(|| {
+
+            let alice = 1u64;
+            let bob = 2u64;
+            let soon = Gather::now() + 10000;
+            let group_id = basic_group_setup();
+            let gathering_id = Nonce::get();
+
+            Notifications::kill(); // clean up all existing events
+            
+            assert_ok!(Gather::create_gathering(Origin::signed(alice), group_id, GatheringInput::then(soon)));
+            let gathering = Gatherings::get(gathering_id).unwrap();
+
+            assert_eq!(Gather::who_to_notify(), vec![(bob, gathering)]);
+        });
+    }
 
 	#[test]
 	fn permissions() {
