@@ -27,6 +27,12 @@ parking_lot = '0.9.0'
 tokio = '0.1.22'
 trie-root = '0.15.2'
 jsonrpc-core = '13.2.0'
+jsonrpc-core-client = '13.2.0'
+jsonrpc-derive = '13.2.0'
+
+[dependencies.serde]
+features = ['derive']
+version = '1.0.101'
 
 [dependencies.aura]
 git = 'https://github.com/paritytech/substrate.git'

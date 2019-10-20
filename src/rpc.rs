@@ -9,7 +9,7 @@ use std::sync::Arc;
 pub trait GatherApi<AccountId> {
 	/// Register (or overwrite) the target of notifications for `account`
     /// to `email`
-	#[rpc(name = "register_notify")]
+	#[rpc(name = "system_registerNotify")]
 	fn register_notify(&self, account: AccountId, email: String) -> Result<String>;
 }
 
