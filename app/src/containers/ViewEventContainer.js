@@ -14,10 +14,11 @@ export default function ViewEventContainer (props) {
     } = props;
 
     // TODO Resolve event Data via event ID
+    const event = EventCardDummyData ? EventCardDummyData.filter(item => item.id === parseInt(eventId))[0] : null;
     let data = {
         meta: {
-            title: EventCardDummyData[0].title,
-            subtitle: EventCardDummyData[0].subtitle,
+            title: event ? event.title : "",
+            subtitle: event ? event.subtitle : "",
             id: eventId
         },
         members: MembersDummyData,
