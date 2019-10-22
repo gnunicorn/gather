@@ -3,6 +3,7 @@ use jsonrpc_derive::rpc;
 use jsonrpc_core::Result;
 use codec::Codec;
 use substrate_client::backend::OffchainStorage;
+use substrate_offchain::STORAGE_PREFIX;
 
 /// Substrate system RPC API
 #[rpc]
@@ -36,7 +37,7 @@ where
     fn register_notify(&self, account: AccountId, email: String) -> Result<String> {
         println!("storing {} for {}", email, account);
         // FIXME: this should do an actual auth flow.
-        self.backend.clone().set(b"gather", &account.encode(), email.as_bytes());
+        self.backend.clone().set(STORAGE_PREFIX, &account.encode(), email.as_bytes());
         Ok(email)
     }
 }
