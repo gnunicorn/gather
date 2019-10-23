@@ -4,6 +4,7 @@ use rstd::prelude::*;
 use support::{decl_module, decl_storage, decl_event, dispatch::Result};
 use system::ensure_signed;
 use codec::{Encode, Decode};
+use sr_primitives::RuntimeDebug;
 
 #[cfg(feature = "std")]
 use serde::{Serialize, Deserialize};
@@ -23,8 +24,8 @@ pub type Timezone = u8;
 pub type Timestamp = u64; 
 
 /// We have multiple ways to define and understand a location
-#[derive(Encode, Decode, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+#[derive(Encode, Decode, Clone, PartialEq, RuntimeDebug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Location {
     /// This is a globally acting group, events are everywhere or nowhere
     Global,
@@ -40,8 +41,8 @@ impl Default for Location {
 
 /// The role attachted to a specific Membership between Account
 /// and either Group or Community, by increasing privileges
-#[derive(Encode, Decode, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+#[derive(Encode, Decode, Clone, PartialEq, RuntimeDebug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum Role {
     /// Regular Member
     Member,
@@ -59,8 +60,8 @@ impl Default for Role {
     fn default() -> Self { Role::Member }
 }
 
-#[derive(Encode, Decode, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+#[derive(Encode, Decode, Clone, PartialEq, RuntimeDebug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub enum RSVPStates {
     Yes,
     No,
@@ -74,8 +75,8 @@ impl Default for RSVPStates {
 
 
 /// The Community Definition
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Community {
     /// Title, description and alike are move off chain
     pub metadata: ExternalData,
@@ -86,8 +87,8 @@ pub struct Community {
 }
 
 /// This is a Group
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Group {
     /// Which community does this group belong to
     pub belongs_to: CommunityId,
@@ -102,8 +103,8 @@ pub struct Group {
 }
 
 /// Definition for a specific Gathering
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Gathering {
     pub belongs_to: Vec<GroupId>,
     /// Where does this take place?
@@ -122,8 +123,8 @@ pub struct Gathering {
 }
 
 /// Definition for a specific Gathering
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct GatheringInput {
     pub location: Option<Location>,
     pub starts_at: Option<Timestamp>,
@@ -173,8 +174,8 @@ impl GatheringInput {
 
 
 /// Define the Roles and thus privileges of a specific member
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct Membership {
     pub role: Role,
     pub created_at: Timestamp,
@@ -191,8 +192,8 @@ impl Membership {
     }
 }
 
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+#[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 pub struct RSVP {
     pub state: RSVPStates,
     pub created_at: Timestamp,
@@ -215,8 +216,8 @@ pub trait Trait: system::Trait + timestamp::Trait {
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
 }
 
-#[derive(Encode, Decode, Clone, PartialEq)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize, Debug))]
+#[derive(Encode, Decode, Clone, PartialEq, RuntimeDebug)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
 /// internal offchain worker notifications
 enum Notification<T: Trait> {
     GatheringCreated(GroupId, GatheringId),
