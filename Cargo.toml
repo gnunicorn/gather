@@ -30,6 +30,11 @@ jsonrpc-core = '13.2.0'
 jsonrpc-core-client = '13.2.0'
 jsonrpc-derive = '13.2.0'
 
+# for emailing support
+toml = "0.5"
+lettre = "0.9"
+lettre_email = "0.9"
+
 [dependencies.serde]
 features = ['derive']
 version = '1.0.101'

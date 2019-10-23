@@ -8,6 +8,7 @@ mod chain_spec;
 mod service;
 mod cli;
 mod rpc;
+mod email;
 
 pub use substrate_cli::{VersionInfo, IntoExit, error};
 

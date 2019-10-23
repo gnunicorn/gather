@@ -32,8 +32,10 @@ construct_simple_protocol! {
 /// be able to perform chain operations.
 macro_rules! new_full_start {
 	($config:expr) => {{
+		use crate::email::make_lettre_transport;
 		type RpcExtension = jsonrpc_core::IoHandler<substrate_rpc::Metadata>;
 		let mut import_setup = None;
+		let _emailer = make_lettre_transport(&$config);
 		
 		let inherent_data_providers = inherents::InherentDataProviders::new();
 
