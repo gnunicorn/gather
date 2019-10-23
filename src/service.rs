@@ -13,6 +13,7 @@ use substrate_executor::native_executor_instance;
 pub use substrate_executor::NativeExecutor;
 use aura_primitives::sr25519::{AuthorityPair as AuraPair};
 use grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
+use crate::config::GatherConfig;
 
 // Our native executor instance.
 native_executor_instance!(
@@ -35,7 +36,7 @@ macro_rules! new_full_start {
 		use crate::email::make_lettre_transport;
 		type RpcExtension = jsonrpc_core::IoHandler<substrate_rpc::Metadata>;
 		let mut import_setup = None;
-		let _emailer = make_lettre_transport(&$config);
+		let emailer = make_lettre_transport(&$config.custom)?;
 		
 		let inherent_data_providers = inherents::InherentDataProviders::new();
 
@@ -82,7 +83,7 @@ macro_rules! new_full_start {
 				);
 				if let Some(storage) = backend.offchain_storage() {
 					io.extend_with(
-						GatherApi::<gather_runtime::AccountId>::to_delegate(Gather::new(storage.clone()))
+						GatherApi::<gather_runtime::AccountId>::to_delegate(Gather::new(storage.clone(), emailer))
 					);
 				}
 				io
@@ -93,7 +94,7 @@ macro_rules! new_full_start {
 }
 
 /// Builds a new service for a full client.
-pub fn new_full<C: Send + Default + 'static>(config: Configuration<C, GenesisConfig>)
+pub fn new_full(config: Configuration<GatherConfig, GenesisConfig>)
 	-> Result<impl AbstractService, ServiceError>
 {
 	let is_authority = config.roles.is_authority();

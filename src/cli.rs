@@ -8,6 +8,7 @@ use substrate_service::{AbstractService, Roles as ServiceRoles, Configuration};
 use aura_primitives::sr25519::{AuthorityPair as AuraPair};
 use crate::chain_spec;
 use log::info;
+use crate::config::{load_config as load_gather_config, GatherConfig};
 
 /// Parse command line arguments into service configuration.
 pub fn run<I, T, E>(args: I, exit: E, version: VersionInfo) -> error::Result<()> where
@@ -15,13 +16,14 @@ pub fn run<I, T, E>(args: I, exit: E, version: VersionInfo) -> error::Result<()>
 	T: Into<std::ffi::OsString> + Clone,
 	E: IntoExit,
 {
-	type Config<T> = Configuration<(), T>;
+	type Config<T> = Configuration<GatherConfig, T>;
 	match parse_and_prepare::<NoCustom, NoCustom, _>(&version, "substrate-node", args) {
 		ParseAndPrepare::Run(cmd) => cmd.run(load_spec, exit,
-		|exit, _cli_args, _custom_args, config: Config<_>| {
+		|exit, _cli_args, _custom_args, mut config: Config<_>| {
+			config.custom = load_gather_config(config.in_chain_config_dir("gather.toml").as_path())?;
 			info!("{}", version.name);
 			info!("  version {}", config.full_version());
-			info!("  by {}, 2017, 2018", version.author);
+			info!("  by {}, 2019", version.author);
 			info!("Chain specification: {}", config.chain_spec.name());
 			info!("Node name: {}", config.name);
 			info!("Roles: {:?}", config.roles);
@@ -39,7 +41,7 @@ pub fn run<I, T, E>(args: I, exit: E, version: VersionInfo) -> error::Result<()>
 				),
 			}.map_err(|e| format!("{:?}", e))
 		}),
-		ParseAndPrepare::BuildSpec(cmd) => cmd.run(load_spec),
+		ParseAndPrepare::BuildSpec(cmd) => cmd.run::<GatherConfig, _, _, _>(load_spec),
 		ParseAndPrepare::ExportBlocks(cmd) => cmd.run_with_builder(|config: Config<_>|
 			Ok(new_full_start!(config).0), load_spec, exit),
 		ParseAndPrepare::ImportBlocks(cmd) => cmd.run_with_builder(|config: Config<_>|

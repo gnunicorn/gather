@@ -32,7 +32,7 @@ jsonrpc-derive = '13.2.0'
 
 # for emailing support
 toml = "0.5"
-lettre = "0.9"
+lettre = { version= "0.9", features=["serde-impls"] }
 lettre_email = "0.9"
 
 [dependencies.serde]
