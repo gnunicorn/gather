@@ -11,6 +11,8 @@ use primitives::offchain::StorageKind;
 use serde::{Serialize, Deserialize};
 #[cfg(feature = "std")]
 use serde_json;
+#[cfg(feature = "std")]
+use handlebars;
 
 #[cfg(feature = "std")]
 use gather_emailer::{Email, EmailConfig, make_lettre_transport};
@@ -583,17 +585,35 @@ decl_module! {
 
 		// We want to inform users about new events
 		fn offchain_worker(_now: T::BlockNumber) {
-            // let kind = primitives::offchain::StorageKind::PERSISTENT;
-            for (_u_id, g) in Self::who_to_notify()
-                    // FIXME: Check against email addresses we have locally
-                    // .iter().filter_map(|(u_id, g)|
-                    //     runtime_io::local_storage_get(kind, u_id.into()).map(|e| (e, g)))
-            {
-                Self::email("ben@gnunicorn.org".as_bytes().to_vec(), &g);
-            }
+            #[cfg(feature = "std")]    // we only run this is in native, do not bake into wasm
+            Self::send_notifications();
 		}
 
 	}
+}
+
+#[cfg(feature = "std")]
+fn make_template_rendered() -> handlebars::Handlebars {
+    let mut h = handlebars::Handlebars::new();
+    h.register_template_string("emails/html/rsvped",
+            include_str!("../../templates/emails/html/rsvped.hbs"));
+    h.register_template_string("emails/html/new-gathering",
+            include_str!("../../templates/emails/html/new-gathering.hbs"));
+
+    h.register_template_string("emails/titles/rsvped",
+            include_str!("../../templates/emails/titles/rsvped.hbs"));
+    h.register_template_string("emails/titles/new-gathering",
+            include_str!("../../templates/emails/titles/new-gathering.hbs"));
+
+    if let Ok(mut cur) = std::env::current_dir() {
+        cur.push("templates");
+        if cur.is_dir() {
+            // if we have a "templates" dir in the working dir, add it
+            h.register_templates_directory(".hbs", cur);
+        }
+    }
+
+    h
 }
 
 // We've moved the  helper functions outside of the main decleration for briefety.
@@ -628,47 +648,70 @@ impl<T: Trait> Module<T> {
         Some(id)
     }
 
-    fn who_to_notify() -> Vec<(T::AccountId, Gathering)> { // FIXME: should be Iterator
-        let mut target = Vec::default();
+    #[cfg(feature = "std")]
+    fn send_notifications() {
+        let get_email = |u_id: &T::AccountId| -> Option<Vec<u8>> {
+            runtime_io::local_storage_get(StorageKind::PERSISTENT, format!("email_{}", u_id).as_bytes())
+        };
         for n in Notifications::<T>::get() {
             match n {
-                // Notification::GatheringCreated(group_id, g) => {
-                //     let gathering = Gatherings::get(&g).expect("Gathering always exists. qed");
-                //     for u_id in GroupsMembers::<T>::get(group_id)
-                //             .iter()
-                //             .filter(|u| !RSVPs::<T>::exists( (u, &g))) {
-                //         target.push( (u_id.clone(), gathering.clone()))
-                //     }
-                // }
-                Notification::RSVPUpdated(gathering_id, u_id ) => {
-                    let gathering = Gatherings::get(gathering_id).expect("Gathering always exists. qed");
-                    target.push( (u_id, gathering.clone()))
+                Notification::GatheringCreated(group_id, g) => {
+                    let gathering = Gatherings::get(&g).expect("Gathering always exists. qed");
+                    for email in GroupsMembers::<T>::get(group_id)
+                        .iter()
+                        .filter(|u| !RSVPs::<T>::exists( (u, &g)))
+                        .filter_map(|u| get_email(u))
+                    {
+                        Self::email(email, "new-gathering", &gathering);
+                    }
                 }
-                _ => { }
+                Notification::RSVPUpdated(gathering_id, u_id ) => {
+                    if let Some(email) = get_email(&u_id) {
+                        let gathering = Gatherings::get(gathering_id).expect("Gathering always exists. qed");
+                        Self::email(email, "rsvped", &gathering);
+                    }
+                }
             }
         }
-        target
     }
 
 
     #[cfg(not(feature = "std"))]
-    fn email(_addr: Vec<u8>, _gathering: &Gathering) {
+    fn email(_addr: Vec<u8>, tmpl: &str, _gathering: &Gathering) {
         // stub for WASM for now
     }
 
     #[cfg(feature = "std")]
-    fn email(addr: Vec<u8>, _gathering: &Gathering) {
+    fn email(addr: Vec<u8>, tmpl: &str, _gathering: &Gathering) -> Result {
 		if let Some(cfg_str) = runtime_io::local_storage_get(StorageKind::PERSISTENT, EMAIL_CONFIG_STORAGE_KEY) {
             if let Ok(config) = serde_json::from_slice::<EmailConfig>(&cfg_str)  {
                 if let Ok(mut transport) = make_lettre_transport(config) {
+                    let renderer = make_template_rendered();
+                    let subject = renderer.render(&format!("emails/subject/{}", tmpl), &"")
+                                .map_err(|e| {
+                                    println!("rendering subject failed: {}", e);
+                                    "subject rendering failed"
+                                })?;
+                    let html = renderer.render(&format!("emails/html/{}", tmpl), &"")
+                                    .map_err(|e| {
+                                        println!("rendering email body failed: {}", e);
+                                        "body rendering failed"
+                                    })?;
                     let email = Email::builder()
-                        .to(String::from_utf8(addr).expect("Only checked entries are stored in local_storage."))
-                        .html(include_str!("../../templates/emails/html/rsvped.hbs")) // FIXME #28 use templating
-                        .subject("You are coming to a gathering 🎉");
-                    transport.send(email).map_err(|e| println!("Sending email failed: {}", e));
+                        .to(String::from_utf8(addr).map_err(|e| {
+                            println!("Could not read email addr {}", e);
+                            "email addr not uf8"
+                        })?)
+                        .subject(subject)
+                        .html(html);
+                    transport.send(email).map_err(|e| {
+                        println!("Sending email failed: {}", e);
+                        "sending email failed"
+                    })?;
                 }
             }
         }
+        Ok(())
     }
 }
 
