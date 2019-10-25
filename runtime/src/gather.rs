@@ -5,6 +5,7 @@ use support::{decl_module, decl_storage, decl_event, dispatch::Result};
 use system::ensure_signed;
 use codec::{Encode, Decode};
 use sr_primitives::RuntimeDebug;
+#[cfg(feature = "std")]
 use primitives::offchain::StorageKind;
 
 #[cfg(feature = "std")]
@@ -235,16 +236,20 @@ enum Notification<T: Trait> {
 decl_storage! {
 	trait Store for Module<T: Trait> as Gather
     {
+        CommunitiesIdx get(communities_idx) config(): Vec<CommunityId>;
 		Communities get(communities) config(): map CommunityId => Option<Community>;
         CommunitiesMembers get(communities_members) config(): map CommunityId => Vec<T::AccountId>;
         MembersCommunities get(members_communities) config(): map T::AccountId => Vec<CommunityId>;
         CommunitiesGroups get(communities_groups) config(): map CommunityId => Vec<GroupId>;
 
+        GroupsIdx get(groups_idx) config(): Vec<GroupId>;
 		Groups get(groups) config(): map GroupId => Option<Group>;
         GroupsMembers get(groups_members) config(): map GroupId => Vec<T::AccountId>;
         MembersGroups get(members_groups) config(): map T::AccountId => Vec<GroupId>;
         GroupsGatherings get(groups_gatherings) config(): map GroupId => Vec<GatheringId>;
 
+        UpcomingGatheringsIdx get(upcoming_gatherings_idx) config(): Vec<GatheringId>;
+        ArchivedGatheringsIdx get(archived_gatherings_idx) config(): Vec<GatheringId>;
         Gatherings get(gatherings) config(): map GatheringId => Option<Gathering>;
         GatheringsMembers get(gatherings_members) config(): map GatheringId => Vec<T::AccountId>;
         MembersGatherings get(members_gatherings) config(): map T::AccountId => Vec<GatheringId>;
@@ -287,7 +292,8 @@ decl_module! {
                 created_at: now,
                 updated_at: now
             });
-
+            
+            CommunitiesIdx::get().insert(0, id);
             CommunitiesMembers::<T>::insert(id, vec![&who]);
             MembersCommunities::<T>::append_or_insert(who, &[id][..]);
 
@@ -401,7 +407,8 @@ decl_module! {
                 updated_at: now,
                 role: Role::Admin,
             });
-
+            
+            GroupsIdx::get().insert(0, id);
             GroupsMembers::<T>::insert(id, vec![&who]);
             MembersGroups::<T>::append_or_insert(who, &[id][..]);
             CommunitiesGroups::append_or_insert(community, &[id][..]);
@@ -517,7 +524,8 @@ decl_module! {
                 updated_at: now,
                 state: RSVPStates::Yes,
             });
-
+            
+            UpcomingGatheringsIdx::get().insert(0, id);
             GatheringsMembers::<T>::insert(id,vec![&who]);
             MembersGatherings::<T>::append_or_insert(&who, &[id][..]);
             GroupsGatherings::append_or_insert(group_id, &[id][..]);
