@@ -37,6 +37,8 @@ export const customTypes = {
         "location": "Location",
         "rsvp_opens": "Timestamp",
         "rsvp_closes": "Timestamp",
+        "starts_at": "Timestamp",
+        "ends_at": "Timestamp",
         "max_rsvps": "u32",
         "metadata": "ExternalData",
         "created_at": "Timestamp",

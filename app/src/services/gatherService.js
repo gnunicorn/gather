@@ -49,8 +49,12 @@ export async function getGroups() {
         }));
         let groups = []
         await Promise.all(communitiesGroups.map(async community => {
-            await Promise.all(community.map(async group => {
-                groups.push(await api.query.gather.groups(group));
+            await Promise.all(community.map(async group_id => {
+                groups.push(await api.query.gather.groups(group_id).then(json => {
+                        const group = JSON.parse(json.toString());
+                        group.id =  group_id;
+                        return group;
+                }))
                 // groups.push(await getGroupDetails(group));
             }))
         }))
@@ -60,8 +64,7 @@ export async function getGroups() {
         //     console.log(ipfsId);
         //     return ipfsId !== "0x" ? JSON.parse( await ipfsService.get(hexToString(ipfsId))) : "";
         // }))
-        const resolvedGroups = groups.map(group => JSON.parse(group.toString()));
-        resolve(resolvedGroups);
+        resolve(groups);
     });
 }
 

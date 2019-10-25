@@ -2,9 +2,11 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { Keyring } from '@polkadot/keyring';
 import { customTypes } from './types';
 
+const provider = new WsProvider(process.env.REACT_APP_WS_TARGET || 'ws://127.0.0.1:9944');
+const api_promise = ApiPromise.create({ provider, types: customTypes });
+
 export async function createApi() {
-    const provider = new WsProvider(process.env.REACT_APP_WS_TARGET || 'ws://127.0.0.1:9944');
-    return await ApiPromise.create({ provider, types: customTypes });
+    return await api_promise;
 }
 
 export async function fundAccount(address) {

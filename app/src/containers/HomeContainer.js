@@ -1,5 +1,5 @@
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
@@ -7,6 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { constants } from '../theme';
 import { GroupCardDummyData, EventCardDummyData } from '../dummyData';
+import { getGroups } from '../services/gatherService';
 import CardBase from '../components/cards/CardBase';
 import StandardGrid from '../components/general/StandardGrid';
 
@@ -53,6 +54,17 @@ const useStyles = makeStyles(theme => ({
 export default function HomeContainer () {
     const classes = useStyles();
 
+    const [groups, setGroups] = useState([]);
+
+    useEffect(() => {
+        const fetchGroups = async () => {
+            const data = await getGroups()
+            setGroups(data);
+        };
+        fetchGroups();
+      }, []);
+
+
     return (
         <Fragment>
             <div className={classes.videoRoot}>
@@ -82,8 +94,8 @@ export default function HomeContainer () {
                 </Typography>
                 <StandardGrid>
                     {
-                        GroupCardDummyData.map(card => 
-                            (<CardBase key={card.id} {...card}></CardBase>)
+                        groups.map(card => 
+                            (<CardBase key={card.id} linkPrefix="/groups" {...card}></CardBase>)
                         )
                     }
                 </StandardGrid>
@@ -93,7 +105,7 @@ export default function HomeContainer () {
                 <StandardGrid>
                     {
                         EventCardDummyData.map(card => 
-                            (<CardBase key={card.id} {...card}></CardBase>)
+                            (<CardBase key={card.id} linkPrefix="/events" {...card}></CardBase>)
                         )
                     }
                 </StandardGrid>

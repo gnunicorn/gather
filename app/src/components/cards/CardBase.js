@@ -78,13 +78,15 @@ const useStyles = makeStyles(theme => ({
 
 export default function CardBase(props) {
   const {
+    id,
     title,
     subtitle,
     type,
-    link,
+    linkPrefix,
     bannerImage
   } = props;
   const classes = useStyles();
+  const link = `${linkPrefix}/${id}`;
   return (
     <Card className={classes.card}>
       <Link to={link} underline="none" className={classes.link} >
