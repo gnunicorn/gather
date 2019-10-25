@@ -35,6 +35,7 @@ export default function App () {
       .then((api) => {
         setApi(api);
         api.isReady.then(() => setApiReady(true));
+        window.API = api;
       })
       .catch((e) => console.error(e));
   }, []);
