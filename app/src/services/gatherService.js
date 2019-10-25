@@ -3,11 +3,24 @@ import * as substrateService from './substrateService';
 import { Keyring } from '@polkadot/keyring';
 import { hexToString } from '@polkadot/util';
 import { customTypes } from './types';
+import Buffer from 'buffer/';
+
+const DEBUG = true;
+
+// super simple cache
+const CACHE = {
+    "communitiesIdx": [],
+    "communities": {},
+    "groupsIdx": [],
+    "groups": {},
+    "gatheringsIdx": [],
+    "gatherings": {},
+}
 
 export async function createGroup(group) {
     return new Promise(async (resolve, reject) => {
         const ipfsHash = await ipfsService.add(group);
-        console.log(ipfsHash);
+        DEBUG && console.log(ipfsHash);
         const api = await substrateService.createApi();
         const keyring = new Keyring({ type: 'sr25519' });
         const alice = keyring.addFromUri('//Alice');
@@ -27,46 +40,73 @@ export async function createGroup(group) {
     });
 }
 
-
-
-export async function getGroupDetails(id) {
-    return new Promise(async (resolve, reject) => {
+function makeApi(item, items, idx_prefix, parent) {
+    items = items || `${item}s`;
+    idx_prefix = idx_prefix || "";
+    async function item_getter(id) {
         const api = await substrateService.createApi();
-        const group = await api.query.gather.groups(id);
-        const ipfsId = JSON.parse(group.toString()).metadata;
-        console.log(ipfsId);
-        const obj = await ipfsService.get(hexToString(ipfsId));
-        resolve(JSON.parse(obj));
-    });
-}
-
-export async function getGroups() {
-    const hardcodedIdPatch = [1,2];
-    return new Promise(async (resolve, reject) => {
+        const cache = CACHE[items];
+        if (cache[id]) {
+            return new Promise((resolve, _)=>{
+                DEBUG && console.log(`Loaded result for ${item}(${id})`);
+                resolve(cache[id]);
+            })
+        };
+        const entry = await api.query.gather[items](id);
+        entry.id = id;
+        DEBUG && console.log(`Found ${item}(${id}) => ${entry}`);
+        window.entry = entry;
+        if (entry.raw.metadata) {
+            DEBUG && console.log(`Loading IPFS data ${entry.raw.metadata} for ${item}(${id})`);
+            const details = await ipfsService.get(Buffer.Buffer.from(entry.raw.metadata));
+            console.log(details);
+            entry.metadata = JSON.parse(details);
+        }
+        DEBUG && console.log(`Caching ${item}(${id})`);
+        cache[id] = entry;
+        return entry; 
+    };
+    
+    async function list_getter(parent_id) {
         const api = await substrateService.createApi();
-        const communitiesGroups = await Promise.all(hardcodedIdPatch.map(async id => {
-            return await api.query.gather.communitiesGroups(id);
-        }));
-        let groups = []
-        await Promise.all(communitiesGroups.map(async community => {
-            await Promise.all(community.map(async group_id => {
-                groups.push(await api.query.gather.groups(group_id).then(json => {
-                        const group = JSON.parse(json.toString());
-                        group.id =  group_id;
-                        return group;
-                }))
-                // groups.push(await getGroupDetails(group));
-            }))
-        }))
+        let ids = CACHE[`${items}Idx`];
+        if (!parent_id) {
+            DEBUG && console.log(`Checked cache for ${items}: ${ids}`);
 
-        // const resolvedGroups = await Promise.all(groups.map(async group => {
-        //     const ipfsId = JSON.parse(group.toString()).metadata;
-        //     console.log(ipfsId);
-        //     return ipfsId !== "0x" ? JSON.parse( await ipfsService.get(hexToString(ipfsId))) : "";
-        // }))
-        resolve(groups);
-    });
+            if (!ids || ids.length == 0) {
+                const key = `${idx_prefix}${items}Idx`;
+                DEBUG && console.log(`Loading ${items}:${key}`);
+                ids = await api.query.gather[key]();
+                CACHE[`${items}Idx`] = ids;
+            }
+        } else {
+            let key = `${parent}${item}`;
+            ids = CACHE[key];
+            DEBUG && console.log(`Checked cache for ${items}: ${ids}`);
+
+            if (!ids || ids.length == 0) {
+                const key = `${idx_prefix}${items}Idx`;
+                DEBUG && console.log(`Loading ${items}:${key}`);
+                ids = await api.query.gather[key]();
+                CACHE[key] = ids;
+            }
+
+        }
+        DEBUG && console.log(`Fetching details for ${items}: ${ids}`);
+        return Promise.all(ids.map(async (id) => item_getter(id)));
+    };
+
+    let fns = {};
+    fns[`get${items}`] = list_getter;
+    fns[`get${item}`] = item_getter;
+
+    return fns;
 }
+export const { getcommunity: getCommunity, getcommunities: getCommunities } = makeApi("community", "communities");
+export const { getgroup: getGroup, getgroups: getGroups } = makeApi("group", "groups", "", "communities");
+export const { getgathering: getGathering, getgatherings: getGatherings } = makeApi("gathering", "gatherings", "upcoming", "groups");
+
+
 
 export async function joinGroup(groupId) {
     console.log(groupId);

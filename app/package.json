@@ -20,6 +20,7 @@
     "clsx": "latest",
     "formik": "^1.5.8",
     "formik-material-ui": "^0.0.22",
+    "ipfs": "^0.39.0",
     "ipfs-http-client": "^39.0.2",
     "moment": "^2.24.0",
     "react": "16.11.0",

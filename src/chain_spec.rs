@@ -9,6 +9,7 @@ use gather_runtime::{
 use aura_primitives::sr25519::{AuthorityId as AuraId};
 use grandpa_primitives::{AuthorityId as GrandpaId};
 use substrate_service;
+use cid::Cid;
 
 // Note this is the URL for the telemetry server
 //const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -158,9 +159,9 @@ fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 			],
 			groups_idx: vec![3u64, 4u64, 5u64],
 			groups: vec![
-				(3u64, Group::default()),
-				(4u64, Group::default()),
-				(5u64, Group::default()),
+				(3u64, Group::with_metadata(Cid::from("QmfESjfnQx9Af2BidAuHsov4bEp5bAA87wzxJqmk7bnsYN").unwrap().to_bytes())),
+				(4u64, Group::with_metadata(Cid::from("QmfESjfnQx9Af2BidAuHsov4bEp5bAA87wzxJqmk7bnsYN").unwrap().to_bytes())),
+				(5u64, Group::with_metadata(Cid::from("QmfESjfnQx9Af2BidAuHsov4bEp5bAA87wzxJqmk7bnsYN").unwrap().to_bytes())),
 			],
 			groups_members: vec![
 				(3u64, vec![alice.clone(), bob.clone()]),

@@ -94,6 +94,15 @@ pub struct Community {
     pub updated_at: Timestamp,
 }
 
+impl Community {
+    pub fn with_metadata(meta: Vec<u8>) -> Self {
+        let mut d = Self::default();
+        d.metadata = meta;
+        d
+    }
+}
+
+
 /// This is a Group
 #[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
@@ -109,6 +118,15 @@ pub struct Group {
     /// when last updated?
     pub updated_at: Timestamp,
 }
+
+impl Group {
+    pub fn with_metadata(meta: Vec<u8>) -> Self {
+        let mut d = Self::default();
+        d.metadata = meta;
+        d
+    }
+}
+
 
 /// Definition for a specific Gathering
 #[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
@@ -130,6 +148,14 @@ pub struct Gathering {
     pub updated_at: Timestamp,
 }
 
+impl Gathering {
+    pub fn with_metadata(meta: Vec<u8>) -> Self {
+        let mut d = Self::default();
+        d.metadata = meta;
+        d
+    }
+}
+
 /// Definition for a specific Gathering
 #[derive(Encode, Decode, Default, Clone, PartialEq, RuntimeDebug)]
 #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
@@ -144,6 +170,11 @@ pub struct GatheringInput {
 }
 
 impl GatheringInput {
+    pub fn with_metadata(meta: Vec<u8>) -> Self {
+        let mut d = Self::default();
+        d.metadata = Some(meta);
+        d
+    }
     pub fn as_new(self, id: GroupId, now: Timestamp) -> Gathering {
         Gathering {
             belongs_to: vec![id],
@@ -292,8 +323,8 @@ decl_module! {
                 created_at: now,
                 updated_at: now
             });
-            
-            CommunitiesIdx::get().insert(0, id);
+
+            CommunitiesIdx::mutate(|l| l.insert(0, id));
             CommunitiesMembers::<T>::insert(id, vec![&who]);
             MembersCommunities::<T>::append_or_insert(who, &[id][..]);
 
@@ -407,8 +438,8 @@ decl_module! {
                 updated_at: now,
                 role: Role::Admin,
             });
-            
-            GroupsIdx::get().insert(0, id);
+
+            GroupsIdx::mutate(|l| l.insert(0, id));
             GroupsMembers::<T>::insert(id, vec![&who]);
             MembersGroups::<T>::append_or_insert(who, &[id][..]);
             CommunitiesGroups::append_or_insert(community, &[id][..]);
@@ -524,8 +555,8 @@ decl_module! {
                 updated_at: now,
                 state: RSVPStates::Yes,
             });
-            
-            UpcomingGatheringsIdx::get().insert(0, id);
+
+            UpcomingGatheringsIdx::mutate(|l| l.insert(0, id));
             GatheringsMembers::<T>::insert(id,vec![&who]);
             MembersGatherings::<T>::append_or_insert(&who, &[id][..]);
             GroupsGatherings::append_or_insert(group_id, &[id][..]);
