@@ -6,7 +6,7 @@ name = 'gather'
 path = 'src/main.rs'
 
 [workspace]
-members = ['runtime']
+members = ['runtime', 'lib/emailer']
 
 [package]
 authors = ['Anonymous']
@@ -38,6 +38,9 @@ lettre_email = "0.9"
 [dependencies.serde]
 features = ['derive']
 version = '1.0.101'
+
+[dependencies.serde_json]
+version = '1.0.41'
 
 [dependencies.aura]
 git = 'https://github.com/paritytech/substrate.git'
@@ -99,6 +102,9 @@ rev = 'd521bb573'
 
 [dependencies.gather-runtime]
 path = 'runtime'
+
+[dependencies.gather-emailer]
+path = 'lib/emailer'
 
 [dependencies.primitives]
 git = 'https://github.com/paritytech/substrate.git'

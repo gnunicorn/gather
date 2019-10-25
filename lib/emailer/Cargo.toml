@@ -1,0 +1,12 @@
+[package]
+name = "gather-emailer"
+version = "0.1.0"
+authors = ["Gatherers"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+lettre = { version= "0.9", features=["serde-impls"] }
+lettre_email = "0.9"
+serde = { version = '1.0.101', features = ['derive'] }

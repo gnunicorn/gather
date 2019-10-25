@@ -5,12 +5,17 @@ use support::{decl_module, decl_storage, decl_event, dispatch::Result};
 use system::ensure_signed;
 use codec::{Encode, Decode};
 use sr_primitives::RuntimeDebug;
+use primitives::offchain::StorageKind;
 
 #[cfg(feature = "std")]
 use serde::{Serialize, Deserialize};
+#[cfg(feature = "std")]
+use serde_json;
 
 #[cfg(feature = "std")]
-use reqwest;
+use gather_emailer::{Email, EmailConfig, make_lettre_transport};
+
+pub const EMAIL_CONFIG_STORAGE_KEY: &[u8] = b"email_config";
 
 // TYPES
 pub type Reference = u64;
@@ -653,21 +658,17 @@ impl<T: Trait> Module<T> {
 
     #[cfg(feature = "std")]
     fn email(addr: Vec<u8>, _gathering: &Gathering) {
-        // FIXME: move this to offchain HTTP API
-        let params = [("from", "Gather <mailgun@sandbox7dd237c7e17e495396625732518feb9b.mailgun.org>"),
-                      ("to", &String::from_utf8(addr).unwrap()),
-                      ("subject", "You are coming to a gathering 🎉"),
-                      ("html", include_str!("../../assets/email-rsvp-template.html"))
-                      ];
-        let client = reqwest::Client::new();
-        let mut resp = client.post("https://api.mailgun.net/v3/sandbox7dd237c7e17e495396625732518feb9b.mailgun.org/messages")
-            .basic_auth("api", Some("key-730319fd97aed60ab09bc0e3e20a0ec4"))
-            .form(&params)
-            .send()
-            .expect("Should Work");
-
-        println!("{}", resp.status());
-        println!("{}", resp.text().unwrap_or("".to_owned()));
+		if let Some(cfg_str) = runtime_io::local_storage_get(StorageKind::PERSISTENT, EMAIL_CONFIG_STORAGE_KEY) {
+            if let Ok(config) = serde_json::from_slice::<EmailConfig>(&cfg_str)  {
+                if let Ok(mut transport) = make_lettre_transport(config) {
+                    let email = Email::builder()
+                        .to(String::from_utf8(addr).expect("Only checked entries are stored in local_storage."))
+                        .html(include_str!("../../templates/emails/html/rsvped.hbs")) // FIXME #28 use templating
+                        .subject("You are coming to a gathering 🎉");
+                    transport.send(email).map_err(|e| println!("Sending email failed: {}", e));
+                }
+            }
+        }
     }
 }
 

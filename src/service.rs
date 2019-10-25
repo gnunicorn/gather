@@ -14,6 +14,7 @@ pub use substrate_executor::NativeExecutor;
 use aura_primitives::sr25519::{AuthorityPair as AuraPair};
 use grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
 use crate::config::GatherConfig;
+use serde_json;
 
 // Our native executor instance.
 native_executor_instance!(
@@ -33,11 +34,12 @@ construct_simple_protocol! {
 /// be able to perform chain operations.
 macro_rules! new_full_start {
 	($config:expr) => {{
-		use crate::email::make_lettre_transport;
+		use gather_emailer::make_lettre_transport;
 		type RpcExtension = jsonrpc_core::IoHandler<substrate_rpc::Metadata>;
 		let mut import_setup = None;
-		let emailer = make_lettre_transport(&$config.custom)?;
-		
+		let emailer = make_lettre_transport($config.custom.email.clone())?;
+		let emailer_config = serde_json::to_vec(&$config.custom.email).expect("We can always serialise the config");
+
 		let inherent_data_providers = inherents::InherentDataProviders::new();
 
 		let builder = substrate_service::ServiceBuilder::new_full::<
@@ -76,12 +78,17 @@ macro_rules! new_full_start {
 				use srml_system_rpc::{System, SystemApi};
 				use crate::rpc::{GatherApi, Gather};
 				use substrate_client::backend::Backend;
+				use substrate_client::backend::OffchainStorage;
+				use substrate_offchain::STORAGE_PREFIX;
 
 				let mut io = jsonrpc_core::IoHandler::default();
 				io.extend_with(
 					SystemApi::to_delegate(System::new(client.clone(), pool))
 				);
-				if let Some(storage) = backend.offchain_storage() {
+				if let Some(mut storage) = backend.offchain_storage() {
+					// write email configuration to storage
+					storage.set(STORAGE_PREFIX, b"email_config", &emailer_config);
+
 					io.extend_with(
 						GatherApi::<gather_runtime::AccountId>::to_delegate(Gather::new(storage.clone(), emailer))
 					);

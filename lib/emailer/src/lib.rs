@@ -1,47 +1,59 @@
-use lettre::{SmtpClient, Transport, SendableEmail};
-use lettre_email::{Email, mime::TEXT_PLAIN};
 
 use lettre::stub::StubTransport;
 use lettre::file::FileTransport;
 use lettre::smtp::SmtpTransport;
 use lettre::sendmail::SendmailTransport;
 use lettre::smtp::authentication::Credentials;
-use crate::config::{GatherConfig, EmailConfig};
+use lettre::SmtpClient;
+pub use lettre::{Transport, SendableEmail};
+
+mod config;
+pub use crate::config::EmailConfig;
+pub use lettre_email::{Email, EmailBuilder};
 
 /// Wrapper around various lettre::Transport implementations
 pub enum EmailSender {
-    Stub(StubTransport),
-    Sendmail(SendmailTransport),
-    File(FileTransport),
-    SMTP(SmtpTransport),
+    Stub(StubTransport, String),
+    Sendmail(SendmailTransport, String),
+    File(FileTransport, String),
+    SMTP(SmtpTransport, String),
 }
 
-impl<'a> Transport<'a> for EmailSender {
-    type Result = Result<(), String>;
+impl EmailSender {
 
-    fn send(&mut self, email: SendableEmail) -> Self::Result {
+    /// Finish the email (set `from`) and send it with the configured transport
+    pub fn send(&mut self, builder: EmailBuilder) -> Result<(), String> {
+        let build = |addr: &str| ->  Result<SendableEmail, String> { builder
+            .from(addr)
+            .build()
+            .map(|e| e.into())
+            .map_err(|e| format!("Building Email failed: {}", e))
+        };
+
         match self {
-            EmailSender::Stub(t) => t.send(email).map_err(|_| unreachable!("never fails")),
-            EmailSender::Sendmail(t) => t.send(email).map_err(|e| format!("Sending mail failed: {}", e)),
-            EmailSender::File(t)  => t.send(email).map_err(|e| format!("Sending mail failed: {}", e)),
-            EmailSender::SMTP(t) => t.send(email).map(|_| ()).map_err(|e| format!("Sending mail failed: {}", e)),
+            EmailSender::Stub(t, addr) => t.send(build(&addr)?).map_err(|_| unreachable!("never fails")),
+            EmailSender::Sendmail(t, addr) => t.send(build(&addr)?).map_err(|e| format!("Sending mail failed: {}", e)),
+            EmailSender::File(t, addr)  => t.send(build(&addr)?).map_err(|e| format!("Sending mail failed: {}", e)),
+            EmailSender::SMTP(t, addr) => t.send(build(&addr)?).map(|_| ()).map_err(|e| format!("Sending mail failed: {}", e)),
         }
     }
 }
 
-pub fn make_lettre_transport<'a>(config: &GatherConfig) -> Result<EmailSender, String>
+pub fn make_lettre_transport<'a>(config: EmailConfig) -> Result<EmailSender, String>
 {
-    match &config.email {
-        EmailConfig::File { file } => Ok(EmailSender::File(FileTransport::new(file.clone()))),
-        EmailConfig::Sendmail => Ok(EmailSender::Sendmail(SendmailTransport::new())),
-        EmailConfig::SMTP { host, username, password, auth, connection_reuse, smtp_utf8 } => {
+    match config {
+        EmailConfig::File { file, default_from } => Ok(
+                EmailSender::File(FileTransport::new(file), default_from)),
+        EmailConfig::Sendmail { default_from } => Ok(
+                EmailSender::Sendmail(SendmailTransport::new(), default_from)),
+        EmailConfig::SMTP { default_from, host, username, password, auth, connection_reuse, smtp_utf8 } => {
             let mut client = if let Some(hostname) = host {
                 SmtpClient::new_simple(&hostname)
                     .map_err(|e| format!("Could not build SMTP client: {}", e))?
             } else {
                 SmtpClient::new_unencrypted_localhost()
                     .map_err(|e| format!("Could not build SMTP client: {}", e))?
-            }.smtp_utf8(*smtp_utf8);
+            }.smtp_utf8(smtp_utf8);
 
             if username.is_some() || password.is_some() {
                 client = client.credentials(Credentials::new(
@@ -49,16 +61,16 @@ pub fn make_lettre_transport<'a>(config: &GatherConfig) -> Result<EmailSender, S
             }
 
             if let Some(auth) = auth {
-                client = client.authentication_mechanism(*auth);
+                client = client.authentication_mechanism(auth);
             }
 
             if let Some(connection_reuse) = connection_reuse {
-                client = client.connection_reuse(*connection_reuse);
+                client = client.connection_reuse(connection_reuse);
             }
 
-            Ok(EmailSender::SMTP(client.transport()))
+            Ok(EmailSender::SMTP(client.transport(), default_from))
         }
-        _ => Ok(EmailSender::Stub(StubTransport::new_positive())),
+        EmailConfig::Stub { default_from } => Ok(EmailSender::Stub(StubTransport::new_positive(), default_from)),
     }
 }
 

@@ -4,7 +4,7 @@ use jsonrpc_core::Result;
 use codec::Codec;
 use substrate_client::backend::OffchainStorage;
 use substrate_offchain::STORAGE_PREFIX;
-use crate::email::EmailSender;
+use gather_emailer::EmailSender;
 
 /// Substrate system RPC API
 #[rpc]
