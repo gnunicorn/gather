@@ -95,7 +95,7 @@ export default function HomeContainer () {
                 <StandardGrid>
                     {
                         groups.map(card => 
-                            (<CardBase key={card.id} linkPrefix="/groups" {...card}></CardBase>)
+                            (<CardBase key={card.id} linkPrefix="/groups" id={card.id} {...card.metadata}></CardBase>)
                         )
                     }
                 </StandardGrid>

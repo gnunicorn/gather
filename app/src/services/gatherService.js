@@ -6,6 +6,7 @@ import { customTypes } from './types';
 import Buffer from 'buffer/';
 
 const DEBUG = true;
+const CODER = new TextDecoder("utf-8");
 
 // super simple cache
 const CACHE = {
@@ -60,7 +61,9 @@ function makeApi(item, items, idx_prefix, parent) {
             DEBUG && console.log(`Loading IPFS data ${entry.raw.metadata} for ${item}(${id})`);
             const details = await ipfsService.get(Buffer.Buffer.from(entry.raw.metadata));
             console.log(details);
-            entry.metadata = JSON.parse(details);
+            const metadata = CODER.decode(details);
+            console.log(metadata);
+            entry.metadata = JSON.parse(metadata);
         }
         DEBUG && console.log(`Caching ${item}(${id})`);
         cache[id] = entry;

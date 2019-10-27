@@ -127,7 +127,7 @@ export default function CardBase(props) {
             <Typography color="inherit" className={classes.title} variant="h5" component="h3" gutterBottom>
               {title}
             </Typography>
-            <Typography color="inherit" className={classes.subtitle} variant="h5" component="h3" gutterBottom>
+            <Typography color="inherit" className={classes.tagline} variant="h5" component="h3" gutterBottom>
               {subtitle}
             </Typography>
           </CardContent>

@@ -159,9 +159,9 @@ fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 			],
 			groups_idx: vec![3u64, 4u64, 5u64],
 			groups: vec![
-				(3u64, Group::with_metadata(Cid::from("QmfESjfnQx9Af2BidAuHsov4bEp5bAA87wzxJqmk7bnsYN").unwrap().to_bytes())),
+				(3u64, Group::with_metadata(Cid::from("QmZG2mGFH7fuzhF3B6xnEv8wYZJ8Rirvmg3AyDRnHPoabu").unwrap().to_bytes())),
 				(4u64, Group::with_metadata(Cid::from("QmfESjfnQx9Af2BidAuHsov4bEp5bAA87wzxJqmk7bnsYN").unwrap().to_bytes())),
-				(5u64, Group::with_metadata(Cid::from("QmfESjfnQx9Af2BidAuHsov4bEp5bAA87wzxJqmk7bnsYN").unwrap().to_bytes())),
+				(5u64, Group::with_metadata(Cid::from("QmNthRBfkTH7tCuDcQDsvF6u9za2opxHv64rPSYxHvjNcr").unwrap().to_bytes())),
 			],
 			groups_members: vec![
 				(3u64, vec![alice.clone(), bob.clone()]),
