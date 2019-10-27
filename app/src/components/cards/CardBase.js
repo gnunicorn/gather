@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { constants, mixins } from '../../theme';
 import { grey } from '@material-ui/core/colors';
+import { get } from '../../services/ipfsService';
 
 import logo from "../../assets/logo.svg";
 import ReactSVG from 'react-svg'
-import { Card, CardActionArea, CardContent } from '@material-ui/core';
+import { Card, CardMedia, CardActionArea, CardContent } from '@material-ui/core';
 import { Link } from "react-router-dom";
 
 import Blockies from 'react-blockies';
@@ -18,6 +19,10 @@ const useStyles = makeStyles(theme => ({
     maxWidth: "450px",
     backgroundColor: grey.A700,
     width: "100%",
+  },
+  media: {
+    width: "100%",
+    // paddingTop: '56.25%', // 16:9
   },
   link:{
     textDecoration: "none",
@@ -76,6 +81,43 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+function CardImage(props) {
+  const classes = useStyles();
+  const [imgUrl, setImgUrl] = useState([]);
+
+  useEffect(() => {
+      const fetchData = async () => {
+          const data = await get(props.bannerImage.slice(5))
+          console.log("got data", data);
+          const blob = new Blob( [ data ], { type: "image/jpeg" } );
+          const imageUrl = window.URL.createObjectURL( blob );
+          setImgUrl(imageUrl);
+      };
+      if (!!props.bannerImage) fetchData();
+    }, []);
+
+    if(!!imgUrl && !!imgUrl.length) {
+      console.log("got data, adding image", imgUrl);
+      return <img className={classes.media} src={imgUrl} banner={props.bannerImage} />
+      return <CardMedia
+                className={classes.media}
+                image={imgUrl}
+                title={props.title}
+              />;
+    }
+
+    return <section className={classes.bannerImage}>
+      <Blockies
+        seed={`${props.type}-${props.title}`}
+        size={50}
+        scale={10}
+        color={constants.colors.purple}
+        bgColor={grey.A100}
+        spotColor={constants.colors.blue}
+      />
+    </section>
+}
+
 export default function CardBase(props) {
   const {
     id,
@@ -104,25 +146,7 @@ export default function CardBase(props) {
                 {type}
               </Typography>
           </div>
-          {/* {
-            image && <CardMedia
-            className={classes.bannerImage}
-            image={}
-            title={title} />
-          } */}
-          {
-            !bannerImage && <section className={classes.bannerImage}>
-              <Blockies
-                seed={`${type}-${title}`}
-                size={50}
-                scale={10}
-                color={constants.colors.purple}
-                bgColor={grey.A100}
-                spotColor={constants.colors.blue}
-
-              />
-            </section>
-          }
+          <CardImage type={type} bannerImage={bannerImage} title={title} />
           <CardContent className={classes.cardContent}>
             <Typography color="inherit" className={classes.title} variant="h5" component="h3" gutterBottom>
               {title}
