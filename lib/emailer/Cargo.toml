@@ -10,3 +10,5 @@ edition = "2018"
 lettre = { version= "0.9", features=["serde-impls"] }
 lettre_email = "0.9"
 serde = { version = '1.0.101', features = ['derive'] }
+handlebars = "2.0.2"
+lazy_static = "1.4.0"

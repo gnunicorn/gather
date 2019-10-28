@@ -29,6 +29,7 @@ trie-root = '0.15.2'
 jsonrpc-core = '13.2.0'
 jsonrpc-core-client = '13.2.0'
 jsonrpc-derive = '13.2.0'
+rand = "0.7.2"
 
 # for emailing support
 toml = "0.5"

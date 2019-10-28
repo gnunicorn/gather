@@ -12,11 +12,9 @@ use primitives::offchain::StorageKind;
 use serde::{Serialize, Deserialize};
 #[cfg(feature = "std")]
 use serde_json;
-#[cfg(feature = "std")]
-use handlebars;
 
 #[cfg(feature = "std")]
-use gather_emailer::{Email, EmailConfig, make_lettre_transport};
+use gather_emailer::{Email, EmailConfig, make_lettre_transport, TEMPLATE_RENDERER};
 
 pub const EMAIL_CONFIG_STORAGE_KEY: &[u8] = b"email_config";
 
@@ -631,30 +629,6 @@ decl_module! {
 	}
 }
 
-#[cfg(feature = "std")]
-fn make_template_rendered() -> handlebars::Handlebars {
-    let mut h = handlebars::Handlebars::new();
-    h.register_template_string("emails/html/rsvped",
-            include_str!("../../templates/emails/html/rsvped.hbs"));
-    h.register_template_string("emails/html/new-gathering",
-            include_str!("../../templates/emails/html/new-gathering.hbs"));
-
-    h.register_template_string("emails/titles/rsvped",
-            include_str!("../../templates/emails/titles/rsvped.hbs"));
-    h.register_template_string("emails/titles/new-gathering",
-            include_str!("../../templates/emails/titles/new-gathering.hbs"));
-
-    if let Ok(mut cur) = std::env::current_dir() {
-        cur.push("templates");
-        if cur.is_dir() {
-            // if we have a "templates" dir in the working dir, add it
-            h.register_templates_directory(".hbs", cur);
-        }
-    }
-
-    h
-}
-
 // We've moved the  helper functions outside of the main decleration for briefety.
 impl<T: Trait> Module<T> {
     fn now() -> Timestamp {
@@ -725,13 +699,12 @@ impl<T: Trait> Module<T> {
 		if let Some(cfg_str) = runtime_io::local_storage_get(StorageKind::PERSISTENT, EMAIL_CONFIG_STORAGE_KEY) {
             if let Ok(config) = serde_json::from_slice::<EmailConfig>(&cfg_str)  {
                 if let Ok(mut transport) = make_lettre_transport(config) {
-                    let renderer = make_template_rendered();
-                    let subject = renderer.render(&format!("emails/subject/{}", tmpl), &"")
+                    let subject = TEMPLATE_RENDERER.render(&format!("emails/subject/{}", tmpl), &"")
                                 .map_err(|e| {
                                     println!("rendering subject failed: {}", e);
                                     "subject rendering failed"
                                 })?;
-                    let html = renderer.render(&format!("emails/html/{}", tmpl), &"")
+                    let html = TEMPLATE_RENDERER.render(&format!("emails/html/{}", tmpl), &"")
                                     .map_err(|e| {
                                         println!("rendering email body failed: {}", e);
                                         "body rendering failed"

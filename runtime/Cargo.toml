@@ -8,7 +8,6 @@ version = '2.0.0'
 safe-mix = { default-features = false, version = '1.0.0' }
 serde = { features = ['derive'], optional = true, version = '1.0.101' }
 serde_json = { optional = true,  version = '1.0.41' }
-handlebars = { optional = true, version = "2.0.2"}
 gather-emailer = { optional = true, path = "../lib/emailer" }
 
 [build-dependencies.wasm-builder-runner]
@@ -170,7 +169,6 @@ std = [
     'serde',
     'serde_json',
     'gather-emailer',
-    'handlebars',
     'safe-mix/std',
     'offchain-primitives/std',
     'substrate-session/std',

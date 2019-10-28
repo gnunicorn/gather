@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate lazy_static;
 
 use lettre::stub::StubTransport;
 use lettre::file::FileTransport;
@@ -7,9 +9,40 @@ use lettre::smtp::authentication::Credentials;
 use lettre::SmtpClient;
 pub use lettre::{Transport, SendableEmail};
 
+use handlebars;
+
 mod config;
 pub use crate::config::EmailConfig;
 pub use lettre_email::{Email, EmailBuilder};
+
+lazy_static! {
+    pub static ref TEMPLATE_RENDERER: handlebars::Handlebars = {
+        let mut h = handlebars::Handlebars::new();
+        h.register_template_string("emails/html/confirm-email",
+                include_str!("../../../templates/emails/html/confirm-email.hbs"));
+        h.register_template_string("emails/html/rsvped",
+                include_str!("../../../templates/emails/html/rsvped.hbs"));
+        h.register_template_string("emails/html/new-gathering",
+                include_str!("../../../templates/emails/html/new-gathering.hbs"));
+
+        h.register_template_string("emails/titles/confirm-email",
+                include_str!("../../../templates/emails/titles/confirm-email.hbs"));
+        h.register_template_string("emails/titles/rsvped",
+                include_str!("../../../templates/emails/titles/rsvped.hbs"));
+        h.register_template_string("emails/titles/new-gathering",
+                include_str!("../../../templates/emails/titles/new-gathering.hbs"));
+
+        if let Ok(mut cur) = std::env::current_dir() {
+            cur.push("templates");
+            if cur.is_dir() {
+                // if we have a "templates" dir in the working dir, add it
+                h.register_templates_directory(".hbs", cur);
+            }
+        }
+        h
+    };
+}
+
 
 /// Wrapper around various lettre::Transport implementations
 pub enum EmailSender {
