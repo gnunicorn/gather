@@ -2,7 +2,7 @@
 
 use rstd::prelude::*;
 use support::{decl_module, decl_storage, decl_event, dispatch::Result};
-use system::ensure_signed;
+use system::{ensure_signed, ensure_root};
 use codec::{Encode, Decode};
 use sr_primitives::RuntimeDebug;
 #[cfg(feature = "std")]
@@ -305,8 +305,8 @@ decl_module! {
 
         // ---- Community
 
-        pub fn create_community(origin, metadata: ExternalData) -> Result {
-            let who = ensure_signed(origin)?;
+        pub fn create_community(origin, admin: T::AccountId, metadata: ExternalData) -> Result {
+            let _ = ensure_root(origin)?;
             let id = Self::next_id().ok_or("Next id overflow")?;
             let now = Self::now();
 
@@ -316,15 +316,15 @@ decl_module! {
                     updated_at: now
             });
 
-            Memberships::<T>::insert( (&who, id), Membership {
+            Memberships::<T>::insert( (&admin, id), Membership {
                 role: Role::Admin,
                 created_at: now,
                 updated_at: now
             });
 
             CommunitiesIdx::mutate(|l| l.insert(0, id));
-            CommunitiesMembers::<T>::insert(id, vec![&who]);
-            MembersCommunities::<T>::append_or_insert(who, &[id][..]);
+            CommunitiesMembers::<T>::insert(id, vec![&admin]);
+            MembersCommunities::<T>::append_or_insert(admin, &[id][..]);
 
             Self::notify(RawEvent::CommunityCreated(id));
 
@@ -821,7 +821,7 @@ mod tests {
         let bob = 2u64;
 
         let commuity_id = Nonce::get();
-		assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
+		assert_ok!(Gather::create_community(Origin::root, alice, b"IPFSLINK".to_vec()));
 		assert_ok!(Gather::join_community(Origin::signed(bob), commuity_id));
 
         let group_id = Nonce::get();
@@ -845,7 +845,7 @@ mod tests {
             let next_community = Nonce::get();
             let soon = Gather::now() + 10000;
 
-			assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
+			assert_ok!(Gather::create_community(Origin::root, alice, b"IPFSLINK".to_vec()));
             let community = Communities::get(next_community).unwrap();
 			assert_eq!(community.metadata, b"IPFSLINK".to_vec());
 			assert_eq!(CommunitiesMembers::<Test>::get(next_community), vec![alice]);
@@ -959,7 +959,7 @@ mod tests {
 
             let soon = Gather::now() + 10000;
 
-			assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
+			assert_ok!(Gather::create_community(Origin::root, alice, b"IPFSLINK".to_vec()));
 			assert_ok!(Gather::join_community(Origin::signed(bob), community));
 			assert_ok!(Gather::join_community(Origin::signed(charly), community));
 			assert_ok!(Gather::join_community(Origin::signed(dave), community));
@@ -1019,7 +1019,7 @@ mod tests {
             let alice = 1u64;
             let community = Nonce::get();
 
-			assert_ok!(Gather::create_community(Origin::signed(alice), b"IPFSLINK".to_vec()));
+			assert_ok!(Gather::create_community(Origin::root, alice, b"IPFSLINK".to_vec()));
 			assert_err!(Gather::update_community_membership(Origin::signed(alice), community, alice, Role::Moderator), "The last Admin can\'t demote themselfes");
 			assert_err!(Gather::update_community_membership(Origin::signed(alice), community, alice, Role::Organiser), "The last Admin can\'t demote themselfes");
 			assert_err!(Gather::update_community_membership(Origin::signed(alice), community, alice, Role::Member), "The last Admin can\'t demote themselfes");
