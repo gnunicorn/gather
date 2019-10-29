@@ -70,7 +70,7 @@ export default function HomeContainer () {
             <div className={classes.videoRoot}>
                 <video
                     className={classes.video}
-                    src="http://unterbau.tech:8080/ipfs/QmSKx4LDZHFLTgWWw3g9AH2MzVbpKUFjLYBvQ2LugLC5Ac"
+                    src="https://gather.wtf/static/media/Gather.webm"
                     autoPlay="1"
                     loop="1"
                     muted="1"
