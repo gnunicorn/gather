@@ -9,7 +9,9 @@ use gather_runtime::{
 use aura_primitives::sr25519::{AuthorityId as AuraId};
 use grandpa_primitives::{AuthorityId as GrandpaId};
 use substrate_service;
+use std::borrow::Cow;
 use cid::Cid;
+
 
 // Note this is the URL for the telemetry server
 //const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -26,7 +28,11 @@ pub enum Alternative {
 	Development,
 	/// Whatever the current runtime is, with simple Alice/Bob auths.
 	LocalTestnet,
+	/// The current runtime with an extended auth mechanism for public demonstration
+	/// still a single key authority, but not with Alice.
+	DemoNet, 
 }
+
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -96,13 +102,18 @@ impl Alternative {
 				None,
 				None
 			),
+			Alternative::DemoNet => {
+				let spec = Cow::Owned(include_bytes!("../res/demo.json").to_vec());
+				ChainSpec::from_json_bytes(spec).expect("handcrafted json spec parsing always works")
+			},
 		})
 	}
 
 	pub(crate) fn from(s: &str) -> Option<Self> {
 		match s {
 			"dev" => Some(Alternative::Development),
-			"" | "local" => Some(Alternative::LocalTestnet),
+			"local" => Some(Alternative::LocalTestnet),
+			"" | "demo" => Some(Alternative::DemoNet),
 			_ => None,
 		}
 	}
@@ -114,8 +125,8 @@ fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 	_enable_println: bool
 ) -> GenesisConfig {
 
-	let alice = get_from_seed::<AccountId>("Alice");
-	let bob = get_from_seed::<AccountId>("Bob");
+	let alice = get_from_seed::<AccountId>("gather@22:20");
+	let bob = get_from_seed::<AccountId>("Alice");
 	let soon = 1000;
 
 	GenesisConfig {
@@ -197,14 +208,14 @@ fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 			],
 			memberships: vec![
 				// communities
-				((alice.clone(), 1), Membership::admin(None)),
+				((alice.clone(), 1), Membership::default()),
 				((alice.clone(), 2), Membership::default()),
-				((bob.clone(), 1), Membership::admin(None)),
+				((bob.clone(), 1), Membership::default()),
 				((bob.clone(), 2), Membership::default()),
 				// groups
-				((alice.clone(), 3), Membership::admin(None)),
+				((alice.clone(), 3), Membership::default()),
 				((alice.clone(), 4), Membership::default()),
-				((bob.clone(), 3), Membership::admin(None)),
+				((bob.clone(), 3), Membership::default()),
 				((bob.clone(), 4), Membership::default()),
 			],
 			rsvps: vec![
