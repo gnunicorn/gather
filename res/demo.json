@@ -2,7 +2,7 @@
   "name": "gather Demo Testnet",
   "id": "gather_demo",
   "bootNodes": [
-    "/ip4/159.65.127.121/tcp/30333/p2p/QmUuvdeBWCDPLBan4BGxtxSt3cabGfjJvhLtWYSkabLJ8v"
+    "/ip4/159.65.127.121/tcp/30333/p2p/QmQYgDi9WnGkiAFAF9hoJeosfZez8qBY4H58nShbX83xxf"
   ],
   "telemetryEndpoints":[
     [
