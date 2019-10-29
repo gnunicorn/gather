@@ -21,7 +21,7 @@ import EditEventContainer from './containers/EditEventContainer';
 import SignupContainer from './containers/SignupContainer';
 import LoginContainer from './containers/LoginContainer';
 
-import { customTypes } from './services/types';
+import { createApi } from './services/substrateService';
 
 // import * as gatherService from './services/gatherService';
 export default function App () {
@@ -29,9 +29,8 @@ export default function App () {
   const [apiReady, setApiReady] = useState();
 
   useEffect(() => {
-    const provider = new WsProvider(process.env.REACT_APP_WS_TARGET || 'ws://127.0.0.1:9944');
 
-    ApiPromise.create({provider, types: customTypes })
+    createApi()
       .then((api) => {
         setApi(api);
         api.isReady.then(() => setApiReady(true));
