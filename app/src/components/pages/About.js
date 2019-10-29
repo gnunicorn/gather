@@ -18,6 +18,12 @@ const useStyles = makeStyles(theme => ({
     },
     memberSection:{
         padding: "10px 15px",
+        "h4" : {
+            marginTop: "15px",
+        },
+        "h5" : {
+            marginTop: "15px",
+        },
     },
     floatingCta:{
         ...mixins.floatingCta,
@@ -59,8 +65,8 @@ export default function AboutPage(props) {
                 <p>Most important Links</p>
                 <ul>
                     <li><a href="https://github.com/gnunicorn/gather" target="_blank">Github Repository</a></li>
-                    <li><a href="https://github.com/gnunicorn/gather" target="_blank">Open Issues</a></li>
-                    <li><a href="https://github.com/gnunicorn/gather" target="_blank">Blog Post</a></li>
+                    <li><a href="https://github.com/gnunicorn/gather/issues" target="_blank">Open Issues</a></li>
+                    <li><a href="https://www.parity.io/gather-why-a-decentralized-blockchain-platform-is-the-only-sustainable-answer-to-the-meetup-com-pricing-hike/" target="_blank">Blog Post</a></li>
                     <li><a href="https://substrate.dev" target="_blank">Substrate Developer Hub</a></li>
                 </ul>
             </section>
@@ -93,13 +99,34 @@ export default function AboutPage(props) {
                     All data not relevant for the core functionality of the registry is stored via IPFS and only its cid is kept on chain.
                     Further more, this is using lettre, React and Material UI. The cute Avatars are generated with avataaaaar. 
                 </p>
+
+                <Typography variant="h4" component="h4">
+                    Why a new chain? Why not an existing contracts chain?
+                </Typography>
+                <p>
+                    <a href="https://substrate.dev">Substrate</a> offers quite a few benefits over contract chains: aside from speed
+                    and full control over the chain consensus - which is kinda important for a consortium chain; its forkless
+                    upgradability; and built-in offchain-worker and rpc-infrastructure, the main reason is around full control over
+                    the cryptoeconomics: including - but not limited to - offering calls that are free and don't need any transaction
+                    fee payments (e.g. an RSVP) and incentivisation and subsidation schemes that allow the payments to be made much more
+                    in line with the values of the community behind the chain.
+                </p>
+                <p>
+                    While these are not part of the proof of concept (right now), through the on-chain governance mechanism the consortium
+                    can - at any point - decide to add and change on-chain incentive. A simple example would be that you offer an on-chain
+                    kickback mechanism where the organiser would mark every participant who particiapted in a gather, which would earn them
+                    on-chain payments and on the other side certain activities - for example posting a comment, even more expensive if it
+                    contains a link - then require higher payments to prevent spam and foster good citizenship and collaboration. All This
+                    is fairly easy to implement using <a href="https://substrate.dev">Substrate</a>.
+                </p>
                 <Typography variant="h4" component="h4">
                     Is this live/production?
                 </Typography>
                 <p>
                     This is a proof of concept. While what you see here, is fetching the registry from the publicly running node, and you
                     can create accounts, login, join groups and rsvp to events - all internally create transactions and issue updates of
-                    the chain-state - the node is running in development-mode, does not actually send emails and is reset every hour.
+                    the chain-state - the node does not actually send emails or allow you to create commmunities, groups or events. And as
+                    this demos is still in development, we might reset it at any time (with a new genesis config).
                 </p>
 
                 <Typography variant="h4" component="h4">
@@ -109,7 +136,10 @@ export default function AboutPage(props) {
                     <strong>As a regular user</strong>,  you can just click sign up on the top right.
                 </p>
                 <p>
-                    <strong>As a full node</strong>, you currently can't connect to this node, as it is running in development mode and reset every hour.
+                    <strong>To run a full node</strong>, you can <a href="https://github.com/gnunicorn/gather/">build the project</a> and run it. It will automatically connect to the gather.wtf instance and start syncing. You can also modify and build the js app and host that wherever you like.,
+                </p>
+                <p>
+                    <strong>To become a validator</strong>, the on-chain governance must add you to consortium.
                 </p>
                 <p>
                     <strong>As a community/consortium member</strong>, easiest is to <a href="https://github.com/gnunicorn/gather/issues/29">just comment on this ticket</a> or contact us directly (see below).
