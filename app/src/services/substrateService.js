@@ -14,7 +14,6 @@ export async function fundAccount(address) {
         const api = await createApi();
         const keyring = new Keyring({ type: 'sr25519' });
         const alice = keyring.addFromUri('//Alice');
-        console.log(address);
         api.tx.balances
             .transfer(address, 10000000)
             .signAndSend(alice, (result) => {

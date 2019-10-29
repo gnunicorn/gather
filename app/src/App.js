@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 
 import HomeContainer from "./containers/HomeContainer";
+import AboutPage from "./components/pages/About";
 import AppWrapper from "./containers/AppWrapper";
 import UIMasterPage from './containers/UIMasterPage';
 import CreateEventContainer from './containers/CreateEventContainer';
@@ -58,6 +59,7 @@ export default function App () {
          
           <Route exact path="/signup" component={SignupContainer}/>
           <Route exact path="/login" component={LoginContainer}/>
+          <Route exact path="/about" component={AboutPage}/>
 
           <Route exact path="/ui-master" render={(props) => <UIMasterPage {...props}></UIMasterPage>}/>
 

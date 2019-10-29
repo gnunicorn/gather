@@ -84,6 +84,9 @@ export default function Header() {
           </Link>
         </section>
         <section className={classes.accountControl}>
+          <Link to="/about" underline="none">
+            about
+          </Link>
           <Link to="/login" underline="none">
             <Button variant="contained" color="primary">Login</Button>
           </Link>
