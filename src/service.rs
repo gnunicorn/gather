@@ -156,6 +156,8 @@ pub fn new_full(config: Configuration<GatherConfig, GenesisConfig>)
 		justification_period: 512,
 		name: Some(name),
 		keystore: Some(service.keystore()),
+		observer_enabled: true,
+		is_authority,
 	};
 
 	match (is_authority, disable_grandpa) {
