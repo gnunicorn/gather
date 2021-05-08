@@ -8231,7 +8231,7 @@ iso-stream-http@~0.1.2:
     inherits "^2.0.1"
     readable-stream "^3.1.1"
 
-iso-url@^0.4.4, iso-url@~0.4.4, iso-url@~0.4.6:
+iso-url@~0.4.4, iso-url@~0.4.6:
   version "0.4.6"
   resolved "https://registry.yarnpkg.com/iso-url/-/iso-url-0.4.6.tgz#45005c4af4984cad4f8753da411b41b74cf0a8a6"
   integrity sha512-YQO7+aIe6l1aSJUKOx+Vrv08DlhZeLFIVfehG2L29KLSEb9RszqPXilxJRVpp57px36BddKR5ZsebacO5qG0tg==
@@ -12762,11 +12762,11 @@ pull-utf8-decoder@^1.0.2:
   resolved "https://registry.yarnpkg.com/pull-utf8-decoder/-/pull-utf8-decoder-1.0.2.tgz#a7afa2384d1e6415a5d602054126cc8de3bcbce7"
   integrity sha1-p6+iOE0eZBWl1gIFQSbMjeO8vOc=
 
-"pull-ws@github:hugomrdias/pull-ws#fix/bundle-size":
-  version "3.3.1"
-  resolved "https://codeload.github.com/hugomrdias/pull-ws/tar.gz/8e2ce0bb3b1cd6804828316e937fff8e0bef6225"
+pull-ws@hugomrdias/pull-ws#fix/bundle-size:
+  version "3.3.2"
+  uid "9c1a9cf612ff6d1a030b763cb64b02922ae3c824"
+  resolved "https://codeload.github.com/hugomrdias/pull-ws/tar.gz/9c1a9cf612ff6d1a030b763cb64b02922ae3c824"
   dependencies:
-    iso-url "^0.4.4"
     relative-url "^1.0.2"
     safe-buffer "^5.1.1"
     ws "^1.1.0"
@@ -12857,9 +12857,9 @@ querystring@0.2.0:
   integrity sha1-sgmEkgO7Jd+CDadW50cAWHhSFiA=
 
 querystringify@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.1.1.tgz#60e5a5fd64a7f8bfa4d2ab2ed6fdf4c85bad154e"
-  integrity sha512-w7fLxIRCRT7U8Qu53jQnJyPkYZIaR4n5151KMfcJlO/A9397Wxb1amJvROTK6TOnp7PfoAmg/qXiNHI+08jRfA==
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.2.0.tgz#3345941b4153cb9d082d8eee4cda2016a9aef7f6"
+  integrity sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==
 
 queue-microtask@^1.1.0:
   version "1.1.2"
@@ -15247,9 +15247,9 @@ url-parse-lax@^3.0.0:
     prepend-http "^2.0.0"
 
 url-parse@^1.4.3:
-  version "1.4.7"
-  resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.4.7.tgz#a8a83535e8c00a316e403a5db4ac1b9b853ae278"
-  integrity sha512-d3uaVyzDB9tQoSXFvuSUNFibTd9zxd2bkVrDRvF5TmvWWQwqE4lgYJ5m+x1DbecWkw+LK4RNl2CU1hHuOKPVlg==
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.1.tgz#d5fa9890af8a5e1f274a2c98376510f6425f6e3b"
+  integrity sha512-HOfCOUJt7iSYzEx/UqgtwKRMC6EU91NFhsCHMv9oM03VJcVo2Qrp8T8kI9D7amFf1cu+/3CEhgb3rF9zL7k85Q==
   dependencies:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
