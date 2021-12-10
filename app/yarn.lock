@@ -8231,7 +8231,7 @@ iso-stream-http@~0.1.2:
     inherits "^2.0.1"
     readable-stream "^3.1.1"
 
-iso-url@^0.4.4, iso-url@~0.4.4, iso-url@~0.4.6:
+iso-url@~0.4.4, iso-url@~0.4.6:
   version "0.4.6"
   resolved "https://registry.yarnpkg.com/iso-url/-/iso-url-0.4.6.tgz#45005c4af4984cad4f8753da411b41b74cf0a8a6"
   integrity sha512-YQO7+aIe6l1aSJUKOx+Vrv08DlhZeLFIVfehG2L29KLSEb9RszqPXilxJRVpp57px36BddKR5ZsebacO5qG0tg==
@@ -9060,9 +9060,9 @@ just-safe-get@^1.3.0:
   integrity sha512-tZgS+PJWvyuC2matNIkC/zhHKQ26cHdoSHosgRxpYxCjxdVt94zskANwIU1r3K4yHhT6SNKLhhnh7j2jsOmQfA==
 
 just-safe-set@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/just-safe-set/-/just-safe-set-2.1.0.tgz#237234e681a4f330b5dfa71a5251f34962813ef9"
-  integrity sha512-wSTg/2bQpzyivBYbWPqQgafdfxW0tr3hX9qYGDRS2ws+AXwc7tvn8ABqkp8iPQHChjj4F5JvL3t0FQLbcNuKig==
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/just-safe-set/-/just-safe-set-2.2.3.tgz#b717b71a7237ff9f4b9d1220128a576001a11535"
+  integrity sha512-6zAkfGKRjB766zXv/UVSGOFKSAqakhwLQDyIR9bmIhJ/e6jS3Ci1VxYTqaiooYZZUw3VLg0sZva8PE6JX/iu2w==
 
 k-bucket@^5.0.0:
   version "5.0.0"
@@ -12762,11 +12762,11 @@ pull-utf8-decoder@^1.0.2:
   resolved "https://registry.yarnpkg.com/pull-utf8-decoder/-/pull-utf8-decoder-1.0.2.tgz#a7afa2384d1e6415a5d602054126cc8de3bcbce7"
   integrity sha1-p6+iOE0eZBWl1gIFQSbMjeO8vOc=
 
-"pull-ws@github:hugomrdias/pull-ws#fix/bundle-size":
-  version "3.3.1"
-  resolved "https://codeload.github.com/hugomrdias/pull-ws/tar.gz/8e2ce0bb3b1cd6804828316e937fff8e0bef6225"
+pull-ws@hugomrdias/pull-ws#fix/bundle-size:
+  version "3.3.2"
+  uid "9c1a9cf612ff6d1a030b763cb64b02922ae3c824"
+  resolved "https://codeload.github.com/hugomrdias/pull-ws/tar.gz/9c1a9cf612ff6d1a030b763cb64b02922ae3c824"
   dependencies:
-    iso-url "^0.4.4"
     relative-url "^1.0.2"
     safe-buffer "^5.1.1"
     ws "^1.1.0"
